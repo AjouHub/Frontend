@@ -1,6 +1,6 @@
 // src/pages/Home.js
 
-import React from 'react';
+import React, { useState } from 'react';
 
 function Home() {
     return (
@@ -10,5 +10,6 @@ function Home() {
         </div>
     );
 }
+
 
 export default Home;
