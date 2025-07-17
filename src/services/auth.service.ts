@@ -1,10 +1,9 @@
 import { UserInfo } from '../types/user';
 import { getAccessToken, getRefreshToken, setTokens } from '../utils/auth';
 
-export async function loginWithGoogle(): Promise<void> {
-    const res = await fetch('/auth/google', { method: 'POST' });
-    const data = await res.json();
-    setTokens(data.accessToken, data.refreshToken);
+export function loginWithGoogle() {
+    // 브라우저 전체를 백엔드 인증 경로로 이동
+    window.location.href = 'https://port-0-backend-mcx018vt98002089.sel5.cloudtype.app/auth/google';
 }
 
 export async function fetchUserInfo(): Promise<UserInfo> {
