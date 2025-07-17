@@ -1,5 +1,5 @@
 import { UserInfo } from '../types/user';
-import { getAccessToken, getRefreshToken } from '../utils/auth';
+import { getAccessToken, getRefreshToken, setTokens } from '../utils/auth';
 
 export async function loginWithGoogle(): Promise<void> {
     const res = await fetch('/auth/google', { method: 'POST' });
