@@ -35,7 +35,7 @@ function Login() {
             localStorage.setItem('access_token', accessToken);
             localStorage.setItem('refresh_token', refreshToken);
             console.log(accessToken, refreshToken);
-            navigate('/google-callback'); // ✅ 로그인 성공 시 이동
+            navigate('/account-info'); // ✅ 로그인 성공 시 이동
         }
     }, []);
 
