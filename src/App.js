@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import AccountInfo from './pages/AccountInfo';
-import OAuthCallback from "./pages/OAuthCallback";
+import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 // import Home from './pages/Home'; // 필요 시 사용
 
 function App() {
@@ -13,7 +13,7 @@ function App() {
                 <Routes>
                     <Route path="/" element={<Login />} />
                     <Route path="/account-info" element={<AccountInfo />} />
-                    <Route path="/oauth/callback" element={<OAuthCallback />} />
+                    <Route path="/google-callback" element={<GoogleCallbackPage />} />
                 </Routes>
             </Router>
         </div>

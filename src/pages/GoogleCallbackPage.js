@@ -1,14 +1,14 @@
-// src/pages/OAuthCallback.js
+// src/pages/GoogleCallbackPage.js
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function OAuthCallback() {
+function GoogleCallbackPage() {
     const navigate = useNavigate();
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        const token = params.get('access_token');
+        const token = params.get('accessToken');
 
         if (token) {
             localStorage.setItem('access_token', token);
@@ -22,4 +22,4 @@ function OAuthCallback() {
     return <p>로그인 중입니다...</p>;
 }
 
-export default OAuthCallback;
+export default GoogleCallbackPage;

@@ -1,6 +1,6 @@
 // src/pages/Login.js
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 // import Home from "./Home";
@@ -18,13 +18,27 @@ function Login() {
         console.log('Password:', password);
         // 여기에 로그인 API 호출 추가 가능
         window.location.href = 'https://port-0-backend-mcx0t8vt98002089.sel5.cloudtype.app/auth/google';
-        // navigate('/OAuthCallback');
+        // navigate('/GoogleCallbackPage');
     };
 
     const handleGoogleLogin = () => {
         // 백엔드 서버의 /auth/google 주소로 리디렉션 (Google 로그인 시작)
         window.location.href = 'https://port-0-backend-mcx0t8vt98002089.sel5.cloudtype.app/auth/google';
     };
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessToken = urlParams.get('accessToken');
+        const refreshToken = urlParams.get('refreshToken');
+
+        if (accessToken && refreshToken) {
+            localStorage.setItem('access_token', accessToken);
+            localStorage.setItem('refresh_token', refreshToken);
+            console.log(accessToken, refreshToken);
+            navigate('/google-callback'); // ✅ 로그인 성공 시 이동
+        }
+    }, []);
+
 
     return (
         <div style={{ padding: '20px' }}>
