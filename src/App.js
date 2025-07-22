@@ -1,31 +1,23 @@
-import logo from './logo.svg';
-import './App.css';
-import Home from './pages/Home';
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
-import AccountInfo from "./pages/AccountInfo";
+import AccountInfo from './pages/AccountInfo';
+import OAuthCallback from "./pages/OAuthCallback";
+// import Home from './pages/Home'; // 필요 시 사용
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        {/*<img src={logo} className="App-logo" alt="logo" />*/}
-        {/*<p>*/}
-        {/*  Edit <code>src/App.js</code> and save to reload.*/}
-        {/*</p>*/}
-        {/*<a*/}
-        {/*  className="App-link"*/}
-        {/*  href="https://reactjs.org"*/}
-        {/*  target="_blank"*/}
-        {/*  rel="noopener noreferrer"*/}
-        {/*>*/}
-        {/*  Learn React*/}
-        {/*</a>*/}
-
-        <AccountInfo />
-
-      </header>
-    </div>
-  );
+    return (
+        <div className="App">
+            <Router>
+                <Routes>
+                    <Route path="/" element={<Login />} />
+                    <Route path="/account-info" element={<AccountInfo />} />
+                    <Route path="/oauth/callback" element={<OAuthCallback />} />
+                </Routes>
+            </Router>
+        </div>
+    );
 }
 
 export default App;

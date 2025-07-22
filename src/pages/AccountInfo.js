@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 function AccountInfo() {
-    // const [email, setEmail] = useState('');
+    // const [email, setEmail] = useState('yueric050930@ajou.ac.kr');
     // const [password, setPassword] = useState('');
     const [user, setUser] = useState(null);
     const [error, setError] = useState('');
