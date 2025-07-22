@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import AccountInfo from "./pages/AccountInfo";
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
         {/*  Learn React*/}
         {/*</a>*/}
 
-        <Login />
+        <AccountInfo />
 
       </header>
     </div>
