@@ -9,7 +9,7 @@ export default function SelectDepartmentPage() {
         const token = localStorage.getItem('accessToken');
 
         try {
-            const res = await fetch('https://your-backend-url.com/user/departments', {
+            const res = await fetch('https://https://port-0-backend-mcx0t8vt98002089.sel5.cloudtype.app/user/departments', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
