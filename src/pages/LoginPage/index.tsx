@@ -1,44 +1,31 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginButton from './LoginButton';
+import { FontImport, LoginPageWrapper } from './login.style';
+import { handleOAuthCallback, redirectToGoogleOAuth } from "../../services/auth.service";
+
 
 export default function LoginPage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const accessToken = params.get('accessToken');
-        const refreshToken = params.get('refreshToken');
-
-        if (accessToken && refreshToken) {
-            // ✅ localStorage에 저장
-            localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', refreshToken);
-
-            // ✅ 주소창에서 토큰 제거 (보안상 중요)
-            window.history.replaceState({}, '', '/LoginPage');
-
-            // ✅ 마이페이지로 이동
-            // navigate('/select-department');
-            navigate('/mypage');
-        }
-
+        handleOAuthCallback(navigate);
     }, [navigate]);
 
     const handleLogin = () => {
-        try {
-            console.debug('[Front] Redirecting to /auth/google');
-            window.location.href = 'https://port-0-backend-mcx0t8vt98002089.sel5.cloudtype.app/auth/google';
-        } catch (error) {
-            alert('로그인에 실패했습니다.');
-            console.error(error);
-        }
+        redirectToGoogleOAuth();
     };
 
+
     return (
-        <div style={{ textAlign: 'center', marginTop: '20vh' }}>
-            <h1>로그인</h1>
-            <LoginButton onClick={handleLogin} />
-        </div>
+        <>
+            <FontImport /> {/* 폰트 불러오기 (이 페이지에서만) */}
+            <LoginPageWrapper>
+                <h1 style={{ fontSize: '45px' }}>AjouNotice</h1>
+                <div style={{ marginTop: '60px' }}>
+                    <LoginButton onClick={handleLogin}>로그인</LoginButton>
+                </div>
+            </LoginPageWrapper>
+        </>
     );
 }
