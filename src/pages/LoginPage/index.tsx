@@ -19,7 +19,7 @@ export default function LoginPage() {
             window.history.replaceState({}, '', '/LoginPage');
 
             // ✅ 마이페이지로 이동
-            navigate('/MyPage');
+            navigate('/select-department');
         }
     }, [navigate]);
 
