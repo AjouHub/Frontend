@@ -16,7 +16,7 @@ function AccountInfo(): JSX.Element {
     useEffect(() => {
         if (!token) return;
 
-        fetchUserInfo(token)
+        fetchUserInfo()
             .then((data: UserInfo) => {
                 setUser(data)
             })

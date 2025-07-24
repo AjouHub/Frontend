@@ -1,25 +1,19 @@
-import axios from "axios";
+import api from './api';
 import { UserInfo } from '../types/user';
 
-export async function fetchUserInfo(token: string): Promise<UserInfo> {
-    if (!token) {
-        throw new Error('No token');
-    }
+export async function fetchUserInfo(): Promise<UserInfo> {
+    try {
+        const response = await api.get('/user/info');
 
-    const res = await axios.get(
-        'https://port-0-backend-mcx0t8vt98002089.sel5.cloudtype.app/user/info', {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/json',
-            },
-            withCredentials: true,
-        });
+        if (response.data.status != 'success') {
+            const error = new Error(response.data.message || '사용자 정보를 불러올 수 없습니다.');
+            (error as any).status = response.status;
+            throw error;
+        }
 
-    if (res.data.status != 'success') {
-        const error = new Error(res.data.message || '사용자 정보를 불러올 수 없습니다.');
-        (error as any).status = res.status;
+        return response.data.data as UserInfo;
+    } catch (error) {
         throw error;
     }
 
-    return res.data.data as UserInfo;
 }
