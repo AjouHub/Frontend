@@ -24,11 +24,13 @@ export async function refreshAccessToken(): Promise<string> {
 export const handleOAuthCallback = (navigate: (path: string) => void) => {
     const params: URLSearchParams = new URLSearchParams(window.location.search);
     const accessToken: string | null = params.get('accessToken');
-    const refreshToken: string | null = params.get('refreshToken');
+    const signUp: string | null = params.get('signUp');
 
-    if (accessToken && refreshToken) {
+    console.log('AccessToken : ', accessToken);
+    console.log('signUp: ', signUp);
+
+    if (accessToken) {
         localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
         window.history.replaceState({}, '', '/LoginPage');
         navigate('/mypage');
     }

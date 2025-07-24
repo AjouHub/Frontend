@@ -1,6 +1,9 @@
 import React, {JSX, useEffect, useState} from 'react';
 import { UserInfo } from '../../types/user';
 import { fetchUserInfo } from "../../services/fetchUserInfo";
+import NavigationButton from "../../components/NavigationButton";
+// import LoginButton from "../LoginPage/LoginButton";
+// import {useNavigate} from "react-router-dom";
 // import axios from 'axios';
 
 function AccountInfo(): JSX.Element {
@@ -9,7 +12,6 @@ function AccountInfo(): JSX.Element {
     const [statusCode, setStatusCode] = useState<number | string | null>(null);
 
     const token = localStorage.getItem('accessToken');
-    console.log("token", token);
 
     useEffect(() => {
         if (!token) return;
@@ -51,7 +53,8 @@ function AccountInfo(): JSX.Element {
             <h2>계정 정보</h2>
             <p><strong>이름:</strong> {user.name}</p>
             <p><strong>이메일:</strong> {user.email}</p>
-            <p><strong>학과:</strong> {user.departments.join(', ')}</p>
+            <p><strong>학과:</strong> {user.departments.join(', ')}</p> <br/>
+            <NavigationButton to='/mypage'>홈으로</NavigationButton>
         </div>
     );
 }
