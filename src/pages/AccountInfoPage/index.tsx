@@ -46,7 +46,13 @@ function AccountInfo(): JSX.Element {
         );
     }
 
-    if (!user) return <p>로딩 중...</p>;
+    if (!user) {
+        return (
+            <div style={{ padding: '20px' }}>
+                <h1>로딩 중...</h1>
+            </div>
+        );
+    }
 
     return (
         <div style={{ padding: '20px' }}>
