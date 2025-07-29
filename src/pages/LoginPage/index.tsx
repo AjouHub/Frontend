@@ -8,19 +8,24 @@ export default function LoginPage() {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const accessToken = params.get('accessToken');
-        const refreshToken = params.get('refreshToken');
 
-        if (accessToken && refreshToken) {
-            // ✅ localStorage에 저장
+
+        console.log('accessToken:', accessToken);
+
+        if(accessToken) {
+
+
+            // localStorage에 저장
             localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', refreshToken);
 
-            // ✅ 주소창에서 토큰 제거 (보안상 중요)
+
+            // 주소창에서 토큰 제거 (보안상 중요)
             window.history.replaceState({}, '', '/LoginPage');
 
-            // ✅ 마이페이지로 이동
+            // 학과 선택 페이지로 이동
             navigate('/select-department');
         }
+
     }, [navigate]);
 
     const handleLogin = () => {
@@ -36,7 +41,7 @@ export default function LoginPage() {
     return (
         <div style={{ textAlign: 'center', marginTop: '20vh' }}>
             <h1>로그인</h1>
-            <LoginButton onClick={handleLogin} />
+            <LoginButton onClick={handleLogin}>로그인</LoginButton>
         </div>
     );
 }

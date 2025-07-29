@@ -6,18 +6,26 @@ export default function SelectDepartmentPage() {
     const navigate = useNavigate();
 
     const handleSubmit = async () => {
-        const token = localStorage.getItem('accessToken');
+        const access_token = localStorage.getItem('accessToken');
+
 
         try {
-            const res = await fetch('https://https://port-0-backend-mcx0t8vt98002089.sel5.cloudtype.app/user/departments', {
+            const res = await fetch('https://port-0-backend-mcx0t8vt98002089.sel5.cloudtype.app/user/departments', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
+                    Authorization: `Bearer ${access_token}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+
                 },
+
                 body: JSON.stringify({ department }),
+
             });
+
+
+
+
 
             if (!res.ok) {
                 throw new Error('학과 설정 실패');
