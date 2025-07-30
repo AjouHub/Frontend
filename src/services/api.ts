@@ -20,6 +20,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (res) => res,
     async (error) => {
+
         const originalRequest = error.config;
 
         if (
@@ -35,9 +36,13 @@ api.interceptors.response.use(
                     withCredentials: true,
                 });
 
-                const newAccessToken = res.data.accessToken;
+
+
+
+                const newAccessToken = res.data.data.accessToken;
                 localStorage.setItem('accessToken', newAccessToken);
                 console.log('New Token : ', newAccessToken);
+
 
                 // 헤더에 새 토큰 붙여서 재요청
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;

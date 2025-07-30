@@ -1,37 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import api from '../../services/api';
 export default function SelectDepartmentPage() {
     const [department, setDepartment] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async () => {
-        const access_token = localStorage.getItem('accessToken');
+
 
 
         try {
-            const res = await fetch('https://port-0-backend-mcx0t8vt98002089.sel5.cloudtype.app/user/departments', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${access_token}`,
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-
-                },
-
-                body: JSON.stringify({ department }),
-
-            });
-
-
-
-
-
-            if (!res.ok) {
-                throw new Error('학과 설정 실패');
-            }
-
+            await api.post('/user/departments', { department });
             navigate('/mypage');
+
         } catch (error) {
             console.error('학과 등록 에러:', error);
             alert('학과 등록에 실패했습니다.');

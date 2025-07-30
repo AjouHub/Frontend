@@ -60,7 +60,7 @@ function AccountInfo(): JSX.Element {
             <p><strong>이름:</strong> {user.name}</p>
             <p><strong>이메일:</strong> {user.email}</p>
             <p><strong>학과:</strong> {user.departments.join(', ')}</p> <br/>
-            <NavigationButton to=''>홈으로</NavigationButton>
+            <NavigationButton to='/mypage'>홈으로</NavigationButton>
         </div>
     );
 }
