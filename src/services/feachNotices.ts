@@ -17,7 +17,7 @@ export async function fetchNotices({
                                        sort = 'date,desc',
                                    }: FetchNoticeParams): Promise<NoticePage> {
     try {
-        const response = await api.get('/notices', {
+        const response = await api.get('/notices/page', {
             params: {
                 page,
                 size,

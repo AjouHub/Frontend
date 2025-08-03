@@ -9,8 +9,9 @@ function NoticePage(): JSX.Element {
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        fetchNotices({ page: 0, size: 5 })
+        fetchNotices({ page: 0, size: 10 })
             .then(data => {
+                console.log()
                 setNotices(data.content);
                 setLoading(false);
             })

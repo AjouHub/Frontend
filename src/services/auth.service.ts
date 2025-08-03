@@ -12,7 +12,7 @@ export const handleOAuthCallback = (navigate: (path: string) => void) => {
         localStorage.setItem('accessToken', accessToken);
         window.history.replaceState({}, '', '/LoginPage');
         if (signUp) navigate('/select-department');
-        navigate('/select-department');
+        navigate('/mypage');
     }
 };
 
