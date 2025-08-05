@@ -28,6 +28,8 @@ export async function fetchNotices({
             withCredentials: true,
         });
 
+
+
         if (response.data.status !== 'success') {
             const error = new Error(response.data.message || '공지사항을 불러올 수 없습니다.');
             (error as any).status = response.status;
