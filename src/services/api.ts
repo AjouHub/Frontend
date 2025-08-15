@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 
-const BASE_URL = process.env.REACT_APP_API_URL || '/api'; // ✅ 프록시 안 씀
+const BASE_URL = process.env.SERVER_URL || '/api'; // ✅ 프록시 안 씀
 console.log('[API] BASE_URL =', BASE_URL);  // ← 콘솔로 반드시 확인
 if (!BASE_URL) {
     throw new Error('REACT_APP_API_URL 가 비어있습니다. .env를 확인하세요.');
@@ -14,18 +14,18 @@ const api = axios.create({
     withCredentials: true, // refreshToken 쿠키 전송용
 });
 
-
-// 3) 리프레시 전용 클라이언트 (인터셉터 없음: 무한루프 방지)
-export const refreshClient = axios.create({
-    baseURL: BASE_URL,
-    withCredentials: true,
-});
+//
+// // 3) 리프레시 전용 클라이언트 (인터셉터 없음: 무한루프 방지)
+// export const refreshClient = axios.create({
+//     baseURL: BASE_URL,
+//     withCredentials: true,
+// });
 
 
 // ✅ 1. 요청 시 accessToken 자동 포함
 api.interceptors.request.use((config) => {
-    // const token = localStorage.getItem('accessToken');
-    const token = null;  // 토큰 재발급 테스트
+    const token = localStorage.getItem('accessToken');
+    // const token = null;  // 토큰 재발급 테스트
     config.headers = config.headers ?? {};
     if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -72,10 +72,19 @@ api.interceptors.response.use(
 
             isRefreshing = true;
             try {
+                // const refreshToken = localStorage.getItem('refreshToken');
                 // 스펙: body는 null, 쿠키로 refreshToken 전송, 새 refreshToken은 Set-Cookie로 재설정
-                const r = await refreshClient.post('/auth/refresh', null, {
-                    headers: { Accept: 'application/json' },
+                // const r = await refreshClient.post(`${API}/auth/refresh`, null, {
+                //     headers: {
+                //         Accept: 'application/json' },
+                // });
+
+                const API = process.env.REACT_APP_API_URL || '/api';
+                const r = await axios.post(`${API}/auth/refresh`, null, {
+                    withCredentials: true,
+                    headers: {Accept: 'application/json'}
                 });
+
 
                 const newAccessToken = r?.data?.data?.accessToken;
                 if (!newAccessToken) throw new Error('No accessToken in refresh response');
