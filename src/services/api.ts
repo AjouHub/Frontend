@@ -26,10 +26,11 @@ export const refreshClient = axios.create({
 api.interceptors.request.use((config) => {
     // const token = localStorage.getItem('accessToken');
     const token = null;  // 토큰 재발급 테스트
-
+    config.headers = config.headers ?? {};
     if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
     }
+    config.headers.Accpet = 'application/json';
     return config;
 });
 
