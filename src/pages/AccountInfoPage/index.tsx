@@ -12,10 +12,10 @@ function AccountInfo(): JSX.Element {
     const [error, setError] = useState<string>('');
     const [statusCode, setStatusCode] = useState<number | string | null>(null);
 
-    const token = localStorage.getItem('accessToken');
+    // const token = localStorage.getItem('accessToken');
 
     useEffect(() => {
-        if (!token) return;
+        // if (!token) return;
 
         fetchUserInfo()
             .then((data: UserInfo) => {
@@ -36,7 +36,7 @@ function AccountInfo(): JSX.Element {
                     setError('알 수 없는 에러 발생');
                 }
             });
-    }, [token]);
+    });
 
     if (error) {
         return (
