@@ -1,46 +1,58 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
-
-const BASE_URL = process.env.SERVER_URL || '/api'; // ✅ 프록시 안 씀
-console.log('[API] BASE_URL =', BASE_URL);  // ← 콘솔로 반드시 확인
-if (!BASE_URL) {
+const ORIGIN_URL = (process.env.REACT_APP_SERVER_ORIGIN || '').replace(/\/+$/, '');
+const API_PREFIX = '/api';
+export const API_BASE_URL = `${ORIGIN_URL}${API_PREFIX}`;
+// const BASE_URL = process.env.REACT_APP_API_URL!;
+console.log('[API] BASE_URL =', API_BASE_URL);  // ← 콘솔로 반드시 확인
+if (!API_PREFIX) {
     throw new Error('REACT_APP_API_URL 가 비어있습니다. .env를 확인하세요.');
 }
 
-
-const api = axios.create({
-    // baseURL: 'https://port-0-backend-mcx0t8vt98002089.sel5.cloudtype.app',
-    baseURL: BASE_URL,
-    withCredentials: true, // refreshToken 쿠키 전송용
+const api: AxiosInstance = axios.create({
+    baseURL: API_BASE_URL,
+    withCredentials: true,
+    xsrfCookieName: 'XSRF-TOKEN',   // Spring CookieCsrfTokenRepository 기본
+    xsrfHeaderName: 'X-XSRF-TOKEN', // 쓰기 요청 시 자동 첨부
 });
 
-//
-// // 3) 리프레시 전용 클라이언트 (인터셉터 없음: 무한루프 방지)
-// export const refreshClient = axios.create({
-//     baseURL: BASE_URL,
-//     withCredentials: true,
-// });
+// 리프레시 전용 클라이언트(인터셉터 X, 무한루프 방지)
+const refreshClient = axios.create({
+    baseURL: API_BASE_URL,
+    withCredentials: true,
+});
 
+
+// 동시 401 방지를 위한 간단한 락
+let refreshing: Promise<void> | null = null;
+function refreshSession(): Promise<void> {
+    if (!refreshing) {
+        refreshing = refreshClient
+            .post('/auth/refresh?web=true', null, { headers: { Accept: 'application/json' } })
+            .then(() => {
+                // 성공 시 쿠키가 갱신됨. 추가 처리 불필요.
+            })
+            .finally(() => {
+                refreshing = null;
+            });
+    }
+    return refreshing;
+}
 
 // ✅ 1. 요청 시 accessToken 자동 포함
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('accessToken');
-    // const token = null;  // 토큰 재발급 테스트
     config.headers = config.headers ?? {};
-    if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
     config.headers.Accpet = 'application/json';
+
+    // 쓰기 요청인데 Content-Type 없으면 기본값 세팅
+    const method = (config.method ?? 'get').toLowerCase();
+    if (['post', 'put', 'patch', 'delete'].includes(method) && !config.headers['Content-Type']) {
+        config.headers['Content-Type'] = 'application/json';
+    }
+
     return config;
 });
 
-// ── 응답 인터셉터(401/403 → /auth/refresh)
-let isRefreshing = false;
-let waitQueue: Array<(t: string) => void> = [];
-const flushQueue = (newToken: string) => {
-    waitQueue.forEach((cb) => cb(newToken));
-    waitQueue = [];
-};
 
 
 // ✅ 2. 응답 에러 시 accessToken 재발급 시도
@@ -48,69 +60,25 @@ api.interceptors.response.use(
     (res) => res,
     async (error) => {
 
-        const originalRequest = error.config || {};
+        const originalRequest = error.config as any;
         const status = error.response?.status;
 
-        if (!status) return Promise.reject(error);
+        if (status === 401 && !String(originalRequest?.url || '').includes('/auth/refresh') && !originalRequest?._retry) {
+            (originalRequest)._retry = true;
 
-        const isAuthErr = status === 401 || status === 403;
-        const isRefreshReq = String(originalRequest?.url || '').includes('/auth/refresh');
-
-        if (isAuthErr && !isRefreshReq && !originalRequest._retry) {
-            (originalRequest as any)._retry = true;
-
-            if (isRefreshing) {
-                // 누군가 이미 리프레시 중 → 큐에 넣고 새 토큰 나오면 재시도
-                return new Promise((resolve) => {
-                    waitQueue.push((newToken: string) => {
-                        originalRequest.headers = originalRequest.headers ?? {};
-                        (originalRequest.headers as any).Authorization = `Bearer ${newToken}`;
-                        resolve(api(originalRequest));
-                    });
-                });
-            }
-
-            isRefreshing = true;
             try {
-                // const refreshToken = localStorage.getItem('refreshToken');
-                // 스펙: body는 null, 쿠키로 refreshToken 전송, 새 refreshToken은 Set-Cookie로 재설정
-                // const r = await refreshClient.post(`${API}/auth/refresh`, null, {
-                //     headers: {
-                //         Accept: 'application/json' },
-                // });
-
-                const API = process.env.REACT_APP_API_URL || '/api';
-                const r = await axios.post(`${API}/auth/refresh`, null, {
-                    withCredentials: true,
-                    headers: {Accept: 'application/json'}
-                });
-
-
-                const newAccessToken = r?.data?.data?.accessToken;
-                if (!newAccessToken) throw new Error('No accessToken in refresh response');
-
-                localStorage.setItem('accessToken', newAccessToken);
-                api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
-                console.log('[토큰 재발급 성공]', newAccessToken);
-
-                flushQueue(newAccessToken);
-
-                originalRequest.headers = originalRequest.headers ?? {};
-                (originalRequest.headers as any).Authorization = `Bearer ${newAccessToken}`;
+                await refreshSession();
                 return api(originalRequest);
             } catch (e) {
                 console.error('[토큰 재발급 실패]', e);
-                localStorage.removeItem('accessToken');
-                waitQueue = [];
                 // window.location.href = '/login'; // 필요 시
                 return Promise.reject(e);
-            } finally {
-                isRefreshing = false;
-            }
+            } finally {}
         }
 
         return Promise.reject(error);
     }
 );
+
 
 export default api;
