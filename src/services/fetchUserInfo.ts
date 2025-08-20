@@ -2,6 +2,8 @@ import api from './api';
 import { UserInfo } from '../types/user';
 
 export async function fetchUserInfo(): Promise<UserInfo> {
+    console.log('[fetchUserInfo] api id =', (api as any).__ID); // 디버그 테스트용
+
     try {
         const response = await api.get('/user/info');
 
