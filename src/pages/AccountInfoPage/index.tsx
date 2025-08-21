@@ -16,7 +16,22 @@ function AccountInfo(): JSX.Element {
 
     useEffect(() => {
         // if (!token) return;
-
+        (async () => {
+            try {
+                const data = await fetchUserInfo();
+                setUser(data);
+            } catch (err: any) {
+                if (err?.response) {
+                    setStatusCode(err.response.status);
+                    setError(err.response.data?.message || '서버 오류 발생');
+                } else {
+                    setStatusCode('Unknown');
+                    setError('알 수 없는 에러 발생');
+                }
+            }
+        })();
+    }, []); // ★ 의존성 배열 추가
+        /*
         fetchUserInfo()
             .then((data: UserInfo) => {
                 setUser(data)
@@ -36,8 +51,12 @@ function AccountInfo(): JSX.Element {
                     setError('알 수 없는 에러 발생');
                 }
             });
+
+
     });
 
+
+         */
     if (error) {
         return (
             <p style={{ color: 'red' }}>
