@@ -1,5 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
-import type { AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError } from 'axios';
 
 const ORIGIN_URL = (process.env.REACT_APP_SERVER_ORIGIN || '').replace(/\/+$/, '');
 const API_PREFIX = '/api';
@@ -17,13 +16,8 @@ const api: AxiosInstance = axios.create({
     xsrfHeaderName: 'X-XSRF-TOKEN', // 쓰기 요청 시 자동 첨부
 });
 
-export const API_INSTANCE_ID = 'API@SINGLETON';
-(api as any).__ID = API_INSTANCE_ID;
-
 // 2xx만 성공으로 취급 (403을 반드시 에러로 보냄)
 api.defaults.validateStatus = (s) => s >= 200 && s < 300;
-
-
 
 // 리프레시 전용 클라이언트(인터셉터 X, 무한루프 방지)
 const refreshClient = axios.create({
@@ -53,15 +47,11 @@ api.interceptors.request.use((config) => {
     if (['post', 'put', 'patch', 'delete'].includes(method) && !config.headers['Content-Type']) {
         config.headers['Content-Type'] = 'application/json';
     }
-    
-    // 디버그
-    (config.headers ||= {} as any)['X-Debug-Api-Instance'] = 'API@SINGLETON';
-    console.log('[REQ]', config.method, config.url, 'via API@SINGLETON');
 
     return config;
 });
 
-
+/*
 type Cfg = import('axios').AxiosRequestConfig & { _retry?: boolean; _isRefresh?: boolean };
 // 응답/에러에서 공통으로 cfg/status/url만 표준화해서 꺼낸다
 function extract(resOrErr: AxiosResponse | AxiosError): {
@@ -111,18 +101,9 @@ async function tryRefreshAndReplay<T = any>(
 
 // ✅ 2. 응답 에러 시 accessToken 재발급 시도
 api.interceptors.response.use(
-    async (res) => {
-        console.log('interceptors');
-
-        const { cfg, status } = extract(res);
-        const replay = await tryRefreshAndReplay(cfg, status);
-        return replay ?? res;
-    },
-
+    (res => res),
     // ✅ onRejected: 기본(정상) 흐름. 4xx가 에러로 들어오면 여기서 처리
     async (error) => {
-        console.log('interceptors');
-
         const { cfg, status } = extract(error);
         const replay = await tryRefreshAndReplay(cfg, status, {
             onRefreshFail: (e: unknown) => {
@@ -135,22 +116,38 @@ api.interceptors.response.use(
     }
 );
 
-// 현재 등록된 응답 인터셉터 개수 확인 (디버그)
-console.log('[api] resp handlers =', (api.interceptors.response as any).handlers?.length);
+ */
 
-// api.ts 하단 어디든
-const _request = api.request.bind(api);
-(api as any).request = (cfg: any) => {
-    console.log('[API.REQUEST]', (cfg?.method || 'get'), cfg?.url);
-    return _request(cfg);
-};
 
-// fetch로 나가는 호출 감지 (개발시에만)
-const _fetch = window.fetch.bind(window);
-window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
-    console.log('[FETCH]', typeof input === 'string' ? input : input.toString());
-    return _fetch(input, init);
-};
+// ✅ 2. 응답 에러 시 accessToken 재발급 시도
+api.interceptors.response.use(
+    (res) => res,
+    async (error: AxiosError) => {
+
+        const originalRequest = (error.config || {}) as any;
+        const status = error.response?.status ?? 0;
+
+        const isRefreshCall = originalRequest._isRefresh === true || String(originalRequest.url || '').includes('/auth/refresh');
+        const shouldRefresh = (status === 401 || status === 403) && !isRefreshCall && !originalRequest?._retry;
+
+        if (shouldRefresh) {
+            (originalRequest)._retry = true;
+
+            try {
+                await refreshSession();
+                console.log('[토큰 재발급 성공]');
+                return api.request(originalRequest);
+            } catch (e) {
+                console.error('[토큰 재발급 실패]', e);
+                window.location.href = '/login'; // 필요 시
+                throw e;
+            } finally {}
+        }
+
+        throw error;
+    }
+);
+
 
 
 export default api;

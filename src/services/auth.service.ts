@@ -3,21 +3,14 @@ import {API_BASE_URL} from "./api";
 
 export const handleOAuthCallback = (navigate: (path: string) => void) => {
     const params: URLSearchParams = new URLSearchParams(window.location.search);
-    // const accessToken: string | null = params.get('accessToken');
-    // const refreshToken: string | null = params.get('refreshToken');
     const signUp: string | null = params.get('signUp');
 
-    // console.log('AccessToken : ', accessToken);
-    // console.log('RefreshToken : ', refreshToken);
-    console.log('signUp: ', signUp);
+    if (signUp === null) return;
 
-    if (signUp) {
-        // localStorage.setItem('accessToken', accessToken);
-        // localStorage.setItem('refreshToken', refreshToken);
-        window.history.replaceState({}, '', '/LoginPage');
-        if (signUp) navigate('/select-department');
-        navigate('/mypage');
-    }
+    window.history.replaceState({}, '', '/LoginPage');
+
+    if (signUp.toLowerCase() === 'true') navigate('/select-department');
+    else navigate('/mypage');
 };
 
 
@@ -30,7 +23,7 @@ export const redirectToGoogleOAuth = () => {
 
     try {
         const URL = `${API_BASE_URL}/auth/google`;
-        console.log(URL);
+        console.log("GoogleOAuth URL : ", URL);
         console.debug('[Front] Redirecting to /auth/google');
         window.location.href = URL;
         // window.location.href = 'https://port-0-backend-mcx0t8vt98002089.sel5.cloudtype.app/auth/google';
