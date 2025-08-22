@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-const ORIGIN_URL = (process.env.REACT_APP_SERVER_ORIGIN || '').replace(/\/+$/, '');
+const ORIGIN_URL = (process.env.REACT_APP_SERVER_URL || '').replace(/\/+$/, '');
 const API_PREFIX = '/api';
 export const API_BASE_URL = `${ORIGIN_URL}${API_PREFIX}`;
 console.log('[API] BASE_URL =', API_BASE_URL);  // ← 콘솔로 반드시 확인

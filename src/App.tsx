@@ -16,7 +16,7 @@ function App() {
                 {/* 탭 항목들 */}
                 <Route path="/mypage" element={<MyPage />} />
                 <Route path="/notice" element={<NoticePage />} />
-                <Route path="/accountinfo" element={<AccountInfoPage />} />
+                <Route path="/account-info" element={<AccountInfoPage />} />
                 <Route path="/login" element={<LoginPage />} />
 
                 {/* 탭엔 없지만 화면은 보여야 하는 경로들도 모두 여기 */}
