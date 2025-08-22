@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import AppLayout from './layouts/AppLayout';
 import LoginPage from './pages/LoginPage';
 import MyPage from './pages/MyPage';
 import SelectDepartmentPage from "./pages/SelectDepartmentPage";
@@ -9,12 +10,20 @@ import NoticePage from "./pages/NoticePage";
 function App() {
     return (
         <Routes>
-            <Route path="/" element={<LoginPage />} />
-            <Route path="/mypage" element={<MyPage />} />
-            <Route path="/select-department" element={<SelectDepartmentPage />} />
-            <Route path="/account-info" element={<AccountInfoPage />} />
-            <Route path="/notice" element={<NoticePage/>} />
+            <Route element={<AppLayout />}>
+                <Route index element={<LoginPage />} />
 
+                {/* 탭 항목들 */}
+                <Route path="/mypage" element={<MyPage />} />
+                <Route path="/notice" element={<NoticePage />} />
+                <Route path="/accountinfo" element={<AccountInfoPage />} />
+                <Route path="/login" element={<LoginPage />} />
+
+                {/* 탭엔 없지만 화면은 보여야 하는 경로들도 모두 여기 */}
+                <Route path="/select-department" element={<SelectDepartmentPage />} />
+
+                <Route path="*" element={<MyPage />} />
+            </Route>
         </Routes>
     );
 }

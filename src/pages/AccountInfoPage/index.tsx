@@ -31,32 +31,8 @@ function AccountInfo(): JSX.Element {
             }
         })();
     }, []); // ★ 의존성 배열 추가
-        /*
-        fetchUserInfo()
-            .then((data: UserInfo) => {
-                setUser(data)
-            })
-            .catch((err: unknown) => {
-                if (
-                    typeof err === 'object' &&
-                    err !== null &&
-                    'response' in err &&
-                    typeof (err as any).response === 'object'
-                ) {
-                    const response = (err as any).response;
-                    setStatusCode(response.status);
-                    setError(response.data?.message || '서버 오류 발생');
-                } else {
-                    setStatusCode('Unknown');
-                    setError('알 수 없는 에러 발생');
-                }
-            });
 
 
-    });
-
-
-         */
     if (error) {
         return (
             <p style={{ color: 'red' }}>

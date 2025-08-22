@@ -15,18 +15,10 @@ export const handleOAuthCallback = (navigate: (path: string) => void) => {
 
 
 export const redirectToGoogleOAuth = () => {
-    // src/services/auth.service.ts (또는 해당 위치)
-    // const SERVER_URL =
-    //     process.env.REACT_APP_SERVER_URL ||
-    //     process.env.REACT_APP_API_URL || // 이미 쓰고 있다면 겸용
-    //     '/api';                          // 개발 프록시 기본값
-
     try {
         const URL = `${API_BASE_URL}/auth/google`;
-        console.log("GoogleOAuth URL : ", URL);
         console.debug('[Front] Redirecting to /auth/google');
         window.location.href = URL;
-        // window.location.href = 'https://port-0-backend-mcx0t8vt98002089.sel5.cloudtype.app/auth/google';
     } catch (error) {
         alert('로그인에 실패했습니다.');
         console.error(error);
