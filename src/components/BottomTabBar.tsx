@@ -5,7 +5,7 @@ const TABS = [
     { to: '/mypage',        label: '홈',   icon: '🏠' },
     { to: '/notice',       label: '공지', icon: '📢' },
     { to: '/account-info',  label: '계정', icon: '👤' },
-    { to: '/',      label: '로그인', icon: '⚙️' }, // 페이지 없으면 빼도 됨
+    // { to: '/',      label: '로그인', icon: '⚙️' }, // 페이지 없으면 빼도 됨
 ];
 
 export default function BottomTabBar() {
