@@ -1,153 +1,249 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, {
+    AxiosInstance,
+    AxiosError,
+    AxiosRequestConfig,
+    InternalAxiosRequestConfig,
+} from 'axios';
 
-const ORIGIN_URL = (process.env.REACT_APP_SERVER_ORIGIN || '').replace(/\/+$/, '');
+
+
+// 런타임 감지
+const IS_APP =
+    !!(window as any).ReactNativeWebView ||
+    new URLSearchParams(window.location.search).get('embed') === 'app' ||
+    (process.env.REACT_APP_RUNTIME || '').toLowerCase() === 'app';
+const IS_WEB = !IS_APP;
+
+// 기본 설정
+const ORIGIN_URL = (process.env.REACT_APP_SERVER_URL || '').replace(/\/+$/, '');
 const API_PREFIX = '/api';
 export const API_BASE_URL = `${ORIGIN_URL}${API_PREFIX}`;
-// const BASE_URL = process.env.REACT_APP_API_URL!;
-console.log('[API] BASE_URL =', API_BASE_URL);  // ← 콘솔로 반드시 확인
-if (!API_PREFIX) {
-    throw new Error('REACT_APP_API_URL 가 비어있습니다. .env를 확인하세요.');
+console.log('[API] BASE_URL =', API_BASE_URL);
+
+const bare = axios.create({
+    baseURL: API_BASE_URL,
+    withCredentials: IS_WEB,
+});
+
+const CSRF_KEY = 'CSRF';
+let csrfLock: Promise<void> | null = null;
+
+async function bootstrapCsrf(): Promise<void> {
+    const res = await bare.get('/auth/csrf', { headers: { Accept: 'application/json' } });
+    const headers = res.headers || {};
+    const fromHeader = (headers['x-csrf-token'] as string) || (headers['X-CSRF-TOKEN'] as any);
+    const fromBody = (res.data && (res.data.token || res.data.csrf || res.data.value)) ?? null;
+    const token = (fromHeader || fromBody || '').toString();
+    if (token) sessionStorage.setItem(CSRF_KEY, token);
+}
+
+async function csrfOnce(): Promise<void> {
+    if (!csrfLock) csrfLock = bootstrapCsrf().finally(() => (csrfLock = null));
+    return csrfLock;
 }
 
 const api: AxiosInstance = axios.create({
     baseURL: API_BASE_URL,
-    withCredentials: true,
-    xsrfCookieName: 'XSRF-TOKEN',   // Spring CookieCsrfTokenRepository 기본
-    xsrfHeaderName: 'X-XSRF-TOKEN', // 쓰기 요청 시 자동 첨부
+    withCredentials: IS_WEB, // 웹만 쿠키 사용
+    ...(IS_WEB
+        ? {
+            xsrfCookieName: 'XSRF-TOKEN',
+            xsrfHeaderName: 'X-XSRF-TOKEN',
+        }
+        : {}),
 });
 
-// 2xx만 성공으로 취급 (403을 반드시 에러로 보냄)
-api.defaults.validateStatus = (s) => s >= 200 && s < 300;
+// 앱용 토큰 저장소(웹에서는 사용 금지)
+const TOK = 'ajouhub:auth';
+const tokenStore = {
+    get access() {
+        try { return localStorage.getItem(`${TOK}:access`); } catch { return null; }
+    },
+    get refresh() {
+        try { return localStorage.getItem(`${TOK}:refresh`); } catch { return null; }
+    },
+    set(access?: string | null, refresh?: string | null) {
+        try {
+            if (access !== undefined) {
+                access === null
+                    ? localStorage.removeItem(`${TOK}:access`)
+                    : localStorage.setItem(`${TOK}:access`, access);
+            }
+            if (refresh !== undefined) {
+                refresh === null
+                    ? localStorage.removeItem(`${TOK}:refresh`)
+                    : localStorage.setItem(`${TOK}:refresh`, refresh);
+            }
+        } catch {}
+    },
+    clear() { this.set(null, null); },
+};
 
-// 리프레시 전용 클라이언트(인터셉터 X, 무한루프 방지)
+// ★ 웹 런타임에서는 혹시 남아있던 앱용 토큰을 청소
+if (IS_WEB) {
+    try {
+        localStorage.removeItem(`${TOK}:access`);
+        localStorage.removeItem(`${TOK}:refresh`);
+    } catch {}
+}
+
+// 인터셉터 없는 얇은 클라이언트(무한루프 방지)
 const refreshClient = axios.create({
     baseURL: API_BASE_URL,
-    withCredentials: true,
+    withCredentials: IS_WEB,
 });
 
-// 동시 401 방지를 위한 간단한 락
-let refreshing: Promise<void> | null = null;
-function refreshSession(): Promise<void> {
-    if (!refreshing) {
-        refreshing = refreshClient
-            .post('/auth/refresh?web=true', null, { _isRefresh: true } as any)
-            .then(() => {})
-            .finally(() => { refreshing = null; });
+// ✅ 헤더/바디를 모두 비워서 프리플라이트, CORS 변수 제거
+refreshClient.interceptors.request.use(cfg => {
+    if (cfg.headers) {
+        delete (cfg.headers as any).Authorization;
+        delete (cfg.headers as any)['Content-Type'];
+        delete (cfg.headers as any).Accept;
+        delete (cfg.headers as any)['X-XSRF-TOKEN'];
     }
-    return refreshing!;
-}
-
-// ✅ 1. 요청 시 accessToken 자동 포함
-api.interceptors.request.use((config) => {
-    config.headers = config.headers ?? {};
-    config.headers.Accept = 'application/json';
-
-    // 쓰기 요청인데 Content-Type 없으면 기본값 세팅
-    const method = (config.method ?? 'get').toLowerCase();
-    if (['post', 'put', 'patch', 'delete'].includes(method) && !config.headers['Content-Type']) {
-        config.headers['Content-Type'] = 'application/json';
-    }
-
-    return config;
+    return cfg;
 });
 
-/*
-type Cfg = import('axios').AxiosRequestConfig & { _retry?: boolean; _isRefresh?: boolean };
-// 응답/에러에서 공통으로 cfg/status/url만 표준화해서 꺼낸다
-function extract(resOrErr: AxiosResponse | AxiosError): {
-    cfg: Cfg;
-    status: number;   // ← 반드시 number
-    url: string;
-} {
-    // 공통: 원요청 config
-    const cfg = ((resOrErr as any).config as Cfg) ?? ({} as Cfg);
-    const url = String(cfg.url ?? '');
+type RetriableCfg = AxiosRequestConfig & { _retry?: boolean; _isRefresh?: boolean };
 
-    // 상태코드 정규화 → number 보장
-    let status: number;
-    if ('status' in resOrErr) {
-        // AxiosResponse
-        status = (resOrErr as AxiosResponse).status;
+// 리프레시 핵심
+async function doRefreshCore(): Promise<void> {
+    if (IS_WEB) {
+        // ★ 웹: 쿠키만 사용 (바디에 RT 절대 금지)
+        // await refreshClient.post('/auth/refresh'); // body/headers 지정 X
+        await refreshClient.post(
+            '/auth/refresh',
+            undefined,
+            // {}, // 빈 JSON
+            {
+                withCredentials: true,
+                // headers: {
+                //     Accept: 'application/json',
+                //     'Content-Type': 'application/json',
+                // },
+                _isRefresh: true as any,  // 루프 방지 플래그를 쓰고 있다면 유지
+            } as any
+        );
     } else {
-        // AxiosError
-        const s = (resOrErr as AxiosError).response?.status;
-        status = typeof s === 'number' ? s : 0;
-    }
-
-    return { cfg, status, url };
-}
-
-// 리프레시가 필요하면 실행하고, 원요청을 재시도해서 응답을 돌려준다. 아니면 undefined
-async function tryRefreshAndReplay<T = any>(
-    cfg: Cfg,
-    status: number,
-    opts?: { onRefreshFail?: (e: unknown) => void }
-): Promise<AxiosResponse<T> | undefined> {
-
-    const isRefreshCall = cfg._isRefresh === true || String(cfg.url || '').includes('/auth/refresh');
-    const shouldRefresh = (status === 401 || status === 403) && !isRefreshCall && !cfg._retry;
-
-    if (!shouldRefresh) return undefined;
-
-    cfg._retry = true;
-    try {
-        await refreshSession();           // ← /api/auth/refresh 호출(쿠키 재발급)
-        return api.request<T>(cfg);       // ← 원래 요청 재시도
-    } catch (e) {
-        opts?.onRefreshFail?.(e);         // ← 필요 시 로그인 페이지로 이동 등
-        throw e;
+        // ★ 앱: 바디로 RT를 보냄
+        const rt = tokenStore.refresh;
+        if (!rt) throw new Error('No refresh token (app)');
+        const res = await refreshClient.post(
+            '/auth/refresh',
+            { refreshToken: rt },
+            {
+                headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+            }
+        );
+        const payload = (res.data && (res.data as any).data) ? (res.data as any).data : res.data;
+        const { accessToken, refreshToken } = (payload ?? {}) as {
+            accessToken?: string;
+            refreshToken?: string | null;
+        };
+        if (!accessToken) throw new Error('Refresh response has no accessToken');
+        tokenStore.set(accessToken, refreshToken ?? rt);
     }
 }
 
-// ✅ 2. 응답 에러 시 accessToken 재발급 시도
-api.interceptors.response.use(
-    (res => res),
-    // ✅ onRejected: 기본(정상) 흐름. 4xx가 에러로 들어오면 여기서 처리
-    async (error) => {
-        const { cfg, status } = extract(error);
-        const replay = await tryRefreshAndReplay(cfg, status, {
-            onRefreshFail: (e: unknown) => {
-                console.error('[토큰 재발급 실패]', e);
-                // window.location.href = '/login';
-            },
-        });
-        if (replay) return replay;
-        throw error;
+// 동시 리프레시 락
+let refreshLock: Promise<void> | null = null;
+async function refreshOnce(): Promise<void> {
+    if (!refreshLock) refreshLock = doRefreshCore().finally(() => (refreshLock = null));
+    return refreshLock;
+}
+
+// 요청 인터셉터
+api.interceptors.request.use(async (cfg: InternalAxiosRequestConfig) => {
+    cfg.headers = cfg.headers ?? {};
+    (cfg.headers as any).Accept = 'application/json';
+
+    const m = (cfg.method ?? 'get').toLowerCase();
+    const isWrite = ['post','put','patch','delete'].includes(m);
+
+    if (isWrite && !(cfg.headers as any)['Content-Type']) {
+        (cfg.headers as any)['Content-Type'] = 'application/json';
     }
-);
 
- */
+    // ★ 웹: 쓰기 요청이면 CSRF 헤더 보장
+    if (IS_WEB && isWrite) {
+        let t = sessionStorage.getItem(CSRF_KEY);
+        if (!t) {                      // 아직 없으면 먼저 받아온다
+            await csrfOnce();
+            t = sessionStorage.getItem(CSRF_KEY);
+        }
+        if (t) (cfg.headers as any)['X-XSRF-TOKEN'] = t;
+    }
 
+    // 앱: Bearer
+    if (IS_APP) {
+        const at = tokenStore.access;
+        if (at) (cfg.headers as any).Authorization = `Bearer ${at}`;
+    }
 
-// ✅ 2. 응답 에러 시 accessToken 재발급 시도
+    return cfg;
+});
+
+// 응답 인터셉터(401/403 → 리프레시 → 재시도)
 api.interceptors.response.use(
     (res) => res,
     async (error: AxiosError) => {
-
-        const originalRequest = (error.config || {}) as any;
+        const cfg = (error.config || {}) as RetriableCfg;
         const status = error.response?.status ?? 0;
 
-        const isRefreshCall = originalRequest._isRefresh === true || String(originalRequest.url || '').includes('/auth/refresh');
-        const shouldRefresh = (status === 401 || status === 403) && !isRefreshCall && !originalRequest?._retry;
+        const url = String(cfg.url || '');
+        const isAuthApi = url.startsWith('/auth/');
 
-        if (shouldRefresh) {
-            (originalRequest)._retry = true;
+        // (기존) 만료 처리
+        const isExpiredWeb = IS_WEB && (status === 401 || status === 403);
+        const isExpiredApp = IS_APP && (status === 401 || status === 403) && !!tokenStore.refresh;
+        const isRefreshCall = cfg._isRefresh === true || url.includes('/auth/refresh');
+
+        if (!isAuthApi && !isRefreshCall && !cfg._retry && (isExpiredWeb || isExpiredApp)) {
+            cfg._retry = true;
 
             try {
-                await refreshSession();
-                console.log('[토큰 재발급 성공]');
-                return api.request(originalRequest);
+                console.debug('[토큰 재발급 시도]', { isWeb: IS_WEB, req: url });
+                await refreshOnce();                 // ← 실제 재발급 호출
+                console.info('[토큰 재발급 성공]');
+
+                if (IS_APP) {
+                    cfg.headers = cfg.headers ?? {};
+                    const at = tokenStore.access;
+                    if (at) (cfg.headers as any).Authorization = `Bearer ${at}`;
+                }
+
+                return api.request(cfg);
             } catch (e) {
                 console.error('[토큰 재발급 실패]', e);
-                window.location.href = '/login'; // 필요 시
+                // 필요 시 로그인 화면 이동
+                window.location.href = '/';
                 throw e;
-            } finally {}
+            }
+        }
+
+        // ★ 웹: CSRF 문제(403)면 1회 부트스트랩 후 재시도
+        if (IS_WEB && status === 403 && !isAuthApi && !(cfg as any)._retry403) {
+            (cfg as any)._retry403 = true;
+            await csrfOnce();
+            // 헤더에 최신 토큰 반영
+            const t = sessionStorage.getItem(CSRF_KEY);
+            if (t) {
+                cfg.headers = cfg.headers ?? {};
+                (cfg.headers as any)['X-XSRF-TOKEN'] = t;
+            }
+            return api.request(cfg);
         }
 
         throw error;
     }
 );
 
-
-
 export default api;
+
+// 앱 로그인/로그아웃 헬퍼
+export const authTokens = {
+    setFromLogin(accessToken: string, refreshToken?: string | null) {
+        if (IS_APP) tokenStore.set(accessToken, refreshToken ?? null);
+    },
+    clear() { tokenStore.clear(); },
+};
