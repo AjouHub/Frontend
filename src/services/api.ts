@@ -93,22 +93,35 @@ const refreshClient = axios.create({
     withCredentials: IS_WEB,
 });
 
+// ✅ 헤더/바디를 모두 비워서 프리플라이트, CORS 변수 제거
+refreshClient.interceptors.request.use(cfg => {
+    if (cfg.headers) {
+        delete (cfg.headers as any).Authorization;
+        delete (cfg.headers as any)['Content-Type'];
+        delete (cfg.headers as any).Accept;
+        delete (cfg.headers as any)['X-XSRF-TOKEN'];
+    }
+    return cfg;
+});
+
 type RetriableCfg = AxiosRequestConfig & { _retry?: boolean; _isRefresh?: boolean };
 
 // 리프레시 핵심
 async function doRefreshCore(): Promise<void> {
     if (IS_WEB) {
         // ★ 웹: 쿠키만 사용 (바디에 RT 절대 금지)
+        // await refreshClient.post('/auth/refresh'); // body/headers 지정 X
         await refreshClient.post(
             '/auth/refresh',
-            {}, // 빈 JSON
+            undefined,
+            // {}, // 빈 JSON
             {
                 withCredentials: true,
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                // _isRefresh: true as any,  // 루프 방지 플래그를 쓰고 있다면 유지
+                // headers: {
+                //     Accept: 'application/json',
+                //     'Content-Type': 'application/json',
+                // },
+                _isRefresh: true as any,  // 루프 방지 플래그를 쓰고 있다면 유지
             } as any
         );
     } else {
@@ -203,7 +216,7 @@ api.interceptors.response.use(
             } catch (e) {
                 console.error('[토큰 재발급 실패]', e);
                 // 필요 시 로그인 화면 이동
-                window.location.href = '/login';
+                window.location.href = '/';
                 throw e;
             }
         }
