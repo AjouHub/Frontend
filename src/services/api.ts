@@ -22,7 +22,7 @@ console.log('[API] BASE_URL =', API_BASE_URL);
 
 const bare = axios.create({
     baseURL: API_BASE_URL,
-    withCredentials: IS_WEB,
+    withCredentials: true,
 });
 
 const CSRF_KEY = 'CSRF';
@@ -44,53 +44,31 @@ async function csrfOnce(): Promise<void> {
 
 const api: AxiosInstance = axios.create({
     baseURL: API_BASE_URL,
-    withCredentials: IS_WEB, // 웹만 쿠키 사용
-    ...(IS_WEB
-        ? {
-            xsrfCookieName: 'XSRF-TOKEN',
-            xsrfHeaderName: 'X-XSRF-TOKEN',
-        }
-        : {}),
+    withCredentials: true, // 앱도 쿠키 사용
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    // ...(IS_WEB
+    //     ? {
+    //         xsrfCookieName: 'XSRF-TOKEN',
+    //         xsrfHeaderName: 'X-XSRF-TOKEN',
+    //     }
+    //     : {}),
 });
 
-// 앱용 토큰 저장소(웹에서는 사용 금지)
-const TOK = 'ajouhub:auth';
-const tokenStore = {
-    get access() {
-        try { return localStorage.getItem(`${TOK}:access`); } catch { return null; }
-    },
-    get refresh() {
-        try { return localStorage.getItem(`${TOK}:refresh`); } catch { return null; }
-    },
-    set(access?: string | null, refresh?: string | null) {
-        try {
-            if (access !== undefined) {
-                access === null
-                    ? localStorage.removeItem(`${TOK}:access`)
-                    : localStorage.setItem(`${TOK}:access`, access);
-            }
-            if (refresh !== undefined) {
-                refresh === null
-                    ? localStorage.removeItem(`${TOK}:refresh`)
-                    : localStorage.setItem(`${TOK}:refresh`, refresh);
-            }
-        } catch {}
-    },
-    clear() { this.set(null, null); },
-};
-
-// ★ 웹 런타임에서는 혹시 남아있던 앱용 토큰을 청소
-if (IS_WEB) {
-    try {
-        localStorage.removeItem(`${TOK}:access`);
-        localStorage.removeItem(`${TOK}:refresh`);
-    } catch {}
+/* ===================== 앱 REAUTH 신호 ===================== */
+function requestAppReauth() {
+    const payload = JSON.stringify({ type: 'REAUTH' });
+    try { (window as any).AURA?.postMessage(payload); } catch {}
+    try { (window as any).ReactNativeWebView?.postMessage(payload); } catch {}
 }
 
-// 인터셉터 없는 얇은 클라이언트(무한루프 방지)
+
+/* ===================== (웹 전용) 토큰 리프레시 ===================== */
+type RetriableCfg = AxiosRequestConfig & { _retry?: boolean; _isRefresh?: boolean };
+
 const refreshClient = axios.create({
     baseURL: API_BASE_URL,
-    withCredentials: IS_WEB,
+    withCredentials: true,
 });
 
 // ✅ 헤더/바디를 모두 비워서 프리플라이트, CORS 변수 제거
@@ -104,45 +82,17 @@ refreshClient.interceptors.request.use(cfg => {
     return cfg;
 });
 
-type RetriableCfg = AxiosRequestConfig & { _retry?: boolean; _isRefresh?: boolean };
-
 // 리프레시 핵심
 async function doRefreshCore(): Promise<void> {
-    if (IS_WEB) {
-        // ★ 웹: 쿠키만 사용 (바디에 RT 절대 금지)
-        // await refreshClient.post('/auth/refresh'); // body/headers 지정 X
-        await refreshClient.post(
-            '/auth/refresh',
-            undefined,
-            // {}, // 빈 JSON
-            {
-                withCredentials: true,
-                // headers: {
-                //     Accept: 'application/json',
-                //     'Content-Type': 'application/json',
-                // },
-                _isRefresh: true as any,  // 루프 방지 플래그를 쓰고 있다면 유지
-            } as any
-        );
-    } else {
-        // ★ 앱: 바디로 RT를 보냄
-        const rt = tokenStore.refresh;
-        if (!rt) throw new Error('No refresh token (app)');
-        const res = await refreshClient.post(
-            '/auth/refresh',
-            { refreshToken: rt },
-            {
-                headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-            }
-        );
-        const payload = (res.data && (res.data as any).data) ? (res.data as any).data : res.data;
-        const { accessToken, refreshToken } = (payload ?? {}) as {
-            accessToken?: string;
-            refreshToken?: string | null;
-        };
-        if (!accessToken) throw new Error('Refresh response has no accessToken');
-        tokenStore.set(accessToken, refreshToken ?? rt);
-    }
+    // ★ 웹: 쿠키만 사용 (바디에 RT 절대 금지)
+    await refreshClient.post(
+        '/auth/refresh',
+        undefined,
+        {
+            withCredentials: true,
+            _isRefresh: true as any,  // 루프 방지 플래그를 쓰고 있다면 유지
+        } as any
+    );
 }
 
 // 동시 리프레시 락
@@ -165,7 +115,7 @@ api.interceptors.request.use(async (cfg: InternalAxiosRequestConfig) => {
     }
 
     // ★ 웹: 쓰기 요청이면 CSRF 헤더 보장
-    if (IS_WEB && isWrite) {
+    if (isWrite) {
         let t = sessionStorage.getItem(CSRF_KEY);
         if (!t) {                      // 아직 없으면 먼저 받아온다
             await csrfOnce();
@@ -174,11 +124,8 @@ api.interceptors.request.use(async (cfg: InternalAxiosRequestConfig) => {
         if (t) (cfg.headers as any)['X-XSRF-TOKEN'] = t;
     }
 
-    // 앱: Bearer
-    if (IS_APP) {
-        const at = tokenStore.access;
-        if (at) (cfg.headers as any).Authorization = `Bearer ${at}`;
-    }
+    // ✅ 앱 모드: Authorization 절대 붙이지 않음(토큰 저장/관리 금지)
+    // (이전에 있던 Bearer 주입 로직 제거)
 
     return cfg;
 });
@@ -192,40 +139,47 @@ api.interceptors.response.use(
 
         const url = String(cfg.url || '');
         const isAuthApi = url.startsWith('/auth/');
-
-        // (기존) 만료 처리
-        const isExpiredWeb = IS_WEB && (status === 401 || status === 403);
-        const isExpiredApp = IS_APP && (status === 401 || status === 403) && !!tokenStore.refresh;
         const isRefreshCall = cfg._isRefresh === true || url.includes('/auth/refresh');
 
-        if (!isAuthApi && !isRefreshCall && !cfg._retry && (isExpiredWeb || isExpiredApp)) {
+        // ---- 401/403 처리 ----
+        // 웹: 쿠키 기반 → 프론트에서 /auth/refresh 호출 후 재시도
+        const shouldRefreshWeb = IS_WEB && !isAuthApi && !isRefreshCall && !cfg._retry && (status === 401 || status === 403);
+
+        // 앱: 프론트는 리프레시/토큰 관리 금지 → 앱에 REAUTH 신호 후 리로드
+        const shouldReauthApp = IS_APP && !isAuthApi && !isRefreshCall && (status === 401 || status === 403);
+
+        if (shouldRefreshWeb) {
             cfg._retry = true;
-
             try {
-                console.debug('[토큰 재발급 시도]', { isWeb: IS_WEB, req: url });
-                await refreshOnce();                 // ← 실제 재발급 호출
-                console.info('[토큰 재발급 성공]');
-
-                if (IS_APP) {
-                    cfg.headers = cfg.headers ?? {};
-                    const at = tokenStore.access;
-                    if (at) (cfg.headers as any).Authorization = `Bearer ${at}`;
-                }
-
+                console.debug('[WEB] 토큰 재발급 시도');
+                await refreshOnce();
+                console.info('[WEB] 토큰 재발급 성공');
                 return api.request(cfg);
             } catch (e) {
-                console.error('[토큰 재발급 실패]', e);
-                // 필요 시 로그인 화면 이동
+                console.error('[WEB] 토큰 재발급 실패', e);
+                // 필요하면 로그인 화면 이동
                 window.location.href = '/';
                 throw e;
             }
         }
 
-        // ★ 웹: CSRF 문제(403)면 1회 부트스트랩 후 재시도
-        if (IS_WEB && status === 403 && !isAuthApi && !(cfg as any)._retry403) {
+        if (shouldReauthApp) {
+            console.warn('[APP] 401/403 → REAUTH 신호 전송');
+            requestAppReauth();
+            // 앱이 SSO로 쿠키를 재주입하는 동안 페이지를 새로고침(세션 반영)
+            setTimeout(() => {
+                const url = new URL(window.location.href);
+                url.searchParams.set('embed', 'app');
+                window.location.replace(url.toString());
+            }, 600);
+            // 여기서 체인을 끝내 브라우저가 진행을 멈추게 한다.
+            return new Promise(() => {});
+        }
+
+        // 쿠키 기반 CSRF 미부트스트랩(403) → 1회 부트스트랩 후 재시도
+        if (!isAuthApi && status === 403 && !(cfg as any)._retry403) {
             (cfg as any)._retry403 = true;
             await csrfOnce();
-            // 헤더에 최신 토큰 반영
             const t = sessionStorage.getItem(CSRF_KEY);
             if (t) {
                 cfg.headers = cfg.headers ?? {};
@@ -239,11 +193,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-
-// 앱 로그인/로그아웃 헬퍼
-export const authTokens = {
-    setFromLogin(accessToken: string, refreshToken?: string | null) {
-        if (IS_APP) tokenStore.set(accessToken, refreshToken ?? null);
-    },
-    clear() { tokenStore.clear(); },
-};

@@ -6,9 +6,9 @@ import {
     ensureFcmTokenRegistered,
     subscribeTopics,
     unsubscribeTopics,
-    type NoticeType,
-    type NotificationPrefs
 } from '../../services/settings.service';
+import type { NoticeType, NotificationPrefs } from '../../types/noticeFCM';
+
 
 export default function NotificationPreferences() {
     const [types, setTypes] = useState<NoticeType[]>([]);

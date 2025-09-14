@@ -88,13 +88,19 @@ export async function removeKeyword(id: number): Promise<void> {
 
 /** ===== Notifications / FCM ===== */
 /** 선택 가능한 공지 유형 목록 (서버 제공 시 그쪽 사용) */
-export async function listNoticeTypes(): Promise<NoticeType[]> {
-    // TODO: 서버에서 제공하면 아래를 사용
-    // const res = await api.get<ApiResponse<{ types: NoticeType[] }>>('/notice/types');
-    // return res.data?.data?.types ?? [];
+export async function listNoticeTypes(): Promise<number[]> {
+    try {
+        const response = await api.get('/keywords/subscriptions');
 
-    // 임시 상수
-    return ['general', 'scholarship', 'dormitory'];
+        if (response.data.status != 'success') {
+            const error = new Error(response.data.message || '구독 정보를 불러올 수 없습니다.');
+            (error as any).status = response.status;
+            throw error;
+        }
+        return response.data.data;
+    } catch (error) {
+        throw error;
+    }
 }
 
 /** 내 알림 설정 조회 */

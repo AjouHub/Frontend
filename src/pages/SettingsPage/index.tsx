@@ -18,10 +18,10 @@ export default function SettingsPage() {
                 <KeywordController />
             </section>
 
-            {/*<section>*/}
-            {/*    <h2 style={{ marginBottom: 12 }}>알림/구독 (FCM)</h2>*/}
-            {/*    <NotificationPreferences />*/}
-            {/*</section>*/}
+            <section>
+                <h2 style={{ marginBottom: 12 }}>알림/구독 (FCM)</h2>
+                <NotificationPreferences />
+            </section>
         </div>
     );
 }
