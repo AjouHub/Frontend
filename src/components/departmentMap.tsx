@@ -68,3 +68,23 @@ export const departmentNameMap: { [key: string]: string } = {
     /* 국제학부 */
     'department.isa': '국제학부'
 };
+
+
+export const departmentGroups: { [college: string]: string[] } = {
+    '공과대학': [
+        'department.me','department.env','department.academic','department.ce','department.che',
+        'department.tse','department.mse','department.arch','department.chembio','department.ise','department.appchem'
+    ],
+    '첨단ICT융합대학': ['department.ece','department.aisemi','department.mobility'],
+    '소프트웨어융합대학': ['department.media','department.software','department.ndc','department.security','department.aai'],
+    '자연과학대학': ['department.math','department.chem','department.physics','department.biology','department.frontiers'],
+    '경영대학': ['department.abiz','department.fe','department.ebiz','department.gb'],
+    '인문대학': ['department.kor','department.history','department.english','department.culture','department.france'],
+    '사회과학대학': ['department.econ','department.soci','department.pba','department.pol','department.apsy','department.slez','department.eps'],
+    '의과대학': ['department.medicine'],
+    '간호대학': ['department.nursing'],
+    '약학대학': ['department.pharm'],
+    '첨단바이오융합대학': ['department.ibio'],
+    '다산학부대학': ['department.uc','department.pre'],
+    '국제학부': ['department.isa'],
+};

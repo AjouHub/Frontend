@@ -5,6 +5,7 @@ import MyPage from './pages/MyPage';
 import SelectDepartmentPage from "./pages/SelectDepartmentPage";
 import AccountInfoPage from "./pages/AccountInfoPage";
 import NoticePage from "./pages/NoticePage";
+import SettingsPage from "./pages/SettingsPage";
 
 
 function App() {
@@ -17,7 +18,7 @@ function App() {
                 <Route path="/mypage" element={<MyPage />} />
                 <Route path="/notice" element={<NoticePage />} />
                 <Route path="/account-info" element={<AccountInfoPage />} />
-                {/*<Route path="/login" element={<LoginPage />} />*/}
+                <Route path="/settings" element={<SettingsPage />} />
 
                 {/* 탭엔 없지만 화면은 보여야 하는 경로들도 모두 여기 */}
                 <Route path="/select-department" element={<SelectDepartmentPage />} />

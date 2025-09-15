@@ -1,4 +1,4 @@
-import {API_BASE_URL, authTokens} from "./api";
+import {API_BASE_URL} from "./api";
 
 
 //  앱(WebView) 환경 감지
@@ -15,13 +15,13 @@ export function isAppEnv(): boolean {
 export const handleOAuthCallback = (navigate: (path: string) => void) => {
     const params: URLSearchParams = new URLSearchParams(window.location.search);
 
-    if (isAppEnv()) {
-        const accessToken = params.get('accessToken');
-        const refreshToken = params.get('refreshToken');
-        if (accessToken) {
-            authTokens.setFromLogin(accessToken, refreshToken);
-        }
-    }
+    // if (isAppEnv()) {
+    //     const accessToken = params.get('accessToken');
+    //     const refreshToken = params.get('refreshToken');
+    //     if (accessToken) {
+    //         authTokens.setFromLogin(accessToken, refreshToken);
+    //     }
+    // }
 
 
     const signUp: string | null = params.get('signUp');
