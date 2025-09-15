@@ -14,7 +14,7 @@ export default function SettingsPage() {
             </section>
 
             <section style={{ marginBottom: 32 }}>
-                <h2 style={{ marginBottom: 12 }}>Keyword Controller</h2>
+                <h2 style={{ marginBottom: 12 }}>키워드 선택</h2>
                 <KeywordController />
             </section>
 
