@@ -1,3 +1,4 @@
+// pages/NoticePage/index.tsx
 import React, { JSX, useEffect, useMemo, useState } from "react";
 import "./NoticePage.css";
 import { fetchUserInfo } from "../../services/fetchUserInfo";
@@ -6,6 +7,7 @@ import type { Notice } from "../../types/notice";
 import type { UserInfo } from "../../types/user";
 import NoticeCard from "./NoticeCard";
 import { listKeywords } from "../../services/settings.service";
+import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark";
 import { departmentNameMap } from "../../components/departmentMap";
 
 /** 색상 토큰 (디자인 시안) */
@@ -29,16 +31,26 @@ const TOP_TABS: TopTab[] = [
     { key: "department", label: "학과" },
 ];
 
-
 const FALLBACK_TAGS = [
-    "수강신청","학사","계절학기","강의","특강","수업","공모전","장학","채용","설문","대회"];
-async function fetchSuggestedTags(): Promise<string[]> {
-    const list = await listKeywords(); // Promise<Keyword[]>
-    const phrases = list
-        // .filter(k => k.scope === 'GLOBAL')
-        .map(k => (k.phrase ?? "").trim())
-        .filter(p => p.length > 0);
+    "수강신청",
+    "학사",
+    "계절학기",
+    "강의",
+    "특강",
+    "수업",
+    "공모전",
+    "장학",
+    "채용",
+    "설문",
+    "대회",
+];
 
+// 서버 키워드 → phrase[] 로 변환
+async function fetchSuggestedTags(): Promise<string[]> {
+    const list = await listKeywords();
+    const phrases = list
+        .map((k) => (k.phrase ?? "").trim())
+        .filter((p) => p.length > 0);
     return Array.from(new Set(phrases));
 }
 
@@ -61,23 +73,25 @@ export default function NoticePage(): JSX.Element {
     const [error, setError] = useState("");
     const [status, setStatus] = useState<number | string | null>(null);
 
-    // 칩(해시태그) — ‘완전 닫힘’ 토글
+    // 칩(해시태그)
     const [chipsOpen, setChipsOpen] = useState(true);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-    // 추천 태그 상태 (기본은 폴백으로 시작)
     const [suggestedTags, setSuggestedTags] = useState<string[]>(FALLBACK_TAGS);
 
+    // ✅ 북마크 ID 집합
+    const [bookmarks, setBookmarks] = useState<Set<string | number>>(new Set());
 
-    /** 초기 데이터 */
+    /** 초기 데이터 (유저 + 추천 태그) */
     useEffect(() => {
         (async () => {
             try {
                 const u = await fetchUserInfo();
                 setUser(u);
+
                 const firstDept = u?.departments?.[0] || "";
                 setDeptType(firstDept);
                 setTab("general");
+
                 const tags = await fetchSuggestedTags();
                 if (tags.length) setSuggestedTags(tags);
             } catch (e: any) {
@@ -88,7 +102,24 @@ export default function NoticePage(): JSX.Element {
         })();
     }, []);
 
-    /** 목록 호출 */
+    /** ✅ 유저 로드 후 북마크 목록 가져오기 */
+    useEffect(() => {
+        if (!user) return;
+        let alive = true;
+        (async () => {
+            try {
+                const ids = await listNoticeBookmarks(); // (string|number)[]
+                if (alive) setBookmarks(new Set(ids));
+            } catch (e) {
+                console.warn("북마크 목록 로드 실패:", e);
+            }
+        })();
+        return () => {
+            alive = false;
+        };
+    }, [user]);
+
+    /** 공지 목록 호출 */
     useEffect(() => {
         const typeForApi = tab === "department" ? (deptType || "general") : tab;
         setLoading(true);
@@ -109,7 +140,6 @@ export default function NoticePage(): JSX.Element {
         const s = new Set<string>();
         notices.forEach((n: any) => n?.tags?.forEach((t: string) => s.add(t)));
         const dynamic = Array.from(s);
-        // 서버 공지에 태그가 없으면 추천 태그 사용
         return dynamic.length ? dynamic : suggestedTags;
     }, [notices, suggestedTags]);
 
@@ -130,9 +160,35 @@ export default function NoticePage(): JSX.Element {
         });
     }, [notices, selectedTags]);
 
+    /** ✅ 하트 클릭: 낙관적 업데이트 + 서버 반영 + 실패 시 롤백 */
+    const handleToggleBookmark = async (id: string | number, next: boolean) => {
+        // UI 먼저 반영
+        setBookmarks((prev) => {
+            const s = new Set(prev);
+            next ? s.add(id) : s.delete(id);
+            return s;
+        });
+
+        try {
+            await setNoticeBookmark(id, next);
+        } catch (e: any) {
+            // 실패 시 롤백
+            setBookmarks((prev) => {
+                const s = new Set(prev);
+                next ? s.delete(id) : s.add(id);
+                return s;
+            });
+            alert(e?.message ?? "북마크 처리에 실패했습니다.");
+        }
+    };
+
     /** 렌더 */
     if (loading && !notices.length) {
-        return <div className="np-container"><div className="np-loading">로딩 중…</div></div>;
+        return (
+            <div className="np-container">
+                <div className="np-loading">로딩 중…</div>
+            </div>
+        );
     }
     if (error) {
         return (
@@ -184,8 +240,7 @@ export default function NoticePage(): JSX.Element {
                     })}
                 </nav>
 
-                {/* ───────── 칩/해시태그: 완전 닫힘 지원 ───────── */}
-                {/* ───────── 칩/해시태그: 완전 닫힘(둥근 사각형 남김) ───────── */}
+                {/* ───────── 칩 영역 ───────── */}
                 {chipsOpen ? (
                     <section className="np-chip-wrap">
                         <div className="np-chips">
@@ -209,7 +264,14 @@ export default function NoticePage(): JSX.Element {
                             title="칩 접기"
                         >
                             <svg viewBox="0 0 24 24" className="np-caret up">
-                                <path d="M7 14l5-5 5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path
+                                    d="M7 14l5-5 5 5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
                             </svg>
                         </button>
                     </section>
@@ -222,12 +284,18 @@ export default function NoticePage(): JSX.Element {
                             title="칩 펼치기"
                         >
                             <svg viewBox="0 0 24 24" className="np-caret down">
-                                <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path
+                                    d="M7 10l5 5 5-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
                             </svg>
                         </button>
                     </div>
                 )}
-
 
                 {/* ───────── 공지 카드 리스트 ───────── */}
                 <ul className="np-card-list">
@@ -238,6 +306,9 @@ export default function NoticePage(): JSX.Element {
                                 leftBarColor={AURA_BLUE}
                                 dateColor={STONE_GRAY}
                                 heartColor={ACCENT_ORANGE}
+                                heartOffColor="#C0C5CF"
+                                isBookmarked={bookmarks.has(n.id)}       // {/* ✅ 하트 ON/OFF */}
+                                onToggleBookmark={handleToggleBookmark}   // {/* ✅ 클릭 처리 */}
                             />
                         </li>
                     ))}
@@ -246,7 +317,7 @@ export default function NoticePage(): JSX.Element {
                     )}
                 </ul>
 
-                {/* ───────── 페이지네이션 (숫자만, 원형 X) ───────── */}
+                {/* ───────── 페이지네이션 ───────── */}
                 {totalPages > 1 && (
                     <div className="np-paging">
                         <button

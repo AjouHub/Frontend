@@ -1,4 +1,6 @@
-import React from "react";
+// ✅ 상단 import
+import { useState } from "react";
+import { setNoticeBookmark } from "../../services/bookMark";
 
 type NoticeCardProps = {
     notice: {
@@ -10,18 +12,47 @@ type NoticeCardProps = {
         date?: string;
         tags?: string[];
     };
-    leftBarColor: string;  // 좌측 세로 바 색 (시안: 아주 블루)
-    dateColor: string;     // 날짜 글자색 (회색)
-    heartColor: string;    // 북마크 on 색 (오렌지)
+    leftBarColor: string;
+    dateColor: string;
+    heartColor?: string;     // on 색
+    heartOffColor?: string;  // off 색
+    isBookmarked?: boolean;  // 부모가 상태를 줄 때 (컨트롤드)
+    onToggleBookmark?: (id: string | number, next: boolean) => void;
 };
 
 export default function NoticeCard({
                                        notice,
                                        leftBarColor,
                                        dateColor,
-                                       heartColor,
+                                       heartColor = "#FFA852",
+                                       heartOffColor = "#C0C5CF",
+                                       isBookmarked,
+                                       onToggleBookmark,
                                    }: NoticeCardProps) {
-    const [marked, setMarked] = React.useState(false);
+    // 컨트롤드 prop이 없을 때만 내부 로컬 상태 사용
+    const [markedLocal, setMarkedLocal] = useState(false);
+    const marked = isBookmarked ?? markedLocal;
+
+    const handleToggle = async () => {
+        const next = !marked;
+
+        // 1) 부모가 관리하면 부모 콜백만 호출
+        if (onToggleBookmark) {
+            onToggleBookmark(notice.id, next);
+            return;
+        }
+
+        // 2) 내부에서 관리하면 낙관적 업데이트 + 서버 호출
+        setMarkedLocal(next);
+        try {
+            await setNoticeBookmark(notice.id, next);
+        } catch (e) {
+            // 실패 시 롤백
+            setMarkedLocal(!next);
+            console.error(e);
+            alert((e as any)?.message ?? "북마크 처리에 실패했습니다.");
+        }
+    };
 
     return (
         <div className="np-card">
@@ -42,9 +73,7 @@ export default function NoticeCard({
                 <div className="np-card-tags">
                     {notice.tags?.length ? (
                         notice.tags.map((t) => (
-                            <span key={t} className="np-card-tag">
-                #{t}
-              </span>
+                            <span key={t} className="np-card-tag">#{t}</span>
                         ))
                     ) : (
                         <>
@@ -63,12 +92,11 @@ export default function NoticeCard({
             <div className="np-card-side">
                 <button
                     className="np-heart"
-                    onClick={() => setMarked((v) => !v)}
+                    onClick={handleToggle}
                     aria-label="북마크"
                     title="북마크"
-                    style={{ color: marked ? heartColor : "#C0C5CF" }}
+                    style={{ color: marked ? heartColor : heartOffColor }}
                 >
-                    {/* 하트 아이콘 (시안 느낌) */}
                     <svg viewBox="0 0 24 24" className="np-heart-ico">
                         {marked ? (
                             <path
