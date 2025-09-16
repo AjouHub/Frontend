@@ -1,10 +1,21 @@
 // ✅ 상단 import
 import { useState } from "react";
-import { setNoticeBookmark } from "../../services/bookMark";
+import {
+    IoHeartOutline as RawHeartOutline,
+    IoHeart as RawHeart,
+} from "react-icons/io5";
+import { setNoticeBookmark } from "../../services/bookMark.service";
+import { formatNoticeDate } from "../../utils/date";
+
+// ✅ 아이콘 캐스팅(타입 충돌 우회)
+type IconProps = { size?: number; color?: string; className?: string };
+const IoHeart = RawHeart as unknown as React.ComponentType<IconProps>;
+const IoHeartOutline = RawHeartOutline as unknown as React.ComponentType<IconProps>;
+
 
 type NoticeCardProps = {
     notice: {
-        id: string | number;
+        id: string;
         title: string;
         link?: string;
         category?: string;
@@ -17,14 +28,14 @@ type NoticeCardProps = {
     heartColor?: string;     // on 색
     heartOffColor?: string;  // off 색
     isBookmarked?: boolean;  // 부모가 상태를 줄 때 (컨트롤드)
-    onToggleBookmark?: (id: string | number, next: boolean) => void;
+    onToggleBookmark?: (id: string, next: boolean) => void;
 };
 
 export default function NoticeCard({
                                        notice,
                                        leftBarColor,
                                        dateColor,
-                                       heartColor = "#FFA852",
+                                       heartColor = "#EF4C43",
                                        heartOffColor = "#C0C5CF",
                                        isBookmarked,
                                        onToggleBookmark,
@@ -89,6 +100,8 @@ export default function NoticeCard({
             </div>
 
             {/* 우측 – 하트 + 날짜 */}
+
+
             <div className="np-card-side">
                 <button
                     className="np-heart"
@@ -97,28 +110,11 @@ export default function NoticeCard({
                     title="북마크"
                     style={{ color: marked ? heartColor : heartOffColor }}
                 >
-                    <svg viewBox="0 0 24 24" className="np-heart-ico">
-                        {marked ? (
-                            <path
-                                d="M12 21s-7.5-4.35-9.75-8.1C-0.4 8.8 2.33 4.5 6.6 5.2 8.22 5.47 9.55 6.6 12 9c2.45-2.4 3.78-3.53 5.4-3.8 4.27-.7 7 3.6 4.35 7.7C19.5 16.65 12 21 12 21Z"
-                                fill="currentColor"
-                            />
-                        ) : (
-                            <path
-                                d="M12 20.5s-7.22-4.19-9.38-7.84c-2.3-3.86.45-7.93 4.45-7.27 1.84.3 3.28 1.62 4.93 3.24 1.65-1.62 3.09-2.94 4.93-3.24 4-.66 6.75 3.41 4.45 7.27C19.22 16.31 12 20.5 12 20.5Z"
-                                stroke="currentColor"
-                                strokeWidth="1.6"
-                                fill="none"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        )}
-                    </svg>
+                    {marked ? <IoHeart size={24}/> : <IoHeartOutline size={24}/> }
                 </button>
-
                 {notice.date && (
                     <div className="np-card-date" style={{ color: dateColor }}>
-                        {notice.date}
+                        {formatNoticeDate(notice.date)}
                     </div>
                 )}
             </div>

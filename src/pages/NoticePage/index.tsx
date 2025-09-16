@@ -5,10 +5,12 @@ import { fetchUserInfo } from "../../services/fetchUserInfo";
 import { fetchNotices } from "../../services/fetchNotices";
 import type { Notice } from "../../types/notice";
 import type { UserInfo } from "../../types/user";
+import type { BookMark } from "../../types/bookmark";
 import NoticeCard from "./NoticeCard";
 import { listKeywords } from "../../services/settings.service";
-import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark";
+import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
 import { departmentNameMap } from "../../components/departmentMap";
+
 
 /** 색상 토큰 (디자인 시안) */
 const AURA_BLUE = "#4A6DDB";
@@ -79,7 +81,7 @@ export default function NoticePage(): JSX.Element {
     const [suggestedTags, setSuggestedTags] = useState<string[]>(FALLBACK_TAGS);
 
     // ✅ 북마크 ID 집합
-    const [bookmarks, setBookmarks] = useState<Set<string | number>>(new Set());
+    const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
 
     /** 초기 데이터 (유저 + 추천 태그) */
     useEffect(() => {
@@ -108,15 +110,14 @@ export default function NoticePage(): JSX.Element {
         let alive = true;
         (async () => {
             try {
-                const ids = await listNoticeBookmarks(); // (string|number)[]
-                if (alive) setBookmarks(new Set(ids));
+                const items = await listNoticeBookmarks(); // BookMark[]
+                if (!alive) return;
+                setBookmarks(new Set(items.map(b => String(b.id))));
             } catch (e) {
-                console.warn("북마크 목록 로드 실패:", e);
+                console.warn('북마크 목록 로드 실패:', e);
             }
         })();
-        return () => {
-            alive = false;
-        };
+        return () => { alive = false; };
     }, [user]);
 
     /** 공지 목록 호출 */
@@ -160,27 +161,31 @@ export default function NoticePage(): JSX.Element {
         });
     }, [notices, selectedTags]);
 
-    /** ✅ 하트 클릭: 낙관적 업데이트 + 서버 반영 + 실패 시 롤백 */
-    const handleToggleBookmark = async (id: string | number, next: boolean) => {
-        // UI 먼저 반영
-        setBookmarks((prev) => {
+    /** 실제 토글 로직(비동기) — id는 string */
+    const handleToggleBookmark = async (id: string, next: boolean) => {
+        const key = String(id);
+
+        // 낙관적 업데이트
+        setBookmarks(prev => {
             const s = new Set(prev);
-            next ? s.add(id) : s.delete(id);
+            next ? s.add(key) : s.delete(key);
             return s;
         });
 
         try {
             await setNoticeBookmark(id, next);
         } catch (e: any) {
-            // 실패 시 롤백
-            setBookmarks((prev) => {
+            // 롤백
+            setBookmarks(prev => {
                 const s = new Set(prev);
-                next ? s.delete(id) : s.add(id);
+                next ? s.delete(key) : s.add(key);
                 return s;
             });
-            alert(e?.message ?? "북마크 처리에 실패했습니다.");
+            alert(e?.message ?? '북마크 처리에 실패했습니다.');
         }
     };
+
+
 
     /** 렌더 */
     if (loading && !notices.length) {
@@ -305,7 +310,7 @@ export default function NoticePage(): JSX.Element {
                                 notice={n}
                                 leftBarColor={AURA_BLUE}
                                 dateColor={STONE_GRAY}
-                                heartColor={ACCENT_ORANGE}
+                                heartColor="#EF4C43"
                                 heartOffColor="#C0C5CF"
                                 isBookmarked={bookmarks.has(n.id)}       // {/* ✅ 하트 ON/OFF */}
                                 onToggleBookmark={handleToggleBookmark}   // {/* ✅ 클릭 처리 */}
@@ -358,24 +363,6 @@ export default function NoticePage(): JSX.Element {
                     </div>
                 )}
             </div>
-
-            {/* ───────── 하단 고정 네비 ───────── */}
-            <nav className="np-bottom-nav">
-                {[
-                    { key: "home", label: "홈", active: true },
-                    { key: "mark", label: "북마크" },
-                    { key: "setting", label: "설정" },
-                    { key: "me", label: "나" },
-                ].map((it) => (
-                    <button
-                        key={it.key}
-                        className={`np-bnav-item ${it.active ? "is-active" : ""}`}
-                    >
-                        <span className="np-bnav-ico" />
-                        <span className="np-bnav-text">{it.label}</span>
-                    </button>
-                ))}
-            </nav>
         </div>
     );
 }
