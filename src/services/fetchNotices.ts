@@ -7,6 +7,9 @@ interface FetchNoticeParams {
     type?: string;
     search?: string;
     sort?: string;
+    globalIds: string;
+    personalIds: string;
+    match: string;
 }
 
 export async function fetchNotices({
@@ -15,6 +18,9 @@ export async function fetchNotices({
                                        type,
                                        search,
                                        sort = 'date,desc',
+                                       globalIds,
+                                       personalIds,
+                                       match = 'any',
                                    }: FetchNoticeParams): Promise<NoticePage> {
     try {
         const response = await api.get('/notices/page', {
@@ -24,11 +30,12 @@ export async function fetchNotices({
                 type,
                 search,
                 sort,
+                globalIds,
+                personalIds,
+                match,
             },
             withCredentials: true,
         });
-
-
 
         if (response.data.status !== 'success') {
             const error = new Error(response.data.message || '공지사항을 불러올 수 없습니다.');

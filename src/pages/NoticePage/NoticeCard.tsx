@@ -1,5 +1,5 @@
 // ✅ 상단 import
-import { useState } from "react";
+import React, { useState } from "react";
 import {
     IoHeartOutline as RawHeartOutline,
     IoHeart as RawHeart,

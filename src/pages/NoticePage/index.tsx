@@ -1,11 +1,13 @@
 // pages/NoticePage/index.tsx
 import React, { JSX, useEffect, useMemo, useState } from "react";
+import { IoSearchOutline } from "react-icons/io5";
 import "./NoticePage.css";
 import { fetchUserInfo } from "../../services/fetchUserInfo";
 import { fetchNotices } from "../../services/fetchNotices";
 import type { Notice } from "../../types/notice";
 import type { UserInfo } from "../../types/user";
-import type { BookMark } from "../../types/bookmark";
+import type { Keyword } from "../../types/keywords";
+import { Global_Tags } from "../../utils/tags";
 import NoticeCard from "./NoticeCard";
 import { listKeywords } from "../../services/settings.service";
 import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
@@ -16,6 +18,10 @@ import { departmentNameMap } from "../../components/departmentMap";
 const AURA_BLUE = "#4A6DDB";
 const ACCENT_ORANGE = "#FFA852";
 const STONE_GRAY = "#8D96A8";
+
+const SearchIcon = IoSearchOutline as unknown as React.FC<{
+    size?: number | string; className?: string; color?: string;
+}>;
 
 type GeneralTabKey = "general" | "scholarship" | "dormitory" | "department";
 type DeptKey = string;
@@ -33,28 +39,6 @@ const TOP_TABS: TopTab[] = [
     { key: "department", label: "학과" },
 ];
 
-const FALLBACK_TAGS = [
-    "수강신청",
-    "학사",
-    "계절학기",
-    "강의",
-    "특강",
-    "수업",
-    "공모전",
-    "장학",
-    "채용",
-    "설문",
-    "대회",
-];
-
-// 서버 키워드 → phrase[] 로 변환
-async function fetchSuggestedTags(): Promise<string[]> {
-    const list = await listKeywords();
-    const phrases = list
-        .map((k) => (k.phrase ?? "").trim())
-        .filter((p) => p.length > 0);
-    return Array.from(new Set(phrases));
-}
 
 export default function NoticePage(): JSX.Element {
     const [user, setUser] = useState<UserInfo | null>(null);
@@ -78,7 +62,36 @@ export default function NoticePage(): JSX.Element {
     // 칩(해시태그)
     const [chipsOpen, setChipsOpen] = useState(true);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
-    const [suggestedTags, setSuggestedTags] = useState<string[]>(FALLBACK_TAGS);
+    const [suggestedTags, setSuggestedTags] = useState<string[]>(Global_Tags);
+
+    const [selectedGlobalIds, setGlobalIds] = useState<string>("");
+    const [selectedPersonalIds, setSelectedPersonalIds] = useState<string>("");
+
+    const [keywords, setKeywords] = useState<Keyword[]>([]);
+
+    // 서버 키워드 → phrase[] 로 변환
+    async function fetchSuggestedTags(): Promise<string[]> {
+        // const list = await listKeywords();
+        setKeywords(await listKeywords());
+        const phrases = keywords
+            .map((k) => (k.phrase ?? "").trim())
+            .filter((p) => p.length > 0);
+        return Array.from(new Set(phrases));
+    }
+
+    // tags 배열과 keywords 배열을 비교하여 해당하는 id를 찾는 함수
+    const mapTagsToIds = (tags: string[]): string => {
+        return tags
+            .map(tag => {
+                // tags 배열의 각 element와 keywords 배열에서 phrase를 비교하여 일치하는 id를 찾음
+                const keyword = keywords.find(k => k.phrase === tag);
+                return keyword ? String(keyword.id) : null; // id가 존재하면 id를 반환
+            })
+            .filter(id => id !== null)  // null 제거
+            .join(",");  // "1,2,3" 형태로 반환
+    };
+
+
 
     // ✅ 북마크 ID 집합
     const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
@@ -99,7 +112,7 @@ export default function NoticePage(): JSX.Element {
             } catch (e: any) {
                 setError(e?.message ?? "데이터 오류");
                 setStatus(e?.status ?? "Unknown");
-                setSuggestedTags(FALLBACK_TAGS);
+                setSuggestedTags(Global_Tags);
             }
         })();
     }, []);
@@ -120,11 +133,20 @@ export default function NoticePage(): JSX.Element {
         return () => { alive = false; };
     }, [user]);
 
-    /** 공지 목록 호출 */
+    // 공지 목록 호출 부분 수정
+    /** 공지 목록 호출 부분 수정 */
     useEffect(() => {
         const typeForApi = tab === "department" ? (deptType || "general") : tab;
         setLoading(true);
-        fetchNotices({ page, size: 10, type: typeForApi })
+
+        fetchNotices({
+            page,
+            size: 10,
+            type: typeForApi,
+            globalIds: selectedGlobalIds,          // globalIds: "1,2,3" 형태로 넘김
+            personalIds: selectedPersonalIds,        // personalIds: "10,11" 형태로 넘김
+            match: 'any',
+        })
             .then((d: any) => {
                 setNotices(d?.content ?? []);
                 setTotalPages(d?.totalPages ?? 1);
@@ -134,7 +156,7 @@ export default function NoticePage(): JSX.Element {
                 setStatus(e?.status ?? "Unknown");
             })
             .finally(() => setLoading(false));
-    }, [tab, deptType, page]);
+    }, [tab, deptType, page, selectedGlobalIds, selectedPersonalIds]);
 
     /** 서버 태그 or 예비 칩 */
     const allChips = useMemo(() => {
@@ -153,13 +175,16 @@ export default function NoticePage(): JSX.Element {
     };
 
     /** 칩 필터링 결과 */
-    const filteredNotices = useMemo(() => {
-        if (!selectedTags.length) return notices;
-        return notices.filter((n: any) => {
-            const tags: string[] = n?.tags ?? [];
-            return selectedTags.every((t) => tags.includes(t));
-        });
-    }, [notices, selectedTags]);
+    useEffect(() => {
+        // Global_Tags에 해당하는 태그 ID와 개인 태그 ID를 별도로 구분하여 매핑
+        const newGlobalIds = mapTagsToIds(selectedTags.filter(tag => Global_Tags.includes(tag)));
+        const newPersonalIds = mapTagsToIds(selectedTags.filter(tag => !Global_Tags.includes(tag)));
+
+        // 상태 업데이트
+        setGlobalIds(newGlobalIds);
+        setSelectedPersonalIds(newPersonalIds);
+    }, [selectedTags, keywords]);  // selectedTags나 keywords가 변경될 때마다 실행
+
 
     /** 실제 토글 로직(비동기) — id는 string */
     const handleToggleBookmark = async (id: string, next: boolean) => {
@@ -185,6 +210,12 @@ export default function NoticePage(): JSX.Element {
         }
     };
 
+    // 검색 함수
+    const handleSearch = async () => {
+        alert('검색');
+        console.log('Button Clicked');
+    };
+
 
 
     /** 렌더 */
@@ -207,21 +238,19 @@ export default function NoticePage(): JSX.Element {
         );
     }
 
+    // @ts-ignore
     return (
         <div className="np-root">
             {/* ───────── 상단 AppBar ───────── */}
             <header className="np-appbar">
                 <div className="np-appbar-side" />
                 <h1 className="np-logo">AURA</h1>
-                <button className="np-icon-btn" aria-label="검색">
-                    <svg viewBox="0 0 24 24" className="np-ico">
-                        <path
-                            d="M21 21l-4.2-4.2M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                        />
-                    </svg>
+                <button
+                    className="np-icon-btn"
+                    aria-label="검색"
+                    onClick={() => handleSearch()}
+                >
+                    <SearchIcon className="np-ico" size={22} color="#575757" />
                 </button>
             </header>
 
@@ -304,20 +333,21 @@ export default function NoticePage(): JSX.Element {
 
                 {/* ───────── 공지 카드 리스트 ───────── */}
                 <ul className="np-card-list">
-                    {filteredNotices.map((n) => (
-                        <li key={n.id}>
-                            <NoticeCard
-                                notice={n}
-                                leftBarColor={AURA_BLUE}
-                                dateColor={STONE_GRAY}
-                                heartColor="#EF4C43"
-                                heartOffColor="#C0C5CF"
-                                isBookmarked={bookmarks.has(n.id)}       // {/* ✅ 하트 ON/OFF */}
-                                onToggleBookmark={handleToggleBookmark}   // {/* ✅ 클릭 처리 */}
-                            />
-                        </li>
-                    ))}
-                    {!filteredNotices.length && (
+                    {notices.length > 0 ? (
+                        notices.map((n) => (
+                            <li key={n.id}>
+                                <NoticeCard
+                                    notice={n}
+                                    leftBarColor={AURA_BLUE}
+                                    dateColor={STONE_GRAY}
+                                    heartColor="#EF4C43"
+                                    heartOffColor="#C0C5CF"
+                                    isBookmarked={bookmarks.has(n.id)}       // {/* ✅ 하트 ON/OFF */}
+                                    onToggleBookmark={handleToggleBookmark}   // {/* ✅ 클릭 처리 */}
+                                />
+                            </li>
+                        ))
+                    ) : (
                         <li className="np-empty">공지사항이 없습니다.</li>
                     )}
                 </ul>
