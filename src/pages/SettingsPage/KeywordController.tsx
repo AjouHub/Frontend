@@ -2,49 +2,39 @@ import React, { useEffect, useState } from 'react';
 import { addKeyword, listKeywords, removeKeyword } from '../../services/settings.service';
 import type { Keyword } from '../../types/keywords';
 
-export default function KeywordController() {
-    const [keywords, setKeywords] = useState<Keyword[]>([]);
+
+// 부모로부터 받을 props 타입을 정의합니다.
+interface KeywordControllerProps {
+    keywords: Keyword[];
+    loading: boolean;
+    onAddKeyword: (phrase: string) => Promise<void>;
+    onRemoveKeyword: (id: number) => Promise<void>;
+}
+
+
+export default function KeywordController({ keywords, loading, onAddKeyword, onRemoveKeyword }: KeywordControllerProps) {
     const [input, setInput] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    const load = async () => {
-        setLoading(true);
-        try {
-            const list = await listKeywords();      // Promise<Keyword[]>
-            setKeywords(list ?? []);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        load();
-    }, []);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const onAdd = async () => {
         const phrase = input.trim();
         if (!phrase) return;
 
-        setLoading(true);
+        setIsSubmitting(true);
         try {
-            const response = await addKeyword(phrase);
-            setKeywords(prev =>
-                prev.some(k => k.id === response.id) ? prev : [...prev, response]
-            ); // ← 배열에 합치기 (SetStateAction<Keyword[]> OK)
+            await onAddKeyword(phrase);
             setInput('');
-            await load();
         } finally {
-            setLoading(false);
+            setIsSubmitting(false);
         }
     };
 
     const onRemove = async (id: number) => {
-        setLoading(true);
+        setIsSubmitting(true);
         try {
-            await removeKeyword(id);   // DELETE /keywords/{id}
-            await load();
+            await onRemoveKeyword(id);
         } finally {
-            setLoading(false);
+            setIsSubmitting(false);
         }
     };
 

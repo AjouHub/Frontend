@@ -6,32 +6,47 @@ import {
     saveKeywordSubscriptions,
 } from '../../services/settings.service';
 
-export default function NotificationPreferences() {
-    const [allKeywords, setAllKeywords] = useState<Keyword[]>([]);
+// 부모로부터 받을 props 타입을 정의합니다.
+interface NotificationPreferencesProps {
+    allKeywords: Keyword[];
+    loading: boolean;
+}
+
+export default function NotificationPreferences({ allKeywords, loading }: NotificationPreferencesProps) {
     const [initialSubs, setInitialSubs] = useState<number[]>([]);
     const [selected, setSelected] = useState<Set<number>>(new Set());
-    const [loading, setLoading] = useState(false);
+    const [subsLoading, setSubsLoading] = useState(true); // 구독 정보 로딩 상태
     const [saving, setSaving] = useState(false);
 
-    // 초기 로드: 전체 키워드 + 내 구독 목록
-    const load = async () => {
-        setLoading(true);
-        try {
-            const [keywords, subs] = await Promise.all([
-                listKeywords(),
-                listKeywordSubscriptions(),
-            ]);
-            setAllKeywords(keywords);
-            setInitialSubs(subs);
-            setSelected(new Set(subs));
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
-        load();
+        // 구독 정보 불러오기
+        const loadSubscriptions = async () => {
+            setSubsLoading(true);
+            try {
+                const subs = await listKeywordSubscriptions();
+                setInitialSubs(subs);
+                setSelected(new Set(subs));
+            } finally {
+                setSubsLoading(false);
+            }
+        };
+        loadSubscriptions();
     }, []);
+
+    // allKeywords가 부모로부터 변경되어 전달되면, 선택된 목록을 필터링
+    useEffect(() => {
+        const keywordIds = new Set(allKeywords.map(k => k.id));
+        setSelected(prevSelected => {
+            const newSelected = new Set<number>();
+            for (const id of prevSelected) {
+                if (keywordIds.has(id)) {
+                    newSelected.add(id);
+                }
+            }
+            return newSelected;
+        });
+    }, [allKeywords]);
+
 
     // 토글 핸들러
     const toggle = (id: number) => {
