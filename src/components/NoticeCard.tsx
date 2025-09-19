@@ -4,8 +4,8 @@ import {
     IoHeartOutline as RawHeartOutline,
     IoHeart as RawHeart,
 } from "react-icons/io5";
-import { setNoticeBookmark } from "../../services/bookMark.service";
-import { formatNoticeDate } from "../../utils/date";
+import { setNoticeBookmark } from "../services/bookMark.service";
+import { formatNoticeDate } from "../utils/date";
 
 // ✅ 아이콘 캐스팅(타입 충돌 우회)
 type IconProps = { size?: number; color?: string; className?: string };

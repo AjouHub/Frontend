@@ -8,7 +8,7 @@ import type { Notice } from "../../types/notice";
 import type { UserInfo } from "../../types/user";
 import type { Keyword } from "../../types/keywords";
 import { Global_Tags } from "../../utils/tags";
-import NoticeCard from "./NoticeCard";
+import NoticeCard from "../../components/NoticeCard";
 import { listKeywords } from "../../services/settings.service";
 import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
 import { departmentNameMap } from "../../components/departmentMap";
@@ -159,12 +159,17 @@ export default function NoticePage(): JSX.Element {
     }, [tab, deptType, page, selectedGlobalIds, selectedPersonalIds]);
 
     /** 서버 태그 or 예비 칩 */
-    const allChips = useMemo(() => {
-        const s = new Set<string>();
-        notices.forEach((n: any) => n?.tags?.forEach((t: string) => s.add(t)));
-        const dynamic = Array.from(s);
-        return dynamic.length ? dynamic : suggestedTags;
-    }, [notices, suggestedTags]);
+    const allChips = useMemo<string[]>(() => {
+        const phrases = keywords
+            .map(k => (k.phrase ?? '').trim())
+            .filter(p => p.length > 0);
+
+        // 중복 제거
+        const unique = Array.from(new Set(phrases));
+
+        // 키워드가 아직 없으면 기존 suggestedTags 사용
+        return unique.length ? unique : suggestedTags;
+    }, [keywords, suggestedTags]);
 
     /** 칩 선택 토글 */
     const toggleChip = (t: string) => {
