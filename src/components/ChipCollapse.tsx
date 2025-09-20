@@ -33,27 +33,8 @@ export default function ChipCollapse({
 
     return (
         <div className={`mc ${open ? "open" : ""} ${className}`}>
-            {/* 닫힘 상태에서 높이를 잡아주는 상단 바 */}
-            {!open && (
-                <button
-                    type="button"
-                    className="mc-head"
-                    aria-expanded={open}
-                    aria-label="칩 펼치기"
-                    onClick={() => setOpen(true)}
-                >
-                    <svg viewBox="0 0 24 24" className="chev down">
-                        <path
-                            d="M7 10l5 5 5-5"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                    </svg>
-                </button>
-            )}
+            {/* (기존) mc-head 는 제거하거나 필요 없으면 그대로 삭제 */}
+            {/* <button className="mc-head" ... /> */}
 
             {/* 본문: 높이 애니메이션 */}
             <div className="mc-body" style={{ maxHeight: open ? max : 0 }}>
@@ -62,26 +43,27 @@ export default function ChipCollapse({
                 </div>
             </div>
 
-            {/* 열렸을 때 하단 풀폭 토글 바 */}
-            {open && (
-                <button
-                    type="button"
-                    className="mc-toggle"
-                    aria-label="칩 접기"
-                    onClick={() => setOpen(false)}
-                >
-                    <svg viewBox="0 0 24 24" className="chev up">
-                        <path
-                            d="M7 10l5 5 5-5"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                    </svg>
-                </button>
-            )}
+            {/* ▼ 토글 버튼을 절대배치가 아닌 '흐름 안'에 배치 */}
+            <button
+                type="button"
+                className={`mc-toggle ${open ? "open" : ""}`}
+                aria-label={open ? "칩 접기" : "칩 펼치기"}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setOpen(v => !v);
+                }}
+            >
+                <svg viewBox="0 0 24 24" className={`chev ${open ? "up" : "down"}`}>
+                    <path
+                        d="M7 10l5 5 5-5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                </svg>
+            </button>
         </div>
     );
 }
