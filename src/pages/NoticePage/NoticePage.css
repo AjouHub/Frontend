@@ -37,7 +37,8 @@ body{
 .np-appbar{
     position:sticky; top:0; z-index:10;
     background:#fff; border-bottom:1px solid #e9edf3;
-    display:flex; align-items:center; justify-content:space-between; padding:12px 18px;
+    display:grid; align-items:center; padding:12px 18px;
+    grid-template-columns: 24px 1fr 24px; /* 좌 아이콘 공간 | 로고 | 우 아이콘 공간 */
     color: var(--icon-dark) !important;
 }
 /* outline 아이콘(=stroke 기반)일 때 두께/색도 보강 */
@@ -50,8 +51,13 @@ body{
     background:linear-gradient(135deg,var(--aura-blue) 15%,var(--aura-sky) 85%);
     -webkit-background-clip:text; background-clip:text;
     -webkit-text-fill-color:transparent; color:transparent;
+    justify-self: center;
 }
-.np-icon-btn{ width:32px; height:32px; border-radius:9999px; background:transparent; border:0; color:#64748b; display:grid; place-items:center }
+.np-icon-btn{
+    width:32px; height:32px; border-radius:9999px; background:transparent; border:0;
+    color:#64748b; display:grid; place-items:center; justify-content:end;
+    transform: translateX(-10px); /* 왼쪽으로 6px */
+}
 .np-ico{ width:22px; height:22px }
 
 /* 상단 탭 */
@@ -254,3 +260,95 @@ body{
 /* 상태 */
 .np-loading,.np-error{ padding:16px; color:#475467; font-size:14px }
 .np-error{ color:#dc2626 }
+
+
+/* 검색 오버레이 */
+.np-search{
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%) translateX(12px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 15;
+    transition: transform .25s ease, opacity .2s ease;
+}
+
+.np-search.is-open{
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) translateX(0);
+}
+/* 뒤로가기(닫기) 아이콘 버튼 */
+.np-search-back{
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: transparent;
+    color: #667085;
+    cursor: pointer;
+}
+/* 입력창 */
+.np-search-input{
+    flex: 1;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #e6e8ed;
+    border-radius: 10px;
+    font-size: 14px;
+    background: #fff;
+}
+.np-search-input:focus{
+    outline: none;
+    border-color: var(--aura-blue);
+    box-shadow: 0 0 0 2px rgba(74,109,219,.12);
+}
+
+.np-search-cancel{
+    height: 36px;
+    padding: 0 8px;
+    border: 0;
+    background: transparent;
+    color: #667085;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* 검색 아이콘이 왼쪽으로 살짝 이동(애니메이션) */
+.np-icon-btn {
+    transition: transform .25s ease,
+    opacity .2s ease;
+}
+.np-icon-btn.is-search-open{
+    transform: translateX(-96px);
+}
+
+
+/* ===== 로딩 오버레이: 헤더/검색은 그대로, 본문만 흐림 ===== */
+.np-loading-overlay{
+    position: fixed;
+    left: 0; right: 0;
+    top: 56px;              /* AppBar 높이에 맞춰 조절 */
+    bottom: 64px;           /* 하단 탭 높이에 맞춰 조절 */
+    background: rgba(255,255,255,.55);
+    backdrop-filter: blur(1.5px);
+    display: grid;
+    place-items: center;
+    z-index: 9; /* 헤더보다 낮고, 카드 위 */
+}
+
+/* 심플 스피너 */
+.np-spinner{
+    width: 28px; height: 28px;
+    border: 3px solid #d7dbe5;
+    border-top-color: var(--aura-blue);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

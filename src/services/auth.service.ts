@@ -30,7 +30,7 @@ export const handleOAuthCallback = (navigate: (path: string) => void) => {
     window.history.replaceState({}, '', '/LoginPage');
 
     if (signUp.toLowerCase() === 'true') navigate('/select-department');
-    else navigate('/mypage');
+    else navigate('/notice');
 };
 
 

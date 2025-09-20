@@ -82,40 +82,48 @@ export default function SettingsPage() {
 
 
     return (
-        <div className="settings-container">
-            <main className="settings-main">
-                <AccountInfo
-                    departments={departments} // 상태를 props로 전달
-                    loading={loadingDepartments}
-                />
+        <div className="np-root">
+            {/* ───────── 상단 AppBar ───────── */}
+            <header className="np-appbar">
+                <div className="np-appbar-side" />
+                <h1 className="np-logo">AURA</h1>
+            </header>
 
-                <CollapsibleSection title="학과 선택">
-                    <DepartmentSelector
-                        departments={departments} // 상태와
-                        onAddDepartment={handleAddDepartment} // 핸들러 함수를
-                        onRemoveDepartment={handleRemoveDepartment} // props로 전달
+            <div className="settings-container">
+                <main className="settings-main">
+                    <AccountInfo
+                        departments={departments} // 상태를 props로 전달
                         loading={loadingDepartments}
                     />
-                </CollapsibleSection>
 
-                <CollapsibleSection title="키워드 선택">
-                    {/* 자식에게 상태와 함수를 props로 전달 */}
-                    <KeywordController
-                        keywords={keywords}
-                        onAddKeyword={handleAddKeyword}
-                        onRemoveKeyword={handleRemoveKeyword}
-                        loading={keywordLoading}
-                    />
-                </CollapsibleSection>
+                    <CollapsibleSection title="학과 선택">
+                        <DepartmentSelector
+                            departments={departments} // 상태와
+                            onAddDepartment={handleAddDepartment} // 핸들러 함수를
+                            onRemoveDepartment={handleRemoveDepartment} // props로 전달
+                            loading={loadingDepartments}
+                        />
+                    </CollapsibleSection>
 
-                <CollapsibleSection title="알림 선택">
-                    {/* 자식에게 상태를 props로 전달 */}
-                    <NotificationPreferences
-                        allKeywords={keywords}
-                        loading={keywordLoading}
-                    />
-                </CollapsibleSection>
-            </main>
+                    <CollapsibleSection title="키워드 선택">
+                        {/* 자식에게 상태와 함수를 props로 전달 */}
+                        <KeywordController
+                            keywords={keywords}
+                            onAddKeyword={handleAddKeyword}
+                            onRemoveKeyword={handleRemoveKeyword}
+                            loading={keywordLoading}
+                        />
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="알림 선택">
+                        {/* 자식에게 상태를 props로 전달 */}
+                        <NotificationPreferences
+                            allKeywords={keywords}
+                            loading={keywordLoading}
+                        />
+                    </CollapsibleSection>
+                </main>
+            </div>
         </div>
     );
 }

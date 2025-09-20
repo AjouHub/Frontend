@@ -5,6 +5,7 @@ import {
     listKeywordSubscriptions,
     saveKeywordSubscriptions,
 } from '../../services/settings.service';
+import { notify } from "../../utils/notify";
 
 // 부모로부터 받을 props 타입을 정의합니다.
 interface NotificationPreferencesProps {
@@ -76,10 +77,12 @@ export default function NotificationPreferences({ allKeywords, loading }: Notifi
             await saveKeywordSubscriptions(initialSubs, nextIds);
             // 저장 성공 후 기준값 갱신
             setInitialSubs(nextIds);
-            alert('키워드 구독 설정이 저장되었습니다.');
+            // alert('키워드 구독 설정이 저장되었습니다.');
+            notify.success('키워드 구독 설정이 저장되었습니다.');
         } catch (e) {
             console.error(e);
-            alert('구독 설정 저장에 실패했습니다.');
+            // alert('구독 설정 저장에 실패했습니다.');
+            notify.error('구독 설정 저장에 실패했습니다.');
         } finally {
             setSaving(false);
         }

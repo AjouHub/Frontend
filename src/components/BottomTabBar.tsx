@@ -22,7 +22,7 @@ type Tab = {
 
 const TABS: readonly Tab[] = [
     { to: "/notice",       label: "홈",   icon: IoHomeOutline,     activeIcon: IoHome },
-    { to: "/mypage",       label: "북마크", icon: IoStarOutline,     activeIcon: IoStar },
+    { to: "/bookmark",     label: "북마크", icon: IoStarOutline,     activeIcon: IoStar },
     { to: "/settings",     label: "설정", icon: IoSettingsOutline, activeIcon: IoSettingsOutline },
     // { to: "/account-info", label: "나",   icon: IoPersonOutline,   activeIcon: IoPersonOutline },
 ] as const;

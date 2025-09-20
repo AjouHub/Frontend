@@ -1,6 +1,6 @@
 // pages/NoticePage/index.tsx
-import React, { JSX, useEffect, useMemo, useState } from "react";
-import { IoSearchOutline } from "react-icons/io5";
+import React, { JSX, useEffect, useMemo, useState, useRef } from "react";
+import { IoSearchOutline, IoChevronBackOutline } from "react-icons/io5";
 import "./NoticePage.css";
 import { fetchUserInfo } from "../../services/fetchUserInfo";
 import { fetchNotices } from "../../services/fetchNotices";
@@ -16,12 +16,16 @@ import { departmentNameMap } from "../../components/departmentMap";
 
 
 
-/** 색상 토큰 (디자인 시안) */
+// 색상 토큰
 const AURA_BLUE = "#4A6DDB";
 const ACCENT_ORANGE = "#FFA852";
 const STONE_GRAY = "#8D96A8";
 
+// 아이콘
 const SearchIcon = IoSearchOutline as unknown as React.FC<{
+    size?: number | string; className?: string; color?: string;
+}>;
+const BackIcon = IoChevronBackOutline as unknown as React.FC<{
     size?: number | string; className?: string; color?: string;
 }>;
 
@@ -69,6 +73,10 @@ export default function NoticePage(): JSX.Element {
     const [selectedPersonalIds, setSelectedPersonalIds] = useState<string>("");
 
     const [keywords, setKeywords] = useState<Keyword[]>([]);
+
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [query, setQuery] = useState("");
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     // 서버 키워드 → phrase[] 로 변환
     async function fetchSuggestedTags(): Promise<string[]> {
@@ -144,6 +152,7 @@ export default function NoticePage(): JSX.Element {
             page,
             size: 10,
             type: typeForApi,
+            search: query || undefined,
             globalIds: selectedGlobalIds,          // globalIds: "1,2,3" 형태로 넘김
             personalIds: selectedPersonalIds,        // personalIds: "10,11" 형태로 넘김
             match: 'any',
@@ -157,7 +166,7 @@ export default function NoticePage(): JSX.Element {
                 setStatus(e?.status ?? "Unknown");
             })
             .finally(() => setLoading(false));
-    }, [tab, deptType, page, selectedGlobalIds, selectedPersonalIds]);
+    }, [tab, deptType, page, selectedGlobalIds, selectedPersonalIds, query]);
 
     /** 서버 태그 or 예비 칩 */
     const allChips = useMemo<string[]>(() => {
@@ -192,6 +201,7 @@ export default function NoticePage(): JSX.Element {
     }, [selectedTags, keywords]);  // selectedTags나 keywords가 변경될 때마다 실행
 
 
+
     /** 실제 토글 로직(비동기) — id는 string */
     const handleToggleBookmark = async (id: string, next: boolean) => {
         const key = String(id);
@@ -216,33 +226,43 @@ export default function NoticePage(): JSX.Element {
         }
     };
 
-    // 검색 함수
-    const handleSearch = async () => {
-        alert('검색');
-        console.log('Button Clicked');
+    // 검색 기능
+    useEffect(() => {
+        if (searchOpen) searchInputRef.current?.focus();
+    }, [searchOpen]);
+
+    const onClickSearch = () => setSearchOpen(true);
+    const onSubmitSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        setPage(0);            // 검색어 바뀌면 첫 페이지부터
     };
-
-
-
-    /** 렌더 */
-    if (loading && !notices.length) {
-        return (
-            <div className="np-container">
-                <div className="np-loading">로딩 중…</div>
-            </div>
-        );
+    const onCloseSearch = () => {
+        setSearchOpen(false);
+        // 필요 시 검색어 유지/초기화 선택
+        // setQuery("");
     }
-    if (error) {
-        return (
-            <div className="np-container">
-                <p className="np-error">
-                    {error}
-                    <br />
-                    상태 코드: {status}
-                </p>
-            </div>
-        );
-    }
+
+
+
+    // /** 렌더 */
+    // if (loading && !notices.length) {
+    //     return (
+    //         <div className="np-container">
+    //             <div className="np-loading">로딩 중…</div>
+    //         </div>
+    //     );
+    // }
+    // if (error) {
+    //     return (
+    //         <div className="np-container">
+    //             <p className="np-error">
+    //                 {error}
+    //                 <br />
+    //                 상태 코드: {status}
+    //             </p>
+    //         </div>
+    //     );
+    // }
 
     // @ts-ignore
     return (
@@ -252,12 +272,35 @@ export default function NoticePage(): JSX.Element {
                 <div className="np-appbar-side" />
                 <h1 className="np-logo">AURA</h1>
                 <button
-                    className="np-icon-btn"
+                    className={`np-icon-btn ${searchOpen ? "is-search-open" : ""}`}
                     aria-label="검색"
-                    onClick={() => handleSearch()}
+                    onClick={onClickSearch}
                 >
                     <SearchIcon className="np-ico" size={22} color="#575757" />
                 </button>
+
+                {/* ▼ 검색 입력 오버레이 추가 */}
+                <form
+                    className={`np-search ${searchOpen ? "is-open" : ""}`}
+                    onSubmit={onSubmitSearch}
+                >
+                    <input
+                        ref={searchInputRef}
+                        className="np-search-input"
+                        placeholder="검색어 입력"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                    />
+                    {/* ← 왼쪽 화살표(닫기) */}
+                    <button
+                        type="button"
+                        className="np-search-back"
+                        onClick={onCloseSearch}
+                        aria-label="검색 닫기"
+                    >
+                        <BackIcon size={20}/>
+                    </button>
+                </form>
             </header>
 
             <div className="np-container">
@@ -297,6 +340,13 @@ export default function NoticePage(): JSX.Element {
                         })}
                     </div>
                 </ChipCollapse>
+
+                {/* ───────── 로딩 오버레이 (검색/헤더 유지) ───────── */}
+                {loading && (
+                    <div className="np-loading-overlay">
+                        <div className="np-spinner" aria-label="로딩 중" />
+                    </div>
+                )}
 
                 {/* ───────── 공지 카드 리스트 ───────── */}
                 <ul className="np-card-list">
