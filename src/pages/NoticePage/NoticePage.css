@@ -62,14 +62,6 @@ body{
 }
 .np-tab.is-active{ color:var(--aura-blue); border-bottom-color:var(--aura-blue) }
 
-/* 칩 영역 (열림) */
-.np-chip-wrap{
-    background:#fff; border-radius:14px; box-shadow:var(--card-shadow);
-    /* padding:12px;  ← 기존값 */
-    /* ▼ 아래 버튼이 박스 안에 들어오도록 하단 여백 확보 */
-    padding:12px 12px 40px;          /* ← 하단 40px로 증가 */
-    margin-top:8px; position:relative; border:1px solid #eff1f5;
-}
 .np-chips{ display:flex; flex-wrap:wrap; gap:8px }
 .np-chip{
     background:var(--chip-bg);
@@ -81,72 +73,106 @@ body{
     font-weight:600 }
 .np-chip.is-active{ background:var(--aura-blue); color:#fff }
 
-/* ───────── 펼쳐진 상태(칩 박스 안의 ▲ 버튼) ───────── */
-/* 가로를 박스 거의 전체로 확장 */
-.np-chip-toggle{
-    position:absolute;
-    /* 가운데 고정 대신 좌우를 붙여 폭을 키움 */
-    left:8px; right:8px;            /* ← 좌우 여백만 남기고 전체 폭 */
-    bottom:2px;                     /* 기존 6px → 2px (조금 더 아래) */
-    transform:none;                 /* 가운데 이동 제거 */
-
-    height:40px;                    /* 살짝 크게 */
-    border-radius:12px;
-    border:0; background:transparent; color:#6b7280;
-
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer;
-
-    /* 흐려짐/애니메이션 제거 */
-    transition:none; opacity:1;
-}
-.np-chip-toggle:hover,
-.np-chip-toggle:active,
-.np-chip-toggle:focus{
-    background:transparent; box-shadow:none; outline:none; opacity:1;
-}
-.np-caret{ width:18px; height:18px }
-
-/* 칩 영역 (닫힘: 둥근 박스만) */
-.np-chip-collapsed{
+/*-------------*/
+/* 컨테이너 *//* 컨테이너: 흰 둥근 박스가 ‘한 덩어리’로 보이게 */
+.mc{
+    position: relative;
     background:#fff;
-    border:1px solid #eff1f5;
+    border:1px solid #edf0f4;
     border-radius:14px;
-    height:44px;
+    box-shadow:0 1px 2px rgba(0,0,0,.03);
+    overflow:hidden;
     width:100%;
-    margin:8px 0 0;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:var(--card-shadow);
-    position:relative;
+    margin: 12px 0;
 }
 
-/* ───────── 접힌 상태(둥근 박스 안의 ▼ 버튼) ───────── */
-/* 가로를 박스 거의 전체로 확장 */
-.np-chip-cbtn{
+/* 상단 헤더(빈 영역) – 기존 스크린샷의 둥근 상단바 */
+.mc-head{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:35px;
+    background:#fff;
+    border:0;
+    cursor:pointer;
+}
+
+.mc-head .chev{
+    width:18px;
+    height:18px;
+    color:#6f7580;
+    transition:transform .22s ease;
+}
+.mc-head .chev.down{ transform:rotate(0deg); }
+
+
+/* 본문은 max-height로 슬라이드 애니메이션 */
+.mc-body{
+    overflow:hidden;
+    transition:max-height .28s ease;
+}
+
+/* 본문 내부 패딩 – 아래 쪽은 떠있는 버튼 공간 확보 */
+.mc-inner{
+    padding:12px 10px 40px;
+}
+
+.mc-chevron{
+    transition:transform .25s ease;
+    line-height:1;
+    font-size:16px;
+}
+
+/* 펼쳐질 때 화살표 방향 전환 */
+.mc-floating.open .mc-chevron{ transform:rotate(180deg); }
+
+/* 하단 토글 바: 가로 풀폭, 흰색 직사각형 */
+.mc-toggle{
     position:absolute;
-    left:8px; right:8px;            /* ← 좌우로 길게 */
-    top:54%;                        /* 기존 58% → 54% (조금 위) */
-    transform:translateY(-50%);     /* X 이동 제거 */
+    left:8px;
+    right:8px;
+    bottom:0px;
 
-    height:40px;                    /* 살짝 크게 */
+    height:35px;
     border-radius:12px;
-    background:transparent; border:0;
-    display:flex; align-items:center; justify-content:center;
-    color:#6b7280; cursor:pointer;
 
-    transition:none; opacity:1;
-}
-.np-chip-cbtn:hover,
-.np-chip-cbtn:active,
-.np-chip-cbtn:focus{
-    background:transparent; box-shadow:none; outline:none; opacity:1;
-}
+    /* 실루엣 제거 */
+    background:transparent;
+    border:0;
+    box-shadow:none;
 
-/* ▼(접힘 박스) 가운데 큰 클릭존을 쓰는 경우 유지 */
-.np-chip-clickzone{ transition:none; opacity:1; transform:none; }
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    /*z-index:1; !* 내용 위에 보이도록 *!*/
+    /* 모바일 탭 하이라이트 제거 */
+    -webkit-tap-highlight-color: transparent;
+}
+.mc-toggle:hover,
+.mc-toggle:active,
+.mc-toggle:focus,
+.mc-toggle:focus-visible{
+    background:transparent;
+    border:0;
+    box-shadow:none;
+    outline:none;
+}
+/* 화살표 아이콘 크기/회전 애니메이션 */
+.mc-toggle .chev{
+    width:18px;
+    height:18px;
+    color:#6f7580;
+    transition:transform .22s ease;
+}
+.mc-toggle .chev.down{ transform:rotate(0deg); }
+.mc-toggle .chev.up  { transform:rotate(180deg); }
+
+/*---------------*/
 
 /* 리스트 */
-.np-card-list{ list-style:none; padding:0; margin:22px 0 0; display:grid; gap:10px }
+.np-card-list{ list-style:none; padding:0; margin:0; display:grid; gap:10px }
 .np-card-list>li{ list-style:none }
 .np-empty{ padding:16px; color:#94a3b8; font-size:14px }
 
@@ -219,22 +245,6 @@ body{
 .np-page-nums{ display:flex; align-items:center; gap:18px }
 .np-page-txt{ background:transparent; border:0; padding:0; font-size:14px; font-weight:700; color:#667085 }
 .np-page-txt.is-active{ color:var(--aura-blue) }
-
-/* 하단 네비 */
-.np-bottom-nav{
-    position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid #e9edf3; padding:8px 0;
-    display:grid; grid-template-columns:repeat(4,1fr); gap:0;
-}
-/*.np-bnav-item{background:transparent;border:0;display:grid;justify-items:center;color:#94a3b8}*/
-/*.np-bnav-item.is-active{color:var(--aura-blue)}*/
-/*.np-bnav-ico{width:26px;height:26px;border-radius:8px;background:#e7ecfb;margin-bottom:4px}*/
-/*.np-bnav-item.is-active .np-bnav-ico{background:#dbe3ff}*/
-/*.np-bnav-text{font-size:12px;font-weight:700}*/
-.np-bnav-item { background:transparent; border:0; display:grid; justify-items:center; }
-.np-bnav-icon { color:#94a3b8; }                     /* 비활성 색 */
-.np-bnav-item.is-active .np-bnav-icon { color:var(--aura-blue); }
-.np-bnav-text { font-size:12px; font-weight:700; color:#94a3b8; }
-.np-bnav-item.is-active .np-bnav-text { color:var(--aura-blue); }
 
 /* 상태 */
 .np-loading,.np-error{ padding:16px; color:#475467; font-size:14px }

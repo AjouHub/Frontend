@@ -6,6 +6,7 @@
     --button-blue: #4773D2;
     --background-color: #F9F9FB;
     --chip-background: #dadbe7;
+    --toggle-chip-background: #dadbe7;
     --border-color: #EAEBEE;
     --text-primary: #1A1B1F;
     --text-secondary: #81838A;
@@ -117,8 +118,23 @@ body {
     transform: rotate(180deg);
 }
 .collapsible-content {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 260ms ease, opacity 200ms ease;
+    will-change: max-height, opacity;
+}
+
+/* 열렸을 때는 투명도만 1로 (max-height는 인라인 style에서 제어) */
+.collapsible-content.open {
+    opacity: 1;
+}
+
+/* padding/border는 내부에 두어 높이 계산이 깔끔하도록 */
+.collapsible-body {
     padding: 0 20px 20px 20px;
     border-top: 1px solid var(--border-color);
+    box-sizing: border-box;
 }
 
 /* --- 선택자(Selector) 내부 스타일 --- */
@@ -170,7 +186,7 @@ body {
     color: var(--text-primary); margin-bottom: 12px;
 }
 .item-chip-list {
-    display: flex; flex-wrap: wrap; gap: 8px;
+    display: flex; flex-wrap: wrap; gap: 10px;
 }
 .item-chip {
     display: inline-flex; align-items: center;
@@ -225,40 +241,6 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* --- 알림 설정 토글 칩 (NotificationPreferences) --- */
-.toggle-chip-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.toggle-chip {
-    /* 기본 (비활성화) 스타일 - 회색 버튼 */
-    background-color: #F0F3F7; /* 시안의 회색 배경 */
-    color: var(--text-secondary); /* 회색 텍스트 */
-    border: 1px solid transparent; /* 테두리는 투명하게 */
-    padding: 8px 14px;
-    border-radius: 8px; /* 시안에 맞춰 둥근 사각형으로 변경 */
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.toggle-chip:hover {
-    background-color: #e6e9ee; /* 호버 시 약간 더 어둡게 */
-}
-
-.toggle-chip.active {
-    /* 활성화 스타일 - 파란색 버튼 */
-    background-color: var(--primary-blue); /* 정의된 파란색 사용 */
-    color: white; /* 흰색 텍스트 */
-    border-color: transparent;
-}
-
 /*DepartmentSelector.tsx*/
 .department-input-container {
     margin-top: 16px;
@@ -304,10 +286,6 @@ button:disabled {
 .keyword-input-container {
     margin-top: 16px;
 }
-
-/*.input-group {*/
-/*    color: #F1F1F1;*/
-/*}*/
 
 /* --- 알림 설정 (NotificationPreferences) 내부 스타일 --- */
 .notification-container {
@@ -356,26 +334,26 @@ button:disabled {
     margin-left: 8px;
 }
 
+/* --- 알림 설정 토글 칩 (기존 코드 업데이트) --- */
 /* 키워드 칩 리스트가 로딩 중일 때 약간 투명하게 */
 .toggle-chip-list.loading {
     opacity: 0.6;
 }
 
-
-/* --- 알림 설정 토글 칩 (기존 코드 업데이트) --- */
 .toggle-chip-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px; /* gap을 10px에서 8px로 조정 */
+    gap: 8px;
 }
 
 .toggle-chip {
     /* 기본 (비활성화) 스타일 - 회색 버튼 */
-    background-color: var(--chip-background);
-    color: var(--text-secondary);
-    border: 1px solid var(--chip-background); /* 테두리 색상 통일 */
+    background-color: #f0f3f7; /* 시안의 회색 배경 */
+    /*background-color: var(--toggle-chip-background);*/
+    color: var(--text-secondary); /* 회색 텍스트 */
+    border: 1px solid transparent; /* 테두리는 투명하게 */
     padding: 6px 12px;
-    border-radius: 18px; /* 둥근 모양으로 다시 변경 */
+    border-radius: 18px; /* 시안에 맞춰 둥근 사각형으로 변경 */
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -383,6 +361,11 @@ button:disabled {
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+
+.toggle-chip:hover {
+    background-color: #e6e9ee; /* 호버 시 약간 더 어둡게 */
 }
 
 .toggle-chip:hover:not(.active):not(:disabled) {

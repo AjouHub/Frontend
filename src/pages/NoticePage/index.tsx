@@ -9,9 +9,11 @@ import type { UserInfo } from "../../types/user";
 import type { Keyword } from "../../types/keywords";
 import { Global_Tags } from "../../utils/tags";
 import NoticeCard from "../../components/NoticeCard";
+import ChipCollapse from "../../components/ChipCollapse";
 import { listKeywords } from "../../services/settings.service";
 import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
 import { departmentNameMap } from "../../components/departmentMap";
+
 
 
 /** 색상 토큰 (디자인 시안) */
@@ -38,7 +40,6 @@ const TOP_TABS: TopTab[] = [
     { key: "dormitory", label: "생활관" },
     { key: "department", label: "학과" },
 ];
-
 
 export default function NoticePage(): JSX.Element {
     const [user, setUser] = useState<UserInfo | null>(null);
@@ -280,61 +281,22 @@ export default function NoticePage(): JSX.Element {
                 </nav>
 
                 {/* ───────── 칩 영역 ───────── */}
-                {chipsOpen ? (
-                    <section className="np-chip-wrap">
-                        <div className="np-chips">
-                            {allChips.map((c) => {
-                                const active = selectedTags.includes(c);
-                                return (
-                                    <button
-                                        key={c}
-                                        className={`np-chip ${active ? "is-active" : ""}`}
-                                        onClick={() => toggleChip(c)}
-                                    >
-                                        #{c}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        <button
-                            className="np-chip-toggle"
-                            onClick={() => setChipsOpen(false)}
-                            aria-label="칩 접기"
-                            title="칩 접기"
-                        >
-                            <svg viewBox="0 0 24 24" className="np-caret up">
-                                <path
-                                    d="M7 14l5-5 5 5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                            </svg>
-                        </button>
-                    </section>
-                ) : (
-                    <div className="np-chip-collapsed">
-                        <button
-                            className="np-chip-cbtn"
-                            onClick={() => setChipsOpen(true)}
-                            aria-label="칩 펼치기"
-                            title="칩 펼치기"
-                        >
-                            <svg viewBox="0 0 24 24" className="np-caret down">
-                                <path
-                                    d="M7 10l5 5 5-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                            </svg>
-                        </button>
+                <ChipCollapse openByDefault={false}>
+                    <div className="np-chips">
+                        {allChips.map((c) => {
+                            const active = selectedTags.includes(c);
+                            return (
+                                <button
+                                    key={c}
+                                    className={`np-chip ${active ? "is-active" : ""}`}
+                                    onClick={() => toggleChip(c)}
+                                >
+                                    #{c}
+                                </button>
+                            );
+                        })}
                     </div>
-                )}
+                </ChipCollapse>
 
                 {/* ───────── 공지 카드 리스트 ───────── */}
                 <ul className="np-card-list">
