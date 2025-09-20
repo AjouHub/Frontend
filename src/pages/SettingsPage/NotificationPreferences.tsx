@@ -6,32 +6,47 @@ import {
     saveKeywordSubscriptions,
 } from '../../services/settings.service';
 
-export default function NotificationPreferences() {
-    const [allKeywords, setAllKeywords] = useState<Keyword[]>([]);
+// 부모로부터 받을 props 타입을 정의합니다.
+interface NotificationPreferencesProps {
+    allKeywords: Keyword[];
+    loading: boolean;
+}
+
+export default function NotificationPreferences({ allKeywords, loading }: NotificationPreferencesProps) {
     const [initialSubs, setInitialSubs] = useState<number[]>([]);
     const [selected, setSelected] = useState<Set<number>>(new Set());
-    const [loading, setLoading] = useState(false);
+    const [subsLoading, setSubsLoading] = useState(true); // 구독 정보 로딩 상태
     const [saving, setSaving] = useState(false);
 
-    // 초기 로드: 전체 키워드 + 내 구독 목록
-    const load = async () => {
-        setLoading(true);
-        try {
-            const [keywords, subs] = await Promise.all([
-                listKeywords(),
-                listKeywordSubscriptions(),
-            ]);
-            setAllKeywords(keywords);
-            setInitialSubs(subs);
-            setSelected(new Set(subs));
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
-        load();
+        // 구독 정보 불러오기
+        const loadSubscriptions = async () => {
+            setSubsLoading(true);
+            try {
+                const subs = await listKeywordSubscriptions();
+                setInitialSubs(subs);
+                setSelected(new Set(subs));
+            } finally {
+                setSubsLoading(false);
+            }
+        };
+        loadSubscriptions();
     }, []);
+
+    // allKeywords가 부모로부터 변경되어 전달되면, 선택된 목록을 필터링
+    useEffect(() => {
+        const keywordIds = new Set(allKeywords.map(k => k.id));
+        setSelected(prevSelected => {
+            const newSelected = new Set<number>();
+            for (const id of prevSelected) {
+                if (keywordIds.has(id)) {
+                    newSelected.add(id);
+                }
+            }
+            return newSelected;
+        });
+    }, [allKeywords]);
+
 
     // 토글 핸들러
     const toggle = (id: number) => {
@@ -71,30 +86,40 @@ export default function NotificationPreferences() {
     };
 
     return (
-        <div>
-            <div style={{ marginBottom: 12 }}>
-                <div style={{ fontWeight: 600, marginBottom: 6 }}>키워드 구독</div>
-                <div style={{ fontSize: 12, color: '#666' }}>
-                    등록된 키워드 중에서 받길 원하는 것만 선택하세요.
+        <div className="notification-container">
+            {/* 설명 섹션 */}
+            <div className="notification-header">
+                <div className="notification-title">키워드 구독</div>
+                <div className="notification-description">
+                    등록된 키워드 중에서 알림을 받길 원하는 것만 선택하세요.
                 </div>
             </div>
 
-            <div style={{ marginBottom: 8, display: 'flex', gap: 8 }}>
-                <button onClick={selectAll} disabled={loading || saving || allKeywords.length === 0}>
+            {/* 전체 선택/해제 바 */}
+            <div className="bulk-actions-bar">
+                <button
+                    className="bulk-action-button"
+                    onClick={selectAll}
+                    disabled={loading || saving || allKeywords.length === 0}
+                >
                     전체 선택
                 </button>
-                <button onClick={clearAll} disabled={loading || saving || selected.size === 0}>
+                <button
+                    className="bulk-action-button"
+                    onClick={clearAll}
+                    disabled={loading || saving || selected.size === 0}
+                >
                     전체 해제
                 </button>
-                <div style={{ fontSize: 12, color: '#666', marginLeft: 8 }}>
+                <div className="selection-status">
                     선택 {selected.size} / 전체 {allKeywords.length}
                 </div>
             </div>
 
             {/* 키워드 칩 리스트 */}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', opacity: loading ? 0.6 : 1 }}>
+            <div className={`toggle-chip-list ${loading ? 'loading' : ''}`}>
                 {allKeywords.length === 0 && !loading && (
-                    <div style={{ color: '#888' }}>등록된 키워드가 없습니다.</div>
+                    <div className="empty-list-message">등록된 키워드가 없습니다.</div>
                 )}
 
                 {allKeywords.map((k) => {
@@ -106,29 +131,10 @@ export default function NotificationPreferences() {
                             onClick={() => toggle(k.id)}
                             disabled={saving}
                             title={isOn ? '구독 중' : '구독 안 함'}
-                            style={{
-                                cursor: 'pointer',
-                                border: '1px solid',
-                                borderColor: isOn ? '#1677ff' : '#ddd',
-                                color: isOn ? '#0b5bd3' : '#555',
-                                background: isOn ? '#eef5ff' : '#fafafa',
-                                padding: '6px 12px',
-                                borderRadius: 18,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: 6,
-                                fontSize: 14,
-                            }}
+                            className={`toggle-chip ${isOn ? 'active' : ''}`}
                         >
-              <span
-                  aria-hidden
-                  style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: '50%',
-                      background: isOn ? '#1677ff' : '#ccc',
-                  }}
-              />
+                            {/* 시안에서 인디케이터가 다시 보이므로 추가합니다. */}
+                            <span className="toggle-chip-indicator" />
                             {k.phrase}
                         </button>
                     );
@@ -136,12 +142,12 @@ export default function NotificationPreferences() {
             </div>
 
             {/* 저장 바 */}
-            <div style={{ marginTop: 16, display: 'flex', gap: 8, alignItems: 'center' }}>
-                <button onClick={onSave} disabled={!changed || saving}>
+            <div className="save-section">
+                <button onClick={onSave} disabled={!changed || saving} className="save-button">
                     {saving ? '저장 중…' : '변경사항 저장'}
                 </button>
                 {!changed && (
-                    <span style={{ fontSize: 12, color: '#888' }}>변경된 내용이 없습니다.</span>
+                    <span className="save-status-message">변경된 내용이 없습니다.</span>
                 )}
             </div>
         </div>

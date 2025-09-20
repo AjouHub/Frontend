@@ -1,103 +1,79 @@
-import React, { useEffect, useState } from 'react';
-import { addKeyword, listKeywords, removeKeyword } from '../../services/settings.service';
+import React, { useState } from 'react';
 import type { Keyword } from '../../types/keywords';
 
-export default function KeywordController() {
-    const [keywords, setKeywords] = useState<Keyword[]>([]);
+// 부모로부터 받을 props 타입을 정의합니다.
+interface KeywordControllerProps {
+    keywords: Keyword[];
+    loading: boolean;
+    onAddKeyword: (phrase: string) => Promise<void>;
+    onRemoveKeyword: (id: number) => Promise<void>;
+}
+
+
+export default function KeywordController({ keywords, loading, onAddKeyword, onRemoveKeyword }: KeywordControllerProps) {
     const [input, setInput] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    const load = async () => {
-        setLoading(true);
-        try {
-            const list = await listKeywords();      // Promise<Keyword[]>
-            setKeywords(list ?? []);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        load();
-    }, []);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const onAdd = async () => {
         const phrase = input.trim();
         if (!phrase) return;
 
-        setLoading(true);
+        setIsSubmitting(true);
         try {
-            const response = await addKeyword(phrase);
-            setKeywords(prev =>
-                prev.some(k => k.id === response.id) ? prev : [...prev, response]
-            ); // ← 배열에 합치기 (SetStateAction<Keyword[]> OK)
+            await onAddKeyword(phrase);
             setInput('');
-            await load();
         } finally {
-            setLoading(false);
+            setIsSubmitting(false);
         }
     };
 
     const onRemove = async (id: number) => {
-        setLoading(true);
+        setIsSubmitting(true);
         try {
-            await removeKeyword(id);   // DELETE /keywords/{id}
-            await load();
+            await onRemoveKeyword(id);
         } finally {
-            setLoading(false);
+            setIsSubmitting(false);
         }
     };
 
+    const isLoading = loading || isSubmitting;
+
+    // 현재 등록된 키워드를 쉼표로 구분하여 보여줍니다.
+    const keywordText = keywords.length > 0
+        ? keywords.map(k => k.phrase).join(', ')
+        : '등록된 키워드가 없습니다.';
+
     return (
-        <div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div className="keyword-input-container">
+            <div className="input-group">
                 <input
-                    placeholder="키워드 입력"
+                    type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
+                    placeholder="키워드를 입력하세요"
+                    disabled={isLoading}
                     onKeyDown={(e) => {
                         if (e.key === 'Enter') onAdd();
                     }}
-                    disabled={loading}
-                    style={{ minWidth: 320, padding: 6 }}
                 />
-                <button onClick={onAdd} disabled={loading || !input.trim()}>
+                <button onClick={onAdd} disabled={isLoading || !input.trim()}>
                     추가
                 </button>
             </div>
 
-            <div style={{ marginTop: 12 }}>
-                <div style={{ fontSize: 14, color: '#666', marginBottom: 6 }}>내 키워드</div>
-                {keywords.length === 0 ? (
-                    <div style={{ color: '#888' }}>등록된 키워드가 없습니다.</div>
-                ) : (
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        {keywords.map((k) => (
-                            <span
-                                key={k.id}
-                                style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: 6,
-                                    padding: '6px 10px',
-                                    borderRadius: 16,
-                                    border: '1px solid #ddd',
-                                    background: '#fafafa',
-                                }}
-                            >
-                {k.phrase}
-                                <button
-                                    onClick={() => onRemove(k.id)}
-                                    disabled={loading}
-                                    style={{ marginLeft: 4 }}
-                                >
-                  ×
-                </button>
-              </span>
-                        ))}
-                    </div>
-                )}
-            </div>
+            <div className="item-list-title">내 키워드</div>
+            {loading && keywords.length === 0 ? (
+                <div>로딩 중...</div>
+            ) : (
+                <div className="item-chip-list">
+                    {keywords.map((k) => (
+                        <div key={k.id} className="item-chip">
+                            <span>{k.phrase}</span>
+                            <button onClick={() => onRemove(k.id)} disabled={isLoading}>×</button>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
