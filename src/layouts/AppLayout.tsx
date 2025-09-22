@@ -4,7 +4,8 @@ import AppBar from '../components/AppBar';
 import { isAppEnv } from '../services/auth.service';
 import NativeBridge from '../components/NativeBridge';
 import { BOTTOM_TAB_HEIGHT } from '../components/BottomTabBar';
-import {useState} from "react";
+import { useState } from "react";
+import { useDebounce } from "../hooks/usedebounce";
 
 
 // const TABBAR_PX = 64;
@@ -15,6 +16,8 @@ export default function AppLayout() {
     const app = isAppEnv();
 
     const [searchQuery, setSearchQuery] = useState('');
+    // '실시간' 입력값을 500ms 디바운싱한 값
+    const debouncedSearchTerm = useDebounce(searchQuery, 500);
 
     return (
         <>
@@ -32,10 +35,13 @@ export default function AppLayout() {
             >
                 {/* 앱 모드가 아니면 AppBar와 BottomTabBar를 렌더링 */}
                 {/* AppBar에 검색어와 상태 변경 함수를 props로 전달합니다. */}
+                {/* AppBar에는 실시간 값(searchTerm)과 세터(setSearchTerm)를 전달 */}
                 {!app && <AppBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />}
 
                 {/* Outlet의 context를 통해 검색어를 자식 컴포넌트(NoticePage)에 전달합니다. */}
-                <Outlet context={{ searchQuery, setSearchQuery }} />
+                {/* Outlet(NoticePage)에는 디바운싱된 값(debouncedSearchTerm)을 전달 */}
+                <Outlet context={{ searchQuery: debouncedSearchTerm }} />
+                {/*<Outlet context={{ searchQuery, setSearchQuery }} />*/}
             </div>
 
             {/* ⬇️ 변경: 앱 환경이면 탭바 미표시 */}

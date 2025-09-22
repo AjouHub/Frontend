@@ -20,18 +20,24 @@ interface AppBarProps {
 const AppBar: React.FC<AppBarProps> = ({ searchQuery, setSearchQuery }) => {
     // 검색
     const [searchOpen, setSearchOpen] = useState(false);
-    // const [query, setQuery] = useState("");
     const searchInputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
     const location = useLocation();
 
     const onClickSearch = () => setSearchOpen(true);
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newTerm = e.target.value;
+        // 2. 입력할 때마다 부모의 상태를 즉시 업데이트
+        setSearchQuery(newTerm);
+        // 3. URL도 실시간으로 업데이트 (히스토리가 쌓이지 않도록 replace: true 사용)
+        navigate(`/notice?q=${encodeURIComponent(newTerm)}`, { replace: true });
+    };
     const onSubmitSearch = (e: React.FormEvent) => {
         e.preventDefault();
         // 검색 제출 시 부모의 setSearchQuery를 호출합니다.
-        setSearchQuery(searchInputRef.current?.value || '');
+        // setSearchQuery(searchInputRef.current?.value || '');
         // 검색 결과는 NoticePage에서 보여주므로 해당 페이지로 이동시킵니다.
-        navigate(`/notice?q=${encodeURIComponent(searchInputRef.current?.value || '')}`);
+        // navigate(`/notice?q=${encodeURIComponent(searchInputRef.current?.value || '')}`);
         setSearchOpen(false); // 검색창 닫기
     };
     const onCloseSearch = () => setSearchOpen(false);
@@ -61,8 +67,8 @@ const AppBar: React.FC<AppBarProps> = ({ searchQuery, setSearchQuery }) => {
                     ref={searchInputRef}
                     className="np-search-input"
                     placeholder="검색어 입력"
-                    // value={query}
-                    // onChange={(e) => setQuery(e.target.value)}
+                    value={searchQuery}
+                    onChange={handleSearchChange}
                 />
                 {/* 왼쪽 화살표 (닫기) */}
                 <button
