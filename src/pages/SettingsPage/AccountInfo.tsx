@@ -40,14 +40,17 @@ export default function AccountInfo({ departments, loading }: AccountInfoProps):
     // 로딩 중일 때 UI
     if (!user || loading) {
         return (
-            <div className="profile-card">
-                <div className="profile-avatar-placeholder" />
-                <div className="profile-details">
-                    <div className="detail-row-placeholder" />
-                    <div className="detail-row-placeholder" />
-                    <div className="detail-row-placeholder" />
-                </div>
+            <div className="np-loading-overlay">
+                <div className="np-spinner" aria-label="로딩 중" />
             </div>
+            // <div className="profile-card">
+            //     <div className="profile-avatar-placeholder" />
+            //     <div className="profile-details">
+            //         <div className="detail-row-placeholder" />
+            //         <div className="detail-row-placeholder" />
+            //         <div className="detail-row-placeholder" />
+            //     </div>
+            // </div>
         );
     }
 

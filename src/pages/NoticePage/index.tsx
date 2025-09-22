@@ -13,21 +13,14 @@ import ChipCollapse from "../../components/ChipCollapse";
 import { listKeywords } from "../../services/settings.service";
 import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
 import { departmentNameMap } from "../../components/departmentMap";
-
+import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
+import { isAppEnv } from '../../services/auth.service';
 
 
 // 색상 토큰
 const AURA_BLUE = "#4A6DDB";
 const ACCENT_ORANGE = "#FFA852";
 const STONE_GRAY = "#8D96A8";
-
-// 아이콘
-const SearchIcon = IoSearchOutline as unknown as React.FC<{
-    size?: number | string; className?: string; color?: string;
-}>;
-const BackIcon = IoChevronBackOutline as unknown as React.FC<{
-    size?: number | string; className?: string; color?: string;
-}>;
 
 type GeneralTabKey = "general" | "scholarship" | "dormitory" | "department";
 type DeptKey = string;
@@ -45,7 +38,14 @@ const TOP_TABS: TopTab[] = [
     { key: "department", label: "학과" },
 ];
 
+interface NoticePageContext {
+    searchQuery: string;
+    setSearchQuery: (query: string) => void;
+}
+
 export default function NoticePage(): JSX.Element {
+    const location = useLocation();
+
     const [user, setUser] = useState<UserInfo | null>(null);
 
     // 상단 탭(일반/장학/생활관/학과)
@@ -65,7 +65,6 @@ export default function NoticePage(): JSX.Element {
     const [status, setStatus] = useState<number | string | null>(null);
 
     // 칩(해시태그)
-    const [chipsOpen, setChipsOpen] = useState(true);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [suggestedTags, setSuggestedTags] = useState<string[]>(Global_Tags);
 
@@ -74,9 +73,19 @@ export default function NoticePage(): JSX.Element {
 
     const [keywords, setKeywords] = useState<Keyword[]>([]);
 
-    const [searchOpen, setSearchOpen] = useState(false);
-    const [query, setQuery] = useState("");
-    const searchInputRef = useRef<HTMLInputElement>(null);
+    // 검색
+    const { searchQuery } = useOutletContext<NoticePageContext>();
+    // 검색 기능
+    // 네이티브 검색(URL 쿼리)과 웹 검색(Outlet context)을 모두 반영합니다.
+    const query = useMemo(() => {
+        const urlQuery = new URLSearchParams(location.search).get("q") ?? "";
+        // Outlet context에서 받은 searchQuery를 사용합니다.
+        // 만약 context가 없다면 urlQuery만 사용합니다.
+        return urlQuery || (searchQuery || ""); // URL 쿼리가 우선순위를 가집니다.
+    }, [location.search, searchQuery]);
+
+
+
 
     // 서버 키워드 → phrase[] 로 변환
     async function fetchSuggestedTags(): Promise<string[]> {
@@ -99,8 +108,6 @@ export default function NoticePage(): JSX.Element {
             .filter(id => id !== null)  // null 제거
             .join(",");  // "1,2,3" 형태로 반환
     };
-
-
 
     // ✅ 북마크 ID 집합
     const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
@@ -142,8 +149,7 @@ export default function NoticePage(): JSX.Element {
         return () => { alive = false; };
     }, [user]);
 
-    // 공지 목록 호출 부분 수정
-    /** 공지 목록 호출 부분 수정 */
+    // 공지 목록 호출 부분
     useEffect(() => {
         const typeForApi = tab === "department" ? (deptType || "general") : tab;
         setLoading(true);
@@ -168,7 +174,7 @@ export default function NoticePage(): JSX.Element {
             .finally(() => setLoading(false));
     }, [tab, deptType, page, selectedGlobalIds, selectedPersonalIds, query]);
 
-    /** 서버 태그 or 예비 칩 */
+    // 서버 태그 or 예비 칩
     const allChips = useMemo<string[]>(() => {
         const phrases = keywords
             .map(k => (k.phrase ?? '').trim())
@@ -181,7 +187,7 @@ export default function NoticePage(): JSX.Element {
         return unique.length ? unique : suggestedTags;
     }, [keywords, suggestedTags]);
 
-    /** 칩 선택 토글 */
+    // 칩 선택 토글
     const toggleChip = (t: string) => {
         setSelectedTags((prev) =>
             prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
@@ -189,7 +195,7 @@ export default function NoticePage(): JSX.Element {
         setPage(0);
     };
 
-    /** 칩 필터링 결과 */
+    // 칩 필터링 결과
     useEffect(() => {
         // Global_Tags에 해당하는 태그 ID와 개인 태그 ID를 별도로 구분하여 매핑
         const newGlobalIds = mapTagsToIds(selectedTags.filter(tag => Global_Tags.includes(tag)));
@@ -202,7 +208,7 @@ export default function NoticePage(): JSX.Element {
 
 
 
-    /** 실제 토글 로직(비동기) — id는 string */
+    // 실제 토글 로직(비동기) — id는 string
     const handleToggleBookmark = async (id: string, next: boolean) => {
         const key = String(id);
 
@@ -226,83 +232,25 @@ export default function NoticePage(): JSX.Element {
         }
     };
 
-    // 검색 기능
-    useEffect(() => {
-        if (searchOpen) searchInputRef.current?.focus();
-    }, [searchOpen]);
-
-    const onClickSearch = () => setSearchOpen(true);
-    const onSubmitSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        setPage(0);            // 검색어 바뀌면 첫 페이지부터
+    /**
+     * 공지사항 클릭을 처리하는 함수입니다.
+     * 앱 환경(window.AURA.openNotice 존재)과 웹 브라우저 환경을 구분하여 동작합니다.
+     */
+    const handleNoticeClick = (event: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+        // window.AURA 객체와 openNotice 함수가 모두 존재하면 앱 모드로 간주
+        if (window.AURA?.openNotice) {
+            event.preventDefault(); // a 태그의 기본 링크 이동 동작(새 탭 열기)을 막음
+            window.AURA.openNotice(link); // 네이티브 함수를 호출하여 앱 내 오버레이 웹뷰로 상세 페이지를 염
+        }
+        // 앱 모드가 아니면(일반 브라우저이면) 아무것도 하지 않습니다.
+        // 그러면 a 태그의 기본 동작(href와 target="_blank"에 따라 새 탭으로 열기)이 실행됩니다.
     };
-    const onCloseSearch = () => {
-        setSearchOpen(false);
-        // 필요 시 검색어 유지/초기화 선택
-        // setQuery("");
-    }
 
 
 
-    // /** 렌더 */
-    // if (loading && !notices.length) {
-    //     return (
-    //         <div className="np-container">
-    //             <div className="np-loading">로딩 중…</div>
-    //         </div>
-    //     );
-    // }
-    // if (error) {
-    //     return (
-    //         <div className="np-container">
-    //             <p className="np-error">
-    //                 {error}
-    //                 <br />
-    //                 상태 코드: {status}
-    //             </p>
-    //         </div>
-    //     );
-    // }
 
-    // @ts-ignore
     return (
         <div className="np-root">
-            {/* ───────── 상단 AppBar ───────── */}
-            <header className="np-appbar">
-                <div className="np-appbar-side" />
-                <h1 className="np-logo">AURA</h1>
-                <button
-                    className={`np-icon-btn ${searchOpen ? "is-search-open" : ""}`}
-                    aria-label="검색"
-                    onClick={onClickSearch}
-                >
-                    <SearchIcon className="np-ico" size={22} color="#575757" />
-                </button>
-
-                {/* ▼ 검색 입력 오버레이 추가 */}
-                <form
-                    className={`np-search ${searchOpen ? "is-open" : ""}`}
-                    onSubmit={onSubmitSearch}
-                >
-                    <input
-                        ref={searchInputRef}
-                        className="np-search-input"
-                        placeholder="검색어 입력"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                    />
-                    {/* ← 왼쪽 화살표(닫기) */}
-                    <button
-                        type="button"
-                        className="np-search-back"
-                        onClick={onCloseSearch}
-                        aria-label="검색 닫기"
-                    >
-                        <BackIcon size={20}/>
-                    </button>
-                </form>
-            </header>
-
             <div className="np-container">
                 {/* ───────── 상단 탭 ───────── */}
                 <nav className="np-tabs">
@@ -361,6 +309,8 @@ export default function NoticePage(): JSX.Element {
                                     heartOffColor="#C0C5CF"
                                     isBookmarked={bookmarks.has(n.id)}       // {/* ✅ 하트 ON/OFF */}
                                     onToggleBookmark={handleToggleBookmark}   // {/* ✅ 클릭 처리 */}
+                                    // "onNoticeClick" 이라는 이름으로 클릭 핸들러 함수를 전달합니다.
+                                    onNoticeClick={handleNoticeClick}
                                 />
                             </li>
                         ))

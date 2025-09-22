@@ -17,6 +17,12 @@
     --card-x: 12px;   /* 카드 내부 좌/우 패딩: 기존 16px → 12px */
     --card-right: 26px;   /* ← 하트가 너무 붙어보이면 24~28px에서 조절 */
     --icon-dark: #575757;
+
+    --appbar-x: 18px;       /* AppBar 좌우 패딩 */
+    --appbar-max: 420px;    /* 컨테이너 최대폭 */
+    /*--appbar-max: 100%;*/
+    --icon-w: 32px;         /* 검색 아이콘 버튼 폭(=높이) */
+    --left-gap: 10px;       /* 왼쪽 여백 10px 유지 */
 }
 
 *{ box-sizing:border-box }
@@ -54,9 +60,12 @@ body{
     justify-self: center;
 }
 .np-icon-btn{
-    width:32px; height:32px; border-radius:9999px; background:transparent; border:0;
-    color:#64748b; display:grid; place-items:center; justify-content:end;
-    transform: translateX(-10px); /* 왼쪽으로 6px */
+    width:var(--icon-w); height:var(--icon-w); border-radius:9999px;
+    background:transparent; border:0;
+    color:#64748b; display:grid; place-items:center;
+    justify-self:end;         /* 그리드 오른쪽 칸 끝 */
+    transition: transform .28s ease, left .28s ease, right .28s ease;
+    z-index:16;               /* 검색 입력 레이어보다 위 */
 }
 .np-ico{ width:22px; height:22px }
 
@@ -265,17 +274,17 @@ body{
 /* 검색 오버레이 */
 .np-search{
     position: absolute;
-    left: 12px;
-    right: 12px;
+    left: var(--appbar-x);
+    right: var(--appbar-x);
     top: 50%;
-    transform: translateY(-50%) translateX(12px);
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     gap: 8px;
     opacity: 0;
     pointer-events: none;
-    z-index: 15;
-    transition: transform .25s ease, opacity .2s ease;
+    z-index: 15; /* 아이콘(16)보다 아래 */
+    transition: opacity .2s ease;
 }
 
 .np-search.is-open{
@@ -303,6 +312,7 @@ body{
     border-radius: 10px;
     font-size: 14px;
     background: #fff;
+    margin-left: 40px;
 }
 .np-search-input:focus{
     outline: none;
@@ -326,7 +336,19 @@ body{
     opacity .2s ease;
 }
 .np-icon-btn.is-search-open{
-    transform: translateX(-96px);
+    position: absolute;
+    top: 50%;
+    right: var(--appbar-x);   /* 시작 기준: 오른쪽 패딩 */
+    transform:
+            translateY(-50%)
+            translateX(
+                    calc(
+                            -1 * ( min(100vw, var(--appbar-max))        /* AppBar 실제 가로폭 */
+                            - (var(--appbar-x) * 2)              /* 좌우 패딩 제외 */
+                            - var(--icon-w)                      /* 아이콘 너비 */
+                            - var(--left-gap) )                  /* 왼쪽 10px 여백 남김 */
+                    )
+            );
 }
 
 
@@ -335,12 +357,16 @@ body{
     position: fixed;
     left: 0; right: 0;
     top: 56px;              /* AppBar 높이에 맞춰 조절 */
-    bottom: 64px;           /* 하단 탭 높이에 맞춰 조절 */
-    background: rgba(255,255,255,.55);
+    /*bottom: 64px;           !* 하단 탭 높이에 맞춰 조절 *!*/
+    bottom: 0;
+    background: rgba(255,255,255,.6);
     backdrop-filter: blur(1.5px);
-    display: grid;
-    place-items: center;
-    z-index: 9; /* 헤더보다 낮고, 카드 위 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;    /* 검색폼(z=3)보다 낮게, 카드들보다 높게 */
+    font-size: 14px;
+    color: #475467;
 }
 
 /* 심플 스피너 */

@@ -119,6 +119,15 @@ export default function BookMarkPage(): JSX.Element {
         }
     };
 
+    const handleNoticeClick = (event: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+        // window.AURA 객체와 openNotice 함수가 모두 존재하면 앱 모드로 간주
+        if (window.AURA?.openNotice) {
+            event.preventDefault(); // a 태그의 기본 링크 이동 동작(새 탭 열기)을 막음
+            window.AURA.openNotice(link); // 네이티브 함수를 호출하여 앱 내 오버레이 웹뷰로 상세 페이지를 염
+        }
+        // 앱 모드가 아니면(일반 브라우저이면) 아무것도 하지 않습니다.
+        // 그러면 a 태그의 기본 동작(href와 target="_blank"에 따라 새 탭으로 열기)이 실행됩니다.
+    };
 
     /** 렌더 */
     if (loading && !notices.length) {
@@ -142,12 +151,6 @@ export default function BookMarkPage(): JSX.Element {
 
     return (
         <div className="np-root">
-            {/* ───────── 상단 AppBar ───────── */}
-            <header className="np-appbar">
-                <div className="np-appbar-side" />
-                <h1 className="np-logo">AURA</h1>
-            </header>
-
             <div className="np-container">
                 {/* ───────── 상단 탭 ───────── */}
                 <nav className="np-tabs">
@@ -181,6 +184,7 @@ export default function BookMarkPage(): JSX.Element {
                                     heartOffColor="#C0C5CF"
                                     isBookmarked={bookmarksID.has(n.id)}       // {/* ✅ 하트 ON/OFF */}
                                     onToggleBookmark={handleToggleBookmark}   // {/* ✅ 클릭 처리 */}
+                                    onNoticeClick={handleNoticeClick}
                                 />
                             </li>
                         ))

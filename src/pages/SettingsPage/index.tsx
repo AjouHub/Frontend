@@ -83,11 +83,6 @@ export default function SettingsPage() {
 
     return (
         <div className="np-root">
-            {/* ───────── 상단 AppBar ───────── */}
-            <header className="np-appbar">
-                <div className="np-appbar-side" />
-                <h1 className="np-logo">AURA</h1>
-            </header>
 
             <div className="settings-container">
                 <main className="settings-main">

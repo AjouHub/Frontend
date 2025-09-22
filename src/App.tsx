@@ -8,11 +8,14 @@ import BookMarkPage from "./pages/BookMarkPage";
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import NativeBridge from "./components/NativeBridge";
 
 
 function App() {
     return (
         <>
+            <NativeBridge />
+
             <Routes>
                 <Route element={<AppLayout />}>
                     <Route index element={<LoginPage />} />

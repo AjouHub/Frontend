@@ -60,7 +60,9 @@ export default function KeywordController({ keywords, loading, onAddKeyword, onR
 
             <div className="item-list-title">내 키워드</div>
             {loading && keywords.length === 0 ? (
-                <div>로딩 중...</div>
+                <div className="np-loading-overlay">
+                    <div className="np-spinner" aria-label="로딩 중" />
+                </div>
             ) : (
                 <div className="item-chip-list">
                     {keywords.map((k) => (
