@@ -17,7 +17,7 @@ type NoticeCardProps = {
     notice: {
         id: string;
         title: string;
-        link?: string;
+        link: string;
         category?: string;
         department?: string;
         date?: string;
@@ -29,6 +29,7 @@ type NoticeCardProps = {
     heartOffColor?: string;  // off 색
     isBookmarked?: boolean;  // 부모가 상태를 줄 때 (컨트롤드)
     onToggleBookmark?: (id: string, next: boolean) => void;
+    onNoticeClick: (event: React.MouseEvent<HTMLAnchorElement>, link: string) => void;
 };
 
 export default function NoticeCard({
@@ -39,6 +40,7 @@ export default function NoticeCard({
                                        heartOffColor = "#C0C5CF",
                                        isBookmarked,
                                        onToggleBookmark,
+                                       onNoticeClick,
                                    }: NoticeCardProps) {
     // 컨트롤드 prop이 없을 때만 내부 로컬 상태 사용
     const [markedLocal, setMarkedLocal] = useState(false);
@@ -77,6 +79,7 @@ export default function NoticeCard({
                     href={notice.link || "#"}
                     target="_blank"
                     rel="noreferrer noopener"
+                    onClick={(e) => onNoticeClick(e, notice.link)} // props로 받은 함수를 실행
                 >
                     {notice.title}
                 </a>

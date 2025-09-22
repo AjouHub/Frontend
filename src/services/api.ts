@@ -4,14 +4,15 @@ import axios, {
     AxiosRequestConfig,
     InternalAxiosRequestConfig,
 } from 'axios';
+import { isAppEnv } from "./auth.service";
 
 
-
-// 런타임 감지
-const IS_APP =
-    !!(window as any).ReactNativeWebView ||
-    new URLSearchParams(window.location.search).get('embed') === 'app' ||
-    (process.env.REACT_APP_RUNTIME || '').toLowerCase() === 'app';
+// // 런타임 감지
+// const IS_APP =
+//     !!(window as any).ReactNativeWebView ||
+//     new URLSearchParams(window.location.search).get('embed') === 'app' ||
+//     (process.env.REACT_APP_RUNTIME || '').toLowerCase() === 'app';
+const IS_APP = isAppEnv();
 const IS_WEB = !IS_APP;
 
 // 기본 설정
@@ -110,12 +111,13 @@ api.interceptors.request.use(async (cfg: InternalAxiosRequestConfig) => {
     const m = (cfg.method ?? 'get').toLowerCase();
     const isWrite = ['post','put','patch','delete'].includes(m);
 
-    if (isWrite && !(cfg.headers as any)['Content-Type']) {
-        (cfg.headers as any)['Content-Type'] = 'application/json';
-    }
+    // if (isWrite && !(cfg.headers as any)['Content-Type']) {
+    //     (cfg.headers as any)['Content-Type'] = 'application/json';
+    // }
 
     // ★ 웹: 쓰기 요청이면 CSRF 헤더 보장
-    if (isWrite) {
+    // 웹에서만 CSRF 처리
+    if (IS_WEB && isWrite) {
         let t = sessionStorage.getItem(CSRF_KEY);
         if (!t) {                      // 아직 없으면 먼저 받아온다
             await csrfOnce();

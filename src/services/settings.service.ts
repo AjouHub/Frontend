@@ -1,5 +1,6 @@
 import api from './api';
 import type { Keyword } from '../types/keywords';
+import { notify } from "../utils/notify";
 
 
 // 공통 API 응답 타입
@@ -67,16 +68,30 @@ export async function listKeywords(): Promise<Keyword[]> {
 }
 
 export async function addKeyword(phrase: string): Promise<Keyword> {
-    const response = await api.post<ApiResponse<Keyword>>('/keywords',
-        undefined,
-        { params: { phrase } });
+    try {
+        const response = await api.post<ApiResponse<Keyword>>('/keywords',
+            undefined,
+            {params: {phrase}});
 
-    if (response.data.status != 'success') {
-        const error = new Error(response.data.message || '키워드 등록에 실패했습니다.');
-        (error as any).status = response.status;
-        throw error;
+        return response.data.data;
+    } catch(e: any) {
+        const status = e?.response?.status;
+        const data = e?.response?.data;
+
+        if (status === 409) {
+            const code = data?.errors?.[0]?.code;
+            const msg = data?.message;
+                // code === 'CONFLICT_WITH_GLOBAL'
+                //     ? '전역 키워드와 중복될 수 없습니다.'
+                //     : code === 'DUPLICATE_PERSONAL'
+                //         ? '이미 추가된 키워드입니다.'
+                //         : data?.message || '중복된 키워드입니다.';
+            // alert(msg);
+            notify.warn(msg);
+        }
+        // 호출부에서 더 처리할 수 있게 그대로 던짐(또는 여기서 종료해도 됨)
+        throw e;
     }
-    return response.data.data;
 }
 
 export async function removeKeyword(id: number): Promise<void> {

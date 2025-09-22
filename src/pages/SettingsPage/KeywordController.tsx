@@ -22,6 +22,8 @@ export default function KeywordController({ keywords, loading, onAddKeyword, onR
         try {
             await onAddKeyword(phrase);
             setInput('');
+        } catch (e: any) {
+            if (e?.response?.status === 409) return;  // 409는 onAddKeyword에서 alert 띄웠으니 조용히 종료
         } finally {
             setIsSubmitting(false);
         }
@@ -37,11 +39,6 @@ export default function KeywordController({ keywords, loading, onAddKeyword, onR
     };
 
     const isLoading = loading || isSubmitting;
-
-    // 현재 등록된 키워드를 쉼표로 구분하여 보여줍니다.
-    const keywordText = keywords.length > 0
-        ? keywords.map(k => k.phrase).join(', ')
-        : '등록된 키워드가 없습니다.';
 
     return (
         <div className="keyword-input-container">
@@ -63,7 +60,9 @@ export default function KeywordController({ keywords, loading, onAddKeyword, onR
 
             <div className="item-list-title">내 키워드</div>
             {loading && keywords.length === 0 ? (
-                <div>로딩 중...</div>
+                <div className="np-loading-overlay">
+                    <div className="np-spinner" aria-label="로딩 중" />
+                </div>
             ) : (
                 <div className="item-chip-list">
                     {keywords.map((k) => (
