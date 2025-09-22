@@ -7,7 +7,7 @@ import type { BookMark } from "../../types/bookmark";
 import { Global_Tags } from "../../utils/tags";
 import NoticeCard from "../../components/NoticeCard";
 import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
-
+import "./BookMarkPage.css";
 
 
 /** 색상 토큰 (디자인 시안) */
@@ -18,27 +18,8 @@ const STONE_GRAY = "#8D96A8";
 type GeneralTabKey = "general" | "scholarship" | "dormitory" | "department";
 type DeptKey = string;
 
-type TopTab =
-    | { key: "general"; label: "일반" }
-    | { key: "scholarship"; label: "장학" }
-    | { key: "dormitory"; label: "생활관" }
-    | { key: "department"; label: "학과" };
-
-const TOP_TABS: TopTab[] = [
-    { key: "general", label: "일반" },
-    { key: "scholarship", label: "장학" },
-    { key: "dormitory", label: "생활관" },
-    { key: "department", label: "학과" },
-];
-
 export default function BookMarkPage(): JSX.Element {
     const [user, setUser] = useState<UserInfo | null>(null);
-
-    // 상단 탭(일반/장학/생활관/학과)
-    const [tab, setTab] = useState<GeneralTabKey>("general");
-
-    // 학과 탭일 때 선택된 학과 키(백엔드 type으로 사용)
-    const [deptType, setDeptType] = useState<DeptKey>("");
 
     // 목록/페이지
     const [notices, setNotices] = useState<BookMark[]>([]);
@@ -50,12 +31,21 @@ export default function BookMarkPage(): JSX.Element {
     const [error, setError] = useState("");
     const [status, setStatus] = useState<number | string | null>(null);
 
-    const [selectedGlobalIds, setGlobalIds] = useState<string>("");
-    const [selectedPersonalIds, setSelectedPersonalIds] = useState<string>("");
-
     // ✅ 북마크 ID 집합
     const [bookmarksID, setBookmarksID] = useState<Set<string>>(new Set());
-
+    const loadBookmarks = async () => {
+        setLoading(true);
+        try {
+            const items = await listNoticeBookmarks();
+            setNotices(items); // 화면에 표시될 공지 목록을 업데이트
+            setBookmarksID(new Set(items.map(b => String(b.id))));
+        } catch (e) {
+            console.warn('북마크 목록 로드 실패:', e);
+            setNotices([]); // 실패 시 목록 비우기
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // 초기 데이터 (유저)
     useEffect(() => {
@@ -63,10 +53,6 @@ export default function BookMarkPage(): JSX.Element {
             try {
                 const u = await fetchUserInfo();
                 setUser(u);
-
-                const firstDept = u?.departments?.[0] || "";
-                setDeptType(firstDept);
-                setTab("general");
             } catch (e: any) {
                 setError(e?.message ?? "데이터 오류");
                 setStatus(e?.status ?? "Unknown");
@@ -77,45 +63,20 @@ export default function BookMarkPage(): JSX.Element {
     // 유저 로드 후 북마크 목록 가져오기
     useEffect(() => {
         if (!user) return;
-        let alive = true;
-        (async () => {
-            setLoading(true);
-            try {
-                const items = await listNoticeBookmarks(); // BookMark[]
-                if (!alive) return;
-                setNotices(items);
-                setBookmarksID(new Set(items.map(b => String(b.id))));
-            } catch (e) {
-                console.warn('북마크 목록 로드 실패:', e);
-            } finally {
-                if (alive) setLoading(false);
-            }
-        })();
-        return () => { alive = false; };
+        loadBookmarks();
     }, [user]);
-
 
     /** 실제 토글 로직(비동기) — id는 string */
     const handleToggleBookmark = async (id: string, next: boolean) => {
-        const key = String(id);
-
-        // 낙관적 업데이트
-        setBookmarksID(prev => {
-            const s = new Set(prev);
-            next ? s.add(key) : s.delete(key);
-            return s;
-        });
-
+        // 이 함수는 북마크 '설정'만 하고, 목록 로딩은 별도로 처리합니다.
         try {
             await setNoticeBookmark(id, next);
+            // 북마크 상태 변경 성공 후, 목록을 다시 불러와 페이지를 새로고침합니다.
+            await loadBookmarks();
         } catch (e: any) {
-            // 롤백
-            setBookmarksID(prev => {
-                const s = new Set(prev);
-                next ? s.delete(key) : s.add(key);
-                return s;
-            });
             alert(e?.message ?? '북마크 처리에 실패했습니다.');
+            // 실패 시에도 최신 상태를 받아오기 위해 목록을 다시 로드할 수 있습니다.
+            await loadBookmarks();
         }
     };
 
@@ -125,52 +86,12 @@ export default function BookMarkPage(): JSX.Element {
             event.preventDefault(); // a 태그의 기본 링크 이동 동작(새 탭 열기)을 막음
             window.AURA.openNotice(link); // 네이티브 함수를 호출하여 앱 내 오버레이 웹뷰로 상세 페이지를 염
         }
-        // 앱 모드가 아니면(일반 브라우저이면) 아무것도 하지 않습니다.
-        // 그러면 a 태그의 기본 동작(href와 target="_blank"에 따라 새 탭으로 열기)이 실행됩니다.
     };
 
-    /** 렌더 */
-    if (loading && !notices.length) {
-        return (
-            <div className="np-container">
-                <div className="np-loading">로딩 중…</div>
-            </div>
-        );
-    }
-    if (error) {
-        return (
-            <div className="np-container">
-                <p className="np-error">
-                    {error}
-                    <br />
-                    상태 코드: {status}
-                </p>
-            </div>
-        );
-    }
 
     return (
         <div className="np-root">
-            <div className="np-container">
-                {/* ───────── 상단 탭 ───────── */}
-                <nav className="np-tabs">
-                    {TOP_TABS.map((t) => {
-                        const active = tab === t.key;
-                        return (
-                            <button
-                                key={t.key}
-                                className={`np-tab ${active ? "is-active" : ""}`}
-                                onClick={() => {
-                                    setTab(t.key);
-                                    setPage(0);
-                                }}
-                            >
-                                {t.label}
-                            </button>
-                        );
-                    })}
-                </nav>
-
+            <div className="np-bookmark-container">
                 {/* ───────── 공지 카드 리스트 ───────── */}
                 <ul className="np-card-list">
                     {notices.length > 0 ? (
@@ -193,44 +114,10 @@ export default function BookMarkPage(): JSX.Element {
                     )}
                 </ul>
 
-                {/* ───────── 페이지네이션 ───────── */}
-                {totalPages > 1 && (
-                    <div className="np-paging">
-                        <button
-                            className="np-page-arrow"
-                            disabled={page <= 0}
-                            onClick={() => setPage((p) => Math.max(0, p - 1))}
-                            aria-label="이전"
-                        >
-                            ‹
-                        </button>
-
-                        <div className="np-page-nums">
-                            {Array.from({ length: Math.min(6, totalPages) }).map((_, i) => {
-                                const start = Math.floor(page / 6) * 6;
-                                const p = start + i;
-                                if (p >= totalPages) return null;
-                                const active = page === p;
-                                return (
-                                    <button
-                                        key={p}
-                                        className={`np-page-txt ${active ? "is-active" : ""}`}
-                                        onClick={() => setPage(p)}
-                                    >
-                                        {p + 1}
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                        <button
-                            className="np-page-arrow is-next"
-                            disabled={page >= totalPages - 1}
-                            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                            aria-label="다음"
-                        >
-                            ›
-                        </button>
+                {/* ───────── 로딩 오버레이 (검색/헤더 유지) ───────── */}
+                {loading && (
+                    <div className="np-loading-overlay">
+                        <div className="np-spinner" aria-label="로딩 중" />
                     </div>
                 )}
             </div>
