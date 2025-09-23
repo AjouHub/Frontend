@@ -34,18 +34,22 @@ export async function listDepartments(): Promise<DepartmentCode[]> {
 export async function addDepartment(code: DepartmentCode): Promise<void> {
     try {
         await api.post('/user/departments', { department: code });
+        notify.success('학과 등록에 성공했습니다.');
     } catch (error) {
         console.error('학과 등록 에러:', error);
-        alert('학과 등록에 실패했습니다.');
+        // alert('학과 등록에 실패했습니다.');
+        notify.warn('학과 등록에 실패했습니다.');
     }
 }
 
 export async function removeDepartment(code: DepartmentCode): Promise<void> {
     try {
         await api.delete('/user/departments', { data: { department: code } });
+        notify.error('학과를 제거했습니다.');
     } catch (error) {
         console.error('학과 제거 에러:', error);
-        alert('학과 제거에 실패했습니다.');
+        // alert('학과 제거에 실패했습니다.');
+        notify.warn('학과 제거에 실패했습니다.');
     }
 }
 
@@ -72,7 +76,7 @@ export async function addKeyword(phrase: string): Promise<Keyword> {
         const response = await api.post<ApiResponse<Keyword>>('/keywords',
             undefined,
             {params: {phrase}});
-
+        notify.success('키워드 등록에 성공했습니다.')
         return response.data.data;
     } catch(e: any) {
         const status = e?.response?.status;
@@ -97,9 +101,11 @@ export async function addKeyword(phrase: string): Promise<Keyword> {
 export async function removeKeyword(id: number): Promise<void> {
     try {
         await api.delete<ApiResponse<null>>(`/keywords/${encodeURIComponent(id)}`);
+        notify.error('키워드를 제거했습니다.')
     } catch (error) {
         console.error('키워드 제거 에러:', error);
-        alert('키워드 제거에 실패했습니다.');
+        // alert('키워드 제거에 실패했습니다.');
+        notify.warn('키워드 제거에 실패했습니다.');
     }
 }
 
@@ -135,6 +141,7 @@ export async function unsubscribeKeywords(id: number): Promise<void> {
         (err as any).status = res.status;
         throw err;
     }
+
 }
 
 /**

@@ -82,7 +82,7 @@ export default function NotificationPreferences({ allKeywords, loading }: Notifi
         } catch (e) {
             console.error(e);
             // alert('구독 설정 저장에 실패했습니다.');
-            notify.error('구독 설정 저장에 실패했습니다.');
+            notify.warn('구독 설정 저장에 실패했습니다.');
         } finally {
             setSaving(false);
         }
