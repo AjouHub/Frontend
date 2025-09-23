@@ -110,7 +110,7 @@ export default function BookMarkPage(): JSX.Element {
                             </li>
                         ))
                     ) : (
-                        <li className="np-empty">공지사항이 없습니다.</li>
+                        <li className="np-empty">저장한 공지사항이 없습니다.</li>
                     )}
                 </ul>
 

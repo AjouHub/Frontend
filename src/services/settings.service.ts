@@ -102,10 +102,20 @@ export async function removeKeyword(id: number): Promise<void> {
     try {
         await api.delete<ApiResponse<null>>(`/keywords/${encodeURIComponent(id)}`);
         notify.error('키워드를 제거했습니다.')
-    } catch (error) {
-        console.error('키워드 제거 에러:', error);
+    } catch (e: any) {
+        const status = e?.response?.status;
+        const data = e?.response?.data;
+
+        if (status === 409) {
+            const code = data?.errors?.[0]?.code;
+            const msg = data?.message;
+            notify.warn(msg);
+        }
+        console.error('키워드 제거 에러:', e);
         // alert('키워드 제거에 실패했습니다.');
-        notify.warn('키워드 제거에 실패했습니다.');
+        // notify.warn('키워드 제거에 실패했습니다.');
+        // 호출부에서 더 처리할 수 있게 그대로 던짐(또는 여기서 종료해도 됨)
+        throw e;
     }
 }
 
