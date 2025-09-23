@@ -145,12 +145,14 @@ api.interceptors.response.use(
 
         // ---- 401/403 처리 ----
         // 웹: 쿠키 기반 → 프론트에서 /auth/refresh 호출 후 재시도
-        const shouldRefreshWeb = IS_WEB && !isAuthApi && !isRefreshCall && !cfg._retry && (status === 401 || status === 403);
+        // const shouldRefreshWeb = IS_WEB && !isAuthApi && !isRefreshCall && !cfg._retry && (status === 401 || status === 403);
+        // 웹, 앱 : 쿠키 기반
+        const shouldRefresh = IS_WEB && !isAuthApi && !isRefreshCall && !cfg._retry && (status === 401 || status === 403);
 
-        // 앱: 프론트는 리프레시/토큰 관리 금지 → 앱에 REAUTH 신호 후 리로드
-        const shouldReauthApp = IS_APP && !isAuthApi && !isRefreshCall && (status === 401 || status === 403);
+        // // 앱: 프론트는 리프레시/토큰 관리 금지 → 앱에 REAUTH 신호 후 리로드
+        // const shouldReauthApp = IS_APP && !isAuthApi && !isRefreshCall && (status === 401 || status === 403);
 
-        if (shouldRefreshWeb) {
+        if (shouldRefresh) {
             cfg._retry = true;
             try {
                 console.debug('[WEB] 토큰 재발급 시도');
@@ -165,18 +167,18 @@ api.interceptors.response.use(
             }
         }
 
-        if (shouldReauthApp) {
-            console.warn('[APP] 401/403 → REAUTH 신호 전송');
-            requestAppReauth();
-            // 앱이 SSO로 쿠키를 재주입하는 동안 페이지를 새로고침(세션 반영)
-            setTimeout(() => {
-                const url = new URL(window.location.href);
-                url.searchParams.set('embed', 'app');
-                window.location.replace(url.toString());
-            }, 600);
-            // 여기서 체인을 끝내 브라우저가 진행을 멈추게 한다.
-            return new Promise(() => {});
-        }
+        // if (shouldReauthApp) {
+        //     console.warn('[APP] 401/403 → REAUTH 신호 전송');
+        //     requestAppReauth();
+        //     // 앱이 SSO로 쿠키를 재주입하는 동안 페이지를 새로고침(세션 반영)
+        //     setTimeout(() => {
+        //         const url = new URL(window.location.href);
+        //         url.searchParams.set('embed', 'app');
+        //         window.location.replace(url.toString());
+        //     }, 600);
+        //     // 여기서 체인을 끝내 브라우저가 진행을 멈추게 한다.
+        //     return new Promise(() => {});
+        // }
 
         // 쿠키 기반 CSRF 미부트스트랩(403) → 1회 부트스트랩 후 재시도
         if (!isAuthApi && status === 403 && !(cfg as any)._retry403) {
