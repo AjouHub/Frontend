@@ -33,6 +33,8 @@ export default function KeywordController({ keywords, loading, onAddKeyword, onR
         setIsSubmitting(true);
         try {
             await onRemoveKeyword(id);
+        } catch (e: any) {
+            if (e?.response?.status === 409) return;  // 409는 조용히 종료
         } finally {
             setIsSubmitting(false);
         }

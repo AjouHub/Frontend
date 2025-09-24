@@ -88,8 +88,16 @@ export default function NotificationPreferences({ allKeywords, loading }: Notifi
         }
     };
 
+    const isBusy = loading || subsLoading || saving
+
     return (
         <div className="notification-container">
+            {/* 로딩오버레이 */}
+            {isBusy && (
+                <div className="np-loading-overlay">
+                    <div className="np-spinner" aria-label="로딩 중" />
+                </div>
+            )}
             {/* 설명 섹션 */}
             <div className="notification-header">
                 <div className="notification-title">키워드 구독</div>
