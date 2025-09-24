@@ -7,12 +7,13 @@ const base: ToastOptions = {
     closeOnClick: true,
 };
 
+// 아이콘 상 warn과 error 바꿈
 export const notify = {
     success: (msg: string, opts?: ToastOptions) =>
         toast.success(msg, { ...base, ...opts }),
-    error: (msg: string, opts?: ToastOptions) =>
-        toast.error(msg, { ...base, ...opts }),
     warn: (msg: string, opts?: ToastOptions) =>
+        toast.error(msg, { ...base, ...opts }),
+    error: (msg: string, opts?: ToastOptions) =>
         toast.warn(msg, { ...base, ...opts }),
     info: (msg: string, opts?: ToastOptions) =>
         toast.info(msg, { ...base, ...opts }),
