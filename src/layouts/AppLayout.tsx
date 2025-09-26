@@ -21,31 +21,39 @@ export default function AppLayout() {
 
     return (
         <>
-            {/* 네이티브 이벤트 리스너 */}
-            <NativeBridge />
+            <NativeBridge/>
 
-            {/* 모든 화면 컨텐츠 영역 (탭바에 가리지 않도록 하단 패딩) */}
+            {/* 스크롤 루트: 화면 높이 고정 + 바깥 스크롤 잠금 */}
             <div
                 style={{
-                    minHeight: '100dvh',
-                    paddingBottom: app
-                        ? `calc(${BOTTOM_TAB_HEIGHT}px + env(safe-area-inset-bottom, 0px))`
-                        : 'env(safe-area-inset-bottom, 0px)',
+                    height: '100dvh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',               // ← body 대신 여기서 스크롤 잠금
                 }}
             >
-                {/* 앱 모드가 아니면 AppBar와 BottomTabBar를 렌더링 */}
-                {/* AppBar에 검색어와 상태 변경 함수를 props로 전달합니다. */}
-                {/* AppBar에는 실시간 값(searchTerm)과 세터(setSearchTerm)를 전달 */}
-                {!app && <AppBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />}
+                {/* 상단 AppBar (웹에서만) */}
+                {!app && <AppBar searchQuery={searchQuery} setSearchQuery={setSearchQuery}/>}
 
-                {/* Outlet의 context를 통해 검색어를 자식 컴포넌트(NoticePage)에 전달합니다. */}
-                {/* Outlet(NoticePage)에는 디바운싱된 값(debouncedSearchTerm)을 전달 */}
-                <Outlet context={{ searchQuery: debouncedSearchTerm }} />
-                {/*<Outlet context={{ searchQuery, setSearchQuery }} />*/}
+                {/* 가운데 스크롤 영역 */}
+                <main
+                    style={{
+                        flex: '1 1 auto',
+                        minHeight: 0,                   // ← flex 아이템에서 overflow 동작 보장
+                        overflowY: 'auto',              // ← 여기만 스크롤
+                        WebkitOverflowScrolling: 'touch',
+                        overscrollBehavior: 'contain',
+                        paddingBottom: !app
+                            ? `calc(${BOTTOM_TAB_HEIGHT}px + env(safe-area-inset-bottom, 0px))`
+                            : 'env(safe-area-inset-bottom, 0px)',   // 탭바가 있을 때만 하단 여백
+                    }}
+                >
+                    <Outlet context={{searchQuery: debouncedSearchTerm}}/>
+                </main>
+
+                {/* 하단 탭바 (웹에서만) */}
+                {!app && <BottomTabBar/>}
             </div>
-
-            {/* ⬇️ 변경: 앱 환경이면 탭바 미표시 */}
-            {!app && <BottomTabBar />}
         </>
     );
 }
