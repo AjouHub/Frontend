@@ -12,8 +12,8 @@ export default function LoginPage() {
 
     }, [navigate]);
 
-    const handleLogin = () => {
-        redirectToGoogleOAuth();
+    async function handleLogin(){
+        await redirectToGoogleOAuth();
     };
 
     return (
