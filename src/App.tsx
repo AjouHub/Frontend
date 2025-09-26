@@ -18,7 +18,7 @@ function App() {
 
             <Routes>
                 <Route element={<AppLayout />}>
-                    <Route index element={<LoginPage />} />
+                    <Route index element={<NoticePage />} />
 
                     {/* 탭 항목들 */}
                     <Route path="/notice" element={<NoticePage />} />
