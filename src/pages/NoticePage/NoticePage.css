@@ -23,6 +23,8 @@
     /*--appbar-max: 100%;*/
     --icon-w: 32px;         /* 검색 아이콘 버튼 폭(=높이) */
     --left-gap: 10px;       /* 왼쪽 여백 10px 유지 */
+
+    --bottom-tab-bar-height: 64px; /* 실제 BottomTabBar 높이에 맞춰 조정 */
 }
 
 *{ box-sizing:border-box }
@@ -37,7 +39,7 @@ body{
 
 /* 레이아웃 */
 .np-root{
-    min-height:100dvh;
+    /*min-height:100dvh;*/
     /*padding-bottom:88px*/
 }
 .np-container{
@@ -46,6 +48,12 @@ body{
     margin:0 auto;
     padding:0 var(--page-x);
 } /* ← 변수 적용 */
+
+/* 웹 환경일 때만(.is-web), np-container의 하단에 탭바 높이만큼 패딩을 추가합니다. */
+.is-web .np-container {
+    padding-bottom: var(--bottom-tab-bar-height);
+}
+
 
 /* AppBar */
 .np-appbar{
@@ -220,7 +228,6 @@ body{
 /* 리스트 */
 .np-card-list{
     list-style:none; padding:0; margin:0; display:grid; gap:10px;
-    padding-bottom: 24px;
 }
 .np-card-list>li{ list-style:none }
 .np-empty{ padding:16px; color:#94a3b8; font-size:14px }
