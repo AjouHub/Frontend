@@ -151,6 +151,7 @@ export default function NoticePage(): JSX.Element {
     // 공지 목록 호출 부분
     useEffect(() => {
         const typeForApi = tab === "department" ? (deptType || "general") : tab;
+
         const scroller = document.getElementById('app-scroll-root');
         scroller?.scrollTo({ top: 0, behavior: 'smooth' }); // 'auto'로 바꿔도 됨
 

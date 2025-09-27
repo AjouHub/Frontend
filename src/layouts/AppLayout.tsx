@@ -14,28 +14,19 @@ export default function AppLayout() {
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     return (
-        <div style={{
-            height: '100dvh',
-            display: 'flex',
-            flexDirection: 'column',
-        }}>
+        <>
             <NativeBridge />
 
-            {!app && (
-                <AppBar searchQuery={searchTerm} setSearchQuery={setSearchTerm} />
-            )}
+            {/* 웹 환경에서만 AppBar 렌더링 */}
+            {!app && <AppBar searchQuery={searchTerm} setSearchQuery={setSearchTerm} />}
 
-            <main
-                id="app-scroll-root"
-                style={{
-                    flex: 1, // 남은 공간을 모두 차지하도록 설정합니다.
-                    overflowY: 'auto', // 내용이 길어지면 스크롤이 생기도록 합니다.
-                }}
-            >
+            {/* id를 부여하여 스크롤 제어가 가능하도록 main 태그 설정 */}
+            <main id="app-scroll-root">
                 <Outlet context={{ searchQuery: debouncedSearchTerm }} />
             </main>
 
+            {/* 웹 환경에서만 BottomTabBar 렌더링 */}
             {!app && <BottomTabBar />}
-        </div>
+        </>
     );
 }
