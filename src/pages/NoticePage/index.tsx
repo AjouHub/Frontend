@@ -73,7 +73,7 @@ export default function NoticePage(): JSX.Element {
     const [keywords, setKeywords] = useState<Keyword[]>([]);
 
     // 검색
-    const { searchQuery } = useOutletContext<NoticePageContext>();
+    const { searchQuery, setSearchQuery } = useOutletContext<NoticePageContext>();
     // 검색 기능
     // 네이티브 검색(URL 쿼리)과 웹 검색(Outlet context)을 모두 반영합니다.
     const query = useMemo(() => {
