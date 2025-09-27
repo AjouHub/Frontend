@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import BottomTabBar from '../components/BottomTabBar';
 import AppBar from '../components/AppBar';
 import { isAppEnv } from '../services/auth.service';
