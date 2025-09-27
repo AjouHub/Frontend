@@ -41,6 +41,7 @@ export default function AppLayout() {
 
                 {/* 가운데 스크롤 영역 */}
                 <main
+                    id="app-scroll-root"
                     style={{
                         flex: '1 1 auto',
                         minHeight: 0,                   // ← flex 아이템에서 overflow 동작 보장
