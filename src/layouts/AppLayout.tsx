@@ -6,7 +6,7 @@ import BottomTabBar from '../components/BottomTabBar';
 import AppBar from '../components/AppBar';
 import { isAppEnv } from '../services/auth.service';
 import { useDebounce } from '../hooks/usedebounce';
-import NativeBridge from '../components/NativeBridge'; // NativeBridge를 App.tsx 대신 여기에 두는 것이 더 명확할 수 있습니다.
+import NativeBridge from '../components/NativeBridge';
 
 export default function AppLayout() {
     const app = isAppEnv();
@@ -14,24 +14,28 @@ export default function AppLayout() {
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     return (
-        <>
-            {/* NativeBridge는 UI가 없으므로 여기에 두어도 괜찮습니다. */}
+        <div style={{
+            height: '100dvh',
+            display: 'flex',
+            flexDirection: 'column',
+        }}>
             <NativeBridge />
 
-            {/* 웹 환경에서만 AppBar를 렌더링합니다. */}
             {!app && (
                 <AppBar searchQuery={searchTerm} setSearchQuery={setSearchTerm} />
             )}
 
-            {/* 메인 컨텐츠 영역입니다.
-                복잡한 높이 계산 대신, 컨텐츠 길이에 따라 자연스럽게 늘어나도록 합니다.
-            */}
-            <main>
+            <main
+                id="app-scroll-root"
+                style={{
+                    flex: 1, // 남은 공간을 모두 차지하도록 설정합니다.
+                    overflowY: 'auto', // 내용이 길어지면 스크롤이 생기도록 합니다.
+                }}
+            >
                 <Outlet context={{ searchQuery: debouncedSearchTerm }} />
             </main>
 
-            {/* 웹 환경에서만 BottomTabBar를 렌더링합니다. */}
             {!app && <BottomTabBar />}
-        </>
+        </div>
     );
 }
