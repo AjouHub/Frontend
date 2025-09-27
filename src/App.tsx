@@ -21,7 +21,7 @@ function App() {
 
     return (
         <>
-            <NativeBridge />
+            {/*<NativeBridge />*/}
 
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
