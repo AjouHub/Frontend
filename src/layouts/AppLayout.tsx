@@ -20,7 +20,6 @@ export default function AppLayout() {
             height: '100dvh',
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: '#f7f8fa' // body 배경색과 동일하게 설정
         }}>
             <NativeBridge />
 
