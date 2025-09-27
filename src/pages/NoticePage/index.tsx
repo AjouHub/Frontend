@@ -1,6 +1,5 @@
 // pages/NoticePage/index.tsx
-import React, { JSX, useEffect, useMemo, useState, useRef } from "react";
-import { IoSearchOutline, IoChevronBackOutline } from "react-icons/io5";
+import React, { JSX, useEffect, useMemo, useState } from "react";
 import "./NoticePage.css";
 import { fetchUserInfo } from "../../services/fetchUserInfo";
 import { fetchNotices } from "../../services/fetchNotices";
@@ -12,14 +11,14 @@ import NoticeCard from "../../components/NoticeCard";
 import ChipCollapse from "../../components/ChipCollapse";
 import { listKeywords } from "../../services/settings.service";
 import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
-import { departmentNameMap } from "../../components/departmentMap";
-import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
-import { isAppEnv } from '../../services/auth.service';
+// import { departmentNameMap } from "../../components/departmentMap";
+import { useLocation, useOutletContext } from 'react-router-dom';
+// import { isAppEnv } from '../../services/auth.service';
 
 
 // 색상 토큰
 const AURA_BLUE = "#4A6DDB";
-const ACCENT_ORANGE = "#FFA852";
+// const ACCENT_ORANGE = "#FFA852";
 const STONE_GRAY = "#8D96A8";
 
 type GeneralTabKey = "general" | "scholarship" | "dormitory" | "department";
@@ -152,8 +151,10 @@ export default function NoticePage(): JSX.Element {
     // 공지 목록 호출 부분
     useEffect(() => {
         const typeForApi = tab === "department" ? (deptType || "general") : tab;
-        setLoading(true);
+        const scroller = document.getElementById('app-scroll-root');
+        scroller?.scrollTo({ top: 0, behavior: 'smooth' }); // 'auto'로 바꿔도 됨
 
+        setLoading(true);
         fetchNotices({
             page,
             size: 10,
@@ -253,23 +254,25 @@ export default function NoticePage(): JSX.Element {
         <div className="np-root">
             <div className="np-container">
                 {/* ───────── 상단 탭 ───────── */}
-                <nav className="np-tabs">
-                    {TOP_TABS.map((t) => {
-                        const active = tab === t.key;
-                        return (
-                            <button
-                                key={t.key}
-                                className={`np-tab ${active ? "is-active" : ""}`}
-                                onClick={() => {
-                                    setTab(t.key);
-                                    setPage(0);
-                                }}
-                            >
-                                {t.label}
-                            </button>
-                        );
-                    })}
-                </nav>
+                <div className="np-header-fullbleed">
+                    <nav className="np-tabs">
+                        {TOP_TABS.map((t) => {
+                            const active = tab === t.key;
+                            return (
+                                <button
+                                    key={t.key}
+                                    className={`np-tab ${active ? "is-active" : ""}`}
+                                    onClick={() => {
+                                        setTab(t.key);
+                                        setPage(0);
+                                    }}
+                                >
+                                    {t.label}
+                                </button>
+                            );
+                        })}
+                    </nav>
+                </div>
 
                 {/* ───────── 칩 영역 ───────── */}
                 <ChipCollapse openByDefault={false}>

@@ -12,7 +12,6 @@ import { useDebounce } from "../hooks/usedebounce";
 
 export default function AppLayout() {
     // ⬇️ 추가: 앱(WebView) 환경에서는 탭바 숨김
-    const location = useLocation();
     const app = isAppEnv();
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -33,10 +32,15 @@ export default function AppLayout() {
                 }}
             >
                 {/* 상단 AppBar (웹에서만) */}
-                {!app && <AppBar searchQuery={searchQuery} setSearchQuery={setSearchQuery}/>}
+                {!app && (
+                    <div className="np-header-fullbleed">
+                        <AppBar searchQuery={searchQuery} setSearchQuery={setSearchQuery}/>
+                    </div>
+                )}
 
                 {/* 가운데 스크롤 영역 */}
                 <main
+                    id="app-scroll-root"
                     style={{
                         flex: '1 1 auto',
                         minHeight: 0,                   // ← flex 아이템에서 overflow 동작 보장
