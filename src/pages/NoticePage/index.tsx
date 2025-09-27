@@ -1,6 +1,5 @@
 // pages/NoticePage/index.tsx
-import React, { JSX, useEffect, useMemo, useState, useRef } from "react";
-import { IoSearchOutline, IoChevronBackOutline } from "react-icons/io5";
+import React, { JSX, useEffect, useMemo, useState } from "react";
 import "./NoticePage.css";
 import { fetchUserInfo } from "../../services/fetchUserInfo";
 import { fetchNotices } from "../../services/fetchNotices";
@@ -12,14 +11,14 @@ import NoticeCard from "../../components/NoticeCard";
 import ChipCollapse from "../../components/ChipCollapse";
 import { listKeywords } from "../../services/settings.service";
 import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
-import { departmentNameMap } from "../../components/departmentMap";
-import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
-import { isAppEnv } from '../../services/auth.service';
+// import { departmentNameMap } from "../../components/departmentMap";
+import { useLocation, useOutletContext } from 'react-router-dom';
+// import { isAppEnv } from '../../services/auth.service';
 
 
 // 색상 토큰
 const AURA_BLUE = "#4A6DDB";
-const ACCENT_ORANGE = "#FFA852";
+// const ACCENT_ORANGE = "#FFA852";
 const STONE_GRAY = "#8D96A8";
 
 type GeneralTabKey = "general" | "scholarship" | "dormitory" | "department";

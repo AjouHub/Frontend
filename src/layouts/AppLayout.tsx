@@ -12,7 +12,6 @@ import { useDebounce } from "../hooks/usedebounce";
 
 export default function AppLayout() {
     // ⬇️ 추가: 앱(WebView) 환경에서는 탭바 숨김
-    const location = useLocation();
     const app = isAppEnv();
 
     const [searchQuery, setSearchQuery] = useState('');
