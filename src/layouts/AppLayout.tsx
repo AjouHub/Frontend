@@ -20,7 +20,7 @@ export default function AppLayout() {
 
     return (
         <>
-            <NativeBridge/>
+            {/*<NativeBridge/>*/}
 
             {/* 스크롤 루트: 화면 높이 고정 + 바깥 스크롤 잠금 */}
             <div
