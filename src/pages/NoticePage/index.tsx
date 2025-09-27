@@ -152,8 +152,9 @@ export default function NoticePage(): JSX.Element {
     useEffect(() => {
         const typeForApi = tab === "department" ? (deptType || "general") : tab;
 
-        const scroller = document.getElementById('app-scroll-root');
-        scroller?.scrollTo({ top: 0, behavior: 'smooth' }); // 'auto'로 바꿔도 됨
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // 'auto'로 바꿔도 됨
+        // const scroller = document.getElementById('app-scroll-root');
+        // scroller?.scrollTo({ top: 0, behavior: 'smooth' }); // 'auto'로 바꿔도 됨
 
         setLoading(true);
         fetchNotices({
