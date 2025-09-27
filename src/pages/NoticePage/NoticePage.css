@@ -36,8 +36,16 @@ body{
 }
 
 /* 레이아웃 */
-.np-root{ min-height:100dvh; padding-bottom:88px }
-.np-container{ width:100%; max-width:420px; margin:0 auto; padding:0 var(--page-x); } /* ← 변수 적용 */
+.np-root{
+    min-height:100dvh;
+    /*padding-bottom:88px*/
+}
+.np-container{
+    width:100%;
+    max-width:420px;
+    margin:0 auto;
+    padding:0 var(--page-x);
+} /* ← 변수 적용 */
 
 /* AppBar */
 .np-appbar{
@@ -147,7 +155,8 @@ body{
 
 /* 본문 내부 패딩 – 아래 쪽은 떠있는 버튼 공간 확보 */
 .mc-inner{
-    padding:12px 10px 12px;
+    /*padding:12px 10px 12px;*/
+    padding: 16px 10px 12px;
 }
 
 .mc-chevron{
@@ -209,7 +218,10 @@ body{
 /*---------------*/
 
 /* 리스트 */
-.np-card-list{ list-style:none; padding:0; margin:0; display:grid; gap:10px }
+.np-card-list{
+    list-style:none; padding:0; margin:0; display:grid; gap:10px;
+    padding-bottom: 24px;
+}
 .np-card-list>li{ list-style:none }
 .np-empty{ padding:16px; color:#94a3b8; font-size:14px }
 
@@ -264,7 +276,13 @@ body{
 .np-card-date{ font-size:12px; color:var(--stone-gray) }
 
 /* 페이지네이션 (숫자만) */
-.np-paging{ display:flex; align-items:center; justify-content:center; gap:10px; padding:18px 0 10px }
+.np-paging{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:18px 0 10px
+}
 /* ── 페이지네이션 화살표 세로 중앙 정렬 ───────────────── */
 .np-page-arrow{
     width: 32px;
