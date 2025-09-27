@@ -118,7 +118,7 @@ api.interceptors.request.use(async (cfg: InternalAxiosRequestConfig) => {
 
     // ★ 웹: 쓰기 요청이면 CSRF 헤더 보장
     // 웹에서만 CSRF 처리
-    if (IS_WEB && isWrite) {
+    if (isWrite) {
         let t = sessionStorage.getItem(CSRF_KEY);
         if (!t) {                      // 아직 없으면 먼저 받아온다
             await csrfOnce();
