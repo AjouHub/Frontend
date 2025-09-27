@@ -145,6 +145,19 @@ api.interceptors.response.use(
         const isAuthApi = url.startsWith('/auth/');
         const isRefreshCall = cfg._isRefresh === true || url.includes('/auth/refresh');
 
+
+        // 쿠키 기반 CSRF 미부트스트랩(403) → 1회 부트스트랩 후 재시도
+        if (!isAuthApi && status === 403 && !(cfg as any)._retry403) {
+            (cfg as any)._retry403 = true;
+            await csrfOnce();
+            const t = sessionStorage.getItem(CSRF_KEY);
+            if (t) {
+                cfg.headers = cfg.headers ?? {};
+                (cfg.headers as any)['X-XSRF-TOKEN'] = t;
+            }
+            return api.request(cfg);
+        }
+
         // ---- 401/403 처리 ----
         // 웹: 쿠키 기반 → 프론트에서 /auth/refresh 호출 후 재시도
         // const shouldRefreshWeb = IS_WEB && !isAuthApi && !isRefreshCall && !cfg._retry && (status === 401 || status === 403);
@@ -185,17 +198,7 @@ api.interceptors.response.use(
         //     return new Promise(() => {});
         // }
 
-        // 쿠키 기반 CSRF 미부트스트랩(403) → 1회 부트스트랩 후 재시도
-        if (!isAuthApi && status === 403 && !(cfg as any)._retry403) {
-            (cfg as any)._retry403 = true;
-            await csrfOnce();
-            const t = sessionStorage.getItem(CSRF_KEY);
-            if (t) {
-                cfg.headers = cfg.headers ?? {};
-                (cfg.headers as any)['X-XSRF-TOKEN'] = t;
-            }
-            return api.request(cfg);
-        }
+
 
         throw error;
     }

@@ -24,6 +24,8 @@ function App() {
             <NativeBridge />
 
             <Routes>
+                <Route path="/login" element={<LoginPage />} />
+
                 <Route element={<AppLayout />}>
                     <Route index element={<NoticePage />} />
 
@@ -35,7 +37,7 @@ function App() {
 
                     {/* 탭엔 없지만 화면은 보여야 하는 경로들도 모두 여기 */}
                     <Route path="/select-department" element={<SelectDepartmentPage />} />
-                    <Route path="/login" element={<LoginPage />} />
+
 
                     <Route path="*" element={<NoticePage />} />
                 </Route>
