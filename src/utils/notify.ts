@@ -12,7 +12,8 @@ export const notify = {
     success: (msg: string, opts?: ToastOptions) =>
         toast.success(msg, { ...base, ...opts }),
     warn: (msg: string, opts?: ToastOptions) =>
-        toast.error(msg, { ...base, ...opts }),
+        // toast.error(msg, { ...base, ...opts }),
+        toast.success(msg, { ...base, ...opts }), // 삭제 성공도 성공으로 처리
     error: (msg: string, opts?: ToastOptions) =>
         toast.warn(msg, { ...base, ...opts }),
     info: (msg: string, opts?: ToastOptions) =>
