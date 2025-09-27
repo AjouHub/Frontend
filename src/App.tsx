@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import {Routes, Route, useNavigate} from 'react-router-dom';
 import AppLayout from './layouts/AppLayout';
 import LoginPage from './pages/LoginPage';
 import SelectDepartmentPage from "./pages/SelectDepartmentPage";
@@ -9,9 +9,16 @@ import {BookMarkPage} from "./pages/BookMarkPage";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import NativeBridge from "./components/NativeBridge";
+import {useEffect} from "react";
+import {setAppNavigate} from "./utils/router";
 
 
 function App() {
+    const navigate = useNavigate();
+    useEffect(() => {
+        setAppNavigate((path, opts) => navigate(path, opts));
+    }, [navigate]);
+
     return (
         <>
             <NativeBridge />
@@ -25,10 +32,10 @@ function App() {
                     <Route path="/bookmark" element={<BookMarkPage />} />
                     {/*<Route path="/account-info" element={<AccountInfoPage />} />*/}
                     <Route path="/settings" element={<SettingsPage />} />
-                    <Route path="/login" element={<LoginPage />} />
 
                     {/* 탭엔 없지만 화면은 보여야 하는 경로들도 모두 여기 */}
                     <Route path="/select-department" element={<SelectDepartmentPage />} />
+                    <Route path="/login" element={<LoginPage />} />
 
                     <Route path="*" element={<NoticePage />} />
                 </Route>

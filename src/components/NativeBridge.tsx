@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {appNavigate} from "../utils/router";
 
 type AuraNavigateEvent = CustomEvent<{ tab?: "home" | "bookmark" | "settings" }>;
 type AuraSearchEvent  = CustomEvent<{ q?: string }>;
@@ -20,25 +21,23 @@ const tabToPath = (tab: string) => {
  * - aura:search-submit  검색 확정
  */
 export default function NativeBridge() {
-    const navigate = useNavigate();
-
     useEffect(() => {
         const onNavigate = (e: Event) => {
             const tab = (e as AuraNavigateEvent).detail?.tab;
             if (!tab) return;
-            navigate(tabToPath(tab));
+            appNavigate(tabToPath(tab));
         };
 
         const onSearchChange = (e: Event) => {
             const q = (e as AuraSearchEvent).detail?.q ?? "";
             // 입력 중에는 replace로 URL만 업데이트 (브라우저 히스토리 오염 X)
-            navigate(`/notice?q=${encodeURIComponent(q)}`, { replace: true });
+            appNavigate(`/notice?q=${encodeURIComponent(q)}`, { replace: true });
         };
 
         const onSearchSubmit = (e: Event) => {
             const q = (e as AuraSearchEvent).detail?.q ?? "";
             // 제출 시에는 push
-            navigate(`/notice?q=${encodeURIComponent(q)}`);
+            appNavigate(`/notice?q=${encodeURIComponent(q)}`);
         };
 
         window.addEventListener("aura:navigate", onNavigate as EventListener);
@@ -50,7 +49,7 @@ export default function NativeBridge() {
             window.removeEventListener("aura:search-change", onSearchChange as EventListener);
             window.removeEventListener("aura:search-submit", onSearchSubmit as EventListener);
         };
-    }, [navigate]);
+    }, []);
 
     return null;
 }

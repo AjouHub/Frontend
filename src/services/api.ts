@@ -5,7 +5,8 @@ import axios, {
     InternalAxiosRequestConfig,
 } from 'axios';
 import { isAppEnv } from "./auth.service";
-import {useNavigate} from "react-router-dom";
+// import {useNavigate} from "react-router-dom";
+import {appNavigate} from "../utils/router";
 
 
 // // 런타임 감지
@@ -164,9 +165,8 @@ api.interceptors.response.use(
             } catch (e) {
                 console.error('[WEB] 토큰 재발급 실패', e);
                 // 필요하면 로그인 화면 이동
-                window.location.href = '/login';
-                // const navigate = useNavigate();
-                // navigate('/login')
+                // window.location.href = '/login';
+                appNavigate('/login', { replace: true });
                 // throw e;
                 return Promise.reject(e);
             }
