@@ -33,7 +33,11 @@ export default function AppLayout() {
                 }}
             >
                 {/* 상단 AppBar (웹에서만) */}
-                {!app && <AppBar searchQuery={searchQuery} setSearchQuery={setSearchQuery}/>}
+                {!app && (
+                    <div className="np-header-fullbleed">
+                        <AppBar searchQuery={searchQuery} setSearchQuery={setSearchQuery}/>
+                    </div>
+                )}
 
                 {/* 가운데 스크롤 영역 */}
                 <main

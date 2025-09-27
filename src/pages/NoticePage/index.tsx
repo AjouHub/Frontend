@@ -253,23 +253,25 @@ export default function NoticePage(): JSX.Element {
         <div className="np-root">
             <div className="np-container">
                 {/* ───────── 상단 탭 ───────── */}
-                <nav className="np-tabs">
-                    {TOP_TABS.map((t) => {
-                        const active = tab === t.key;
-                        return (
-                            <button
-                                key={t.key}
-                                className={`np-tab ${active ? "is-active" : ""}`}
-                                onClick={() => {
-                                    setTab(t.key);
-                                    setPage(0);
-                                }}
-                            >
-                                {t.label}
-                            </button>
-                        );
-                    })}
-                </nav>
+                <div className="np-header-fullbleed">
+                    <nav className="np-tabs">
+                        {TOP_TABS.map((t) => {
+                            const active = tab === t.key;
+                            return (
+                                <button
+                                    key={t.key}
+                                    className={`np-tab ${active ? "is-active" : ""}`}
+                                    onClick={() => {
+                                        setTab(t.key);
+                                        setPage(0);
+                                    }}
+                                >
+                                    {t.label}
+                                </button>
+                            );
+                        })}
+                    </nav>
+                </div>
 
                 {/* ───────── 칩 영역 ───────── */}
                 <ChipCollapse openByDefault={false}>
