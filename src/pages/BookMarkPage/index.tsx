@@ -12,8 +12,8 @@ import "./BookMarkPage.css";
 
 /** 색상 토큰 (디자인 시안) */
 const STONE_GRAY = "#8D96A8";
-const AURA_BLUE = "#82B1FF";
-const ACCENT_ORANGE = "#2962FF";
+const AURA_BLUE = "#BBDEFB";
+const ACCENT_ORANGE = "#6495ED";
 const TEAL_GREEN = "#0D47A1";
 const LAVENDER_PURPLE = "#000080";
 
