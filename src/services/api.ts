@@ -148,7 +148,8 @@ api.interceptors.response.use(
         // 웹: 쿠키 기반 → 프론트에서 /auth/refresh 호출 후 재시도
         // const shouldRefreshWeb = IS_WEB && !isAuthApi && !isRefreshCall && !cfg._retry && (status === 401 || status === 403);
         // 웹, 앱 : 쿠키 기반
-        const shouldRefresh = IS_WEB && !isAuthApi && !isRefreshCall && !cfg._retry && (status === 401 || status === 403);
+        // const shouldRefresh = IS_WEB && !isAuthApi && !isRefreshCall && !cfg._retry && (status === 401 || status === 403);
+        const shouldRefresh = !isAuthApi && !isRefreshCall && !cfg._retry && (status === 401 || status === 403);
 
         // // 앱: 프론트는 리프레시/토큰 관리 금지 → 앱에 REAUTH 신호 후 리로드
         // const shouldReauthApp = IS_APP && !isAuthApi && !isRefreshCall && (status === 401 || status === 403);
