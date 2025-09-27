@@ -12,21 +12,42 @@ import "./BookMarkPage.css";
 
 /** 색상 토큰 (디자인 시안) */
 const STONE_GRAY = "#8D96A8";
-const AURA_BLUE = "#4A6DDB";
-const ACCENT_ORANGE = "#FFA852";
-const TEAL_GREEN = "#43B988";
-const LAVENDER_PURPLE = "#BF94E4";
+const AURA_BLUE = "#82B1FF";
+const ACCENT_ORANGE = "#2962FF";
+const TEAL_GREEN = "#0D47A1";
+const LAVENDER_PURPLE = "#000080";
 
 type GeneralTabKey = "general" | "scholarship" | "dormitory" | "department";
 type DeptKey = string;
 
+
 // 북마크 카드 색깔
 const tabColorMap = new Map<string, string>([
     ["general", AURA_BLUE],
-    ["dormitory", ACCENT_ORANGE],
-    ["scholarship", TEAL_GREEN],
+    ["scholarship", ACCENT_ORANGE],
+    ["dormitory", TEAL_GREEN],
     ["department", LAVENDER_PURPLE],
 ]);
+
+/* 정렬 우선순위 테이블 */
+const TYPE_ORDER: Record<GeneralTabKey, number> = {
+    general: 0,
+    scholarship: 1,
+    dormitory: 2,
+    department: 3,
+};
+
+/* 들어오는 문자열을 내부 키로 정규화 */
+const normalizeType = (raw?: string): GeneralTabKey => {
+    const head = (raw ?? "").toLowerCase().split(".")[0]; // 'department.software' → 'department'
+    switch (head) {
+        case "department":  return "department";
+        case "dormitory":   return "dormitory";
+        case "scholarship": return "scholarship";
+        case "general":     return "general";
+        default:            return "general"; // 안전한 기본값
+    }
+};
 
 const getLeftBarColor = (cat?: string)=>
     tabColorMap.get(cat ?? "") ?? LAVENDER_PURPLE;
@@ -44,13 +65,22 @@ export function BookMarkPage(): JSX.Element {
     const [error, setError] = useState("");
     const [status, setStatus] = useState<number | string | null>(null);
 
+    // 공지사항 type으로 정렬
+    function sortNoticesByType(list: BookMark[]): BookMark[] {
+        return [...list].sort((a, b) => {
+            const ka = normalizeType(a.type);
+            const kb = normalizeType(b.type);
+            return TYPE_ORDER[ka] - TYPE_ORDER[kb];
+        });
+    }
+
     // ✅ 북마크 ID 집합
     const [bookmarksID, setBookmarksID] = useState<Set<string>>(new Set());
     const loadBookmarks = async () => {
         setLoading(true);
         try {
             const items = await listNoticeBookmarks();
-            setNotices(items); // 화면에 표시될 공지 목록을 업데이트
+            setNotices(sortNoticesByType(items)); // 화면에 표시될 공지 목록을 업데이트
             setBookmarksID(new Set(items.map(b => String(b.id))));
         } catch (e) {
             console.warn('북마크 목록 로드 실패:', e);
@@ -80,6 +110,7 @@ export function BookMarkPage(): JSX.Element {
             await loadBookmarks();
         })();
     }, [user]);
+
 
     /** 실제 토글 로직(비동기) — id는 string */
     const handleToggleBookmark = async (id: string, next: boolean) => {
