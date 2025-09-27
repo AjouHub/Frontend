@@ -4,7 +4,7 @@ import LoginPage from './pages/LoginPage';
 import SelectDepartmentPage from "./pages/SelectDepartmentPage";
 import NoticePage from "./pages/NoticePage";
 import SettingsPage from "./pages/SettingsPage";
-import BookMarkPage from "./pages/BookMarkPage";
+import {BookMarkPage} from "./pages/BookMarkPage";
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
