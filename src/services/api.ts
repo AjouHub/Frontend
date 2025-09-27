@@ -164,9 +164,9 @@ api.interceptors.response.use(
             } catch (e) {
                 console.error('[WEB] 토큰 재발급 실패', e);
                 // 필요하면 로그인 화면 이동
-                // window.location.href = '/login';
-                const navigate = useNavigate();
-                navigate('/login')
+                window.location.href = '/login';
+                // const navigate = useNavigate();
+                // navigate('/login')
                 throw e;
             }
         }
