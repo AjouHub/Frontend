@@ -26,7 +26,6 @@ export default function AppLayout() {
             <div
                 style={{
                     height: '100dvh',
-                    minHeight: '100vh',          // ← 폴백
                     display: 'flex',
                     flexDirection: 'column',
                     overflow: 'hidden',               // ← body 대신 여기서 스크롤 잠금
@@ -41,16 +40,11 @@ export default function AppLayout() {
 
                 {/* 가운데 스크롤 영역 */}
                 <main
-                    id="app-scroll-root"
                     style={{
-                        flex: '1 1 auto',
-                        minHeight: 0,                   // ← flex 아이템에서 overflow 동작 보장
-                        overflowY: 'auto',              // ← 여기만 스크롤
-                        WebkitOverflowScrolling: 'touch',
-                        overscrollBehavior: 'contain',
-                        paddingBottom: !app
-                            ? `calc(${BOTTOM_TAB_HEIGHT}px + env(safe-area-inset-bottom, 0px))`
-                            : 'env(safe-area-inset-bottom, 0px)',   // 탭바가 있을 때만 하단 여백
+                        flex: '1 1 auto', // 남는 공간을 모두 차지하도록 설정
+                        minHeight: 0, // flex 환경에서 내부 스크롤이 되게 하는 중요한 속성
+                        overflowY: 'auto', // 내용이 길어지면 세로 스크롤바가 생김
+                        WebkitOverflowScrolling: 'touch', // 모바일에서 부드러운 스크롤
                     }}
                 >
                     <Outlet context={{ searchQuery: debouncedSearchTerm, setSearchQuery }}/>
