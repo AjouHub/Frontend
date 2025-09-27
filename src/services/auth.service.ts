@@ -1,6 +1,8 @@
 import api, {API_BASE_URL} from "./api";
 import type {Keyword} from "../types/keywords";
 import {notify} from "../utils/notify";
+import {appNavigate} from "../utils/router";
+import {easing} from "@mui/material";
 
 
 //  앱(WebView) 환경 감지
@@ -13,17 +15,27 @@ export function isAppEnv(): boolean {
     return (process.env.REACT_APP_RUNTIME || '').toLowerCase() === 'app';
 }
 
+/** OAuth 콜백 처리: /?signUp=... 만 보고 라우팅 + 쿼리 정리 */
+export const handleOAuthCallback = (): void => {
+    const { pathname, search } = window.location;     // 예: "/" 와 "?signUp=false&x=1"
+    if (!search) return;
 
-export const handleOAuthCallback = (navigate: (path: string) => void) => {
-    const params: URLSearchParams = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(search);
+    const signUp = params.get('signUp');
+    if (signUp == null) return;
 
-    const signUp: string | null = params.get('signUp');
-    if (signUp === null) return;
+    // URL에서 signUp만 제거(다른 쿼리는 유지)
+    params.delete('signUp');
+    const cleaned = params.toString();
+    const newUrl = cleaned ? `${pathname}?${cleaned}` : pathname;
+    window.history.replaceState({}, '', newUrl);
 
-    window.history.replaceState({}, '', '/LoginPage');
+    // 분기 이동
+    const target = signUp.toLowerCase() === 'true'
+        ? '/select-department'
+        : '/notice';
 
-    if (signUp.toLowerCase() === 'true') navigate('/select-department');
-    else navigate('/notice');
+    appNavigate(target, { replace: true });
 };
 
 
