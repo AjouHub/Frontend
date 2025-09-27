@@ -11,14 +11,27 @@ import "./BookMarkPage.css";
 
 
 /** 색상 토큰 (디자인 시안) */
+const STONE_GRAY = "#8D96A8";
 const AURA_BLUE = "#4A6DDB";
 const ACCENT_ORANGE = "#FFA852";
-const STONE_GRAY = "#8D96A8";
+const TEAL_GREEN = "#43B988";
+const LAVENDER_PURPLE = "#BF94E4";
 
 type GeneralTabKey = "general" | "scholarship" | "dormitory" | "department";
 type DeptKey = string;
 
-export default function BookMarkPage(): JSX.Element {
+// 북마크 카드 색깔
+const tabColorMap = new Map<string, string>([
+    ["general", AURA_BLUE],
+    ["dormitory", ACCENT_ORANGE],
+    ["scholarship", TEAL_GREEN],
+    ["department", LAVENDER_PURPLE],
+]);
+
+const getLeftBarColor = (cat?: string)=>
+    tabColorMap.get(cat ?? "") ?? LAVENDER_PURPLE;
+
+export function BookMarkPage(): JSX.Element {
     const [user, setUser] = useState<UserInfo | null>(null);
 
     // 목록/페이지
@@ -62,8 +75,10 @@ export default function BookMarkPage(): JSX.Element {
 
     // 유저 로드 후 북마크 목록 가져오기
     useEffect(() => {
-        if (!user) return;
-        loadBookmarks();
+        (async () => {
+            if (!user) return;
+            await loadBookmarks();
+        })();
     }, [user]);
 
     /** 실제 토글 로직(비동기) — id는 string */
@@ -99,7 +114,8 @@ export default function BookMarkPage(): JSX.Element {
                             <li key={n.id}>
                                 <NoticeCard
                                     notice={n}
-                                    leftBarColor={AURA_BLUE}
+                                    // leftBarColor={AURA_BLUE}
+                                    leftBarColor={getLeftBarColor(n.type)}
                                     dateColor={STONE_GRAY}
                                     heartColor="#EF4C43"
                                     heartOffColor="#C0C5CF"
@@ -117,7 +133,7 @@ export default function BookMarkPage(): JSX.Element {
                 {/* ───────── 로딩 오버레이 (검색/헤더 유지) ───────── */}
                 {loading && (
                     <div className="np-loading-overlay">
-                        <div className="np-spinner" aria-label="로딩 중" />
+                        <div className="np-spinner" aria-label="로딩 중"/>
                     </div>
                 )}
             </div>
