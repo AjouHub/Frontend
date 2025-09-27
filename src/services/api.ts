@@ -167,7 +167,8 @@ api.interceptors.response.use(
                 window.location.href = '/login';
                 // const navigate = useNavigate();
                 // navigate('/login')
-                throw e;
+                // throw e;
+                return Promise.reject(e);
             }
         }
 
