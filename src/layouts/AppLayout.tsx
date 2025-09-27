@@ -26,6 +26,7 @@ export default function AppLayout() {
             <div
                 style={{
                     height: '100dvh',
+                    minHeight: '100vh',          // ← 폴백
                     display: 'flex',
                     flexDirection: 'column',
                     overflow: 'hidden',               // ← body 대신 여기서 스크롤 잠금
@@ -52,7 +53,7 @@ export default function AppLayout() {
                             : 'env(safe-area-inset-bottom, 0px)',   // 탭바가 있을 때만 하단 여백
                     }}
                 >
-                    <Outlet context={{searchQuery: debouncedSearchTerm}}/>
+                    <Outlet context={{ searchQuery: debouncedSearchTerm, setSearchQuery }}/>
                 </main>
 
                 {/* 하단 탭바 (웹에서만) */}
