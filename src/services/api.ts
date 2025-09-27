@@ -5,6 +5,7 @@ import axios, {
     InternalAxiosRequestConfig,
 } from 'axios';
 import { isAppEnv } from "./auth.service";
+import {useNavigate} from "react-router-dom";
 
 
 // // 런타임 감지
@@ -162,7 +163,7 @@ api.interceptors.response.use(
             } catch (e) {
                 console.error('[WEB] 토큰 재발급 실패', e);
                 // 필요하면 로그인 화면 이동
-                window.location.href = '/';
+                window.location.href = '/login';
                 throw e;
             }
         }

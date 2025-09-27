@@ -25,6 +25,7 @@ function App() {
                     <Route path="/bookmark" element={<BookMarkPage />} />
                     {/*<Route path="/account-info" element={<AccountInfoPage />} />*/}
                     <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/login" element={<LoginPage />} />
 
                     {/* 탭엔 없지만 화면은 보여야 하는 경로들도 모두 여기 */}
                     <Route path="/select-department" element={<SelectDepartmentPage />} />
