@@ -111,7 +111,7 @@ export default function NoticePage(): JSX.Element {
     // ✅ 북마크 ID 집합
     const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
 
-    /** 초기 데이터 (유저 + 추천 태그) */
+    // 초기 데이터 (유저 + 추천 태그)
     useEffect(() => {
         (async () => {
             try {
@@ -132,10 +132,11 @@ export default function NoticePage(): JSX.Element {
         })();
     }, []);
 
-    /** ✅ 유저 로드 후 북마크 목록 가져오기 */
+    // 유저 로드 후 북마크 목록 가져오기
     useEffect(() => {
         if (!user) return;
         let alive = true;
+        setLoading(true);
         (async () => {
             try {
                 const items = await listNoticeBookmarks(); // BookMark[]
@@ -145,6 +146,7 @@ export default function NoticePage(): JSX.Element {
                 console.warn('북마크 목록 로드 실패:', e);
             }
         })();
+        setLoading(false);
         return () => { alive = false; };
     }, [user]);
 

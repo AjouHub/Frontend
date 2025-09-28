@@ -74,7 +74,7 @@ export function BookMarkPage(): JSX.Element {
         });
     }
 
-    // ✅ 북마크 ID 집합
+    // 북마크 ID 집합
     const [bookmarksID, setBookmarksID] = useState<Set<string>>(new Set());
     const loadBookmarks = async () => {
         setLoading(true);
@@ -112,7 +112,7 @@ export function BookMarkPage(): JSX.Element {
     }, [user]);
 
 
-    /** 실제 토글 로직(비동기) — id는 string */
+    // 실제 토글 로직(비동기) — id는 string
     const handleToggleBookmark = async (id: string, next: boolean) => {
         // 이 함수는 북마크 '설정'만 하고, 목록 로딩은 별도로 처리합니다.
         try {
