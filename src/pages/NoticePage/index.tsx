@@ -9,10 +9,11 @@ import type { Keyword } from "../../types/keywords";
 import { Global_Tags } from "../../utils/tags";
 import NoticeCard from "../../components/NoticeCard";
 import ChipCollapse from "../../components/ChipCollapse";
-import { listKeywords } from "../../services/settings.service";
+import {listDepartments, listKeywords} from "../../services/settings.service";
 import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
 // import { departmentNameMap } from "../../components/departmentMap";
 import { useLocation, useOutletContext } from 'react-router-dom';
+import {departmentNameMap} from "../../components/departmentMap";
 // import { isAppEnv } from '../../services/auth.service';
 
 
@@ -45,13 +46,12 @@ interface NoticePageContext {
 export default function NoticePage(): JSX.Element {
     const location = useLocation();
 
-    const [user, setUser] = useState<UserInfo | null>(null);
-
     // 상단 탭(일반/장학/생활관/학과)
     const [tab, setTab] = useState<GeneralTabKey>("general");
 
     // 학과 탭일 때 선택된 학과 키(백엔드 type으로 사용)
-    const [deptType, setDeptType] = useState<DeptKey>("");
+    const [departments, setDepartments] = useState<DeptKey[]>([]);
+    const [selectedDept, setSelectedDept] = useState<DeptKey>("");
 
     // 목록/페이지
     const [notices, setNotices] = useState<Notice[]>([]);
@@ -71,6 +71,11 @@ export default function NoticePage(): JSX.Element {
     const [selectedPersonalIds, setSelectedPersonalIds] = useState<string>("");
 
     const [keywords, setKeywords] = useState<Keyword[]>([]);
+    
+    // 검색 칩 &, | 버튼
+    // any: ||, all: &&
+    type Match = 'any' | 'all';
+    const [match, setMatch] = useState<Match>("any");
 
     // 검색
     const { searchQuery, setSearchQuery } = useOutletContext<NoticePageContext>();
@@ -111,15 +116,16 @@ export default function NoticePage(): JSX.Element {
     // ✅ 북마크 ID 집합
     const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
 
-    /** 초기 데이터 (유저 + 추천 태그) */
+    // 초기 데이터 (유저 + 추천 태그)
     useEffect(() => {
         (async () => {
             try {
-                const u = await fetchUserInfo();
-                setUser(u);
+                const dep = await listDepartments();
+                setDepartments(dep);
 
-                const firstDept = u?.departments?.[0] || "";
-                setDeptType(firstDept);
+                // const firstDept = u?.departments?.[0] || "";
+                setSelectedDept(dep[0] || "");
+                console.log(selectedDept);
                 setTab("general");
 
                 const tags = await fetchSuggestedTags();
@@ -132,10 +138,10 @@ export default function NoticePage(): JSX.Element {
         })();
     }, []);
 
-    /** ✅ 유저 로드 후 북마크 목록 가져오기 */
+    // 유저 로드 후 북마크 목록 가져오기
     useEffect(() => {
-        if (!user) return;
         let alive = true;
+        setLoading(true);
         (async () => {
             try {
                 const items = await listNoticeBookmarks(); // BookMark[]
@@ -145,16 +151,15 @@ export default function NoticePage(): JSX.Element {
                 console.warn('북마크 목록 로드 실패:', e);
             }
         })();
+        setLoading(false);
         return () => { alive = false; };
-    }, [user]);
+    }, [departments]);
 
     // 공지 목록 호출 부분
     useEffect(() => {
-        const typeForApi = tab === "department" ? (deptType || "general") : tab;
+        const typeForApi = tab === "department" ? selectedDept : tab;
 
         window.scrollTo({ top: 0, behavior: 'smooth' }); // 'auto'로 바꿔도 됨
-        // const scroller = document.getElementById('app-scroll-root');
-        // scroller?.scrollTo({ top: 0, behavior: 'smooth' }); // 'auto'로 바꿔도 됨
 
         setLoading(true);
         fetchNotices({
@@ -164,7 +169,8 @@ export default function NoticePage(): JSX.Element {
             search: query || undefined,
             globalIds: selectedGlobalIds,          // globalIds: "1,2,3" 형태로 넘김
             personalIds: selectedPersonalIds,        // personalIds: "10,11" 형태로 넘김
-            match: 'any',
+            // match: 'any',
+            match: match,
         })
             .then((d: any) => {
                 setNotices(d?.content ?? []);
@@ -175,7 +181,7 @@ export default function NoticePage(): JSX.Element {
                 setStatus(e?.status ?? "Unknown");
             })
             .finally(() => setLoading(false));
-    }, [tab, deptType, page, selectedGlobalIds, selectedPersonalIds, query]);
+    }, [tab, selectedDept, page, selectedGlobalIds, selectedPersonalIds, query, match]);
 
     // 서버 태그 or 예비 칩
     const allChips = useMemo<string[]>(() => {
@@ -193,10 +199,18 @@ export default function NoticePage(): JSX.Element {
     // 칩 선택 토글
     const toggleChip = (t: string) => {
         setSelectedTags((prev) =>
-            prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+            prev.includes(t)               // 이전 상태(prev)에 t가 이미 있으면
+                ? prev.filter((x) => x !== t) // 제거 (필터로 제외)
+                : [...prev, t]                // 없으면 추가 (스프레드로 새 배열)
         );
         setPage(0);
     };
+
+    // 학과 칩 선택 토글
+    const toggleDeptChip = (t: string) => {
+        setSelectedDept(t);
+        setPage(0);
+    }
 
     // 칩 필터링 결과
     useEffect(() => {
@@ -250,8 +264,6 @@ export default function NoticePage(): JSX.Element {
     };
 
 
-
-
     return (
         <div className="np-root">
             <div className="np-container">
@@ -276,6 +288,27 @@ export default function NoticePage(): JSX.Element {
                     </nav>
                 </div>
 
+                {/* ───────── 학과 선택 칩 ───────── */}
+                {tab === "department" && (
+                    <ChipCollapse openByDefault={false}>
+                        <div className="np-dept-chips">
+                            {departments.map((c) => {
+                                const active = selectedDept.includes(c);
+                                return (
+                                    <button
+                                        key={c}
+                                        className={`np-chip ${active ? "is-active" : ""}`}
+                                        onClick={() => toggleDeptChip(c)}
+                                    >
+                                        #{departmentNameMap[c]}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </ChipCollapse>
+
+                )}
+
                 {/* ───────── 칩 영역 ───────── */}
                 <ChipCollapse openByDefault={false}>
                     <div className="np-chips">
@@ -292,6 +325,23 @@ export default function NoticePage(): JSX.Element {
                             );
                         })}
                     </div>
+
+                    {/* 전체 선택/해제 바 */}
+                    <div className="bulk-actions-bar-andOr">
+                        <button
+                            className="and-or-button"
+                            onClick={() => setMatch("any")}
+                            disabled={loading || match === "any"}>
+                            일부 포함
+                        </button>
+                        <button
+                            className="and-or-button"
+                            onClick={() => setMatch("all")}
+                            disabled={loading || match === "all"}>
+                            전부 포함
+                        </button>
+                    </div>
+
                 </ChipCollapse>
 
                 {/* ───────── 로딩 오버레이 (검색/헤더 유지) ───────── */}

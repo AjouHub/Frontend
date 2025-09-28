@@ -18,6 +18,8 @@
     --card-right: 26px;   /* ← 하트가 너무 붙어보이면 24~28px에서 조절 */
     --icon-dark: #575757;
 
+    --card-gap: 10px; /* 카드 사이 공간 */
+
     --appbar-x: 18px;       /* AppBar 좌우 패딩 */
     --appbar-max: 420px;    /* 컨테이너 최대폭 */
     /*--appbar-max: 100%;*/
@@ -111,6 +113,8 @@ body{
 }
 
 .np-chips{ display:flex; flex-wrap:wrap; gap:8px }
+/* 학과 칩 */
+.np-dept-chips{ display:flex; flex-wrap:wrap; gap:8px }
 .np-chip{
     background:var(--chip-bg);
     color:var(--chip-text);
@@ -120,6 +124,29 @@ body{
     border:0;
     font-weight:600 }
 .np-chip.is-active{ background:var(--aura-blue); color:#fff }
+
+/*any all 버튼*/
+.bulk-actions-bar-andOr {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;              /* 전체 너비 차지 */
+}
+.and-or-button {
+    background-color: var(--chip-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.and-or-button:hover:not(:disabled) {
+    background-color: var(--chip-background);
+}
+
 
 /*-------------*/
 /* 컨테이너 *//* 컨테이너: 흰 둥근 박스가 ‘한 덩어리’로 보이게 */
@@ -227,7 +254,7 @@ body{
 
 /* 리스트 */
 .np-card-list{
-    list-style:none; padding:0; margin:0; display:grid; gap:10px;
+    list-style:none; padding:0; margin:0; display:grid; gap:var(--card-gap);
 }
 .np-card-list>li{ list-style:none }
 .np-empty{ padding:16px; color:#94a3b8; font-size:14px }

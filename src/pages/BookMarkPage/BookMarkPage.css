@@ -1,1 +1,7 @@
-.np-bookmark-container{ width:100%; max-width:420px; margin:10px auto; padding:0 var(--page-x); } /* ← 변수 적용 */
+.np-bookmark-container{
+    width:100%; max-width:420px; margin:10px auto; padding:0 var(--page-x);
+    padding-bottom: var(--card-gap);
+}
+.is-web .np-bookmark-container {
+    padding-bottom: calc(var(--card-gap) + var(--bottom-tab-bar-height));
+}
