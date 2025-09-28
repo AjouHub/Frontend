@@ -54,8 +54,10 @@ export default function SettingsPage() {
 
     // 초기 데이터 로딩
     useEffect(() => {
-        loadDepartments();
-        loadKeywords();
+        (async () => {
+            await loadDepartments();
+            await loadKeywords();
+        })();
     }, []);
 
     // 키워드 추가 함수

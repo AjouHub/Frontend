@@ -125,6 +125,29 @@ body{
     font-weight:600 }
 .np-chip.is-active{ background:var(--aura-blue); color:#fff }
 
+/*any all 버튼*/
+.bulk-actions-bar-andOr {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;              /* 전체 너비 차지 */
+}
+.and-or-button {
+    background-color: var(--chip-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.and-or-button:hover:not(:disabled) {
+    background-color: var(--chip-background);
+}
+
+
 /*-------------*/
 /* 컨테이너 *//* 컨테이너: 흰 둥근 박스가 ‘한 덩어리’로 보이게 */
 .mc{

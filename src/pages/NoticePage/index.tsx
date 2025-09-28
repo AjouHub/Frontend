@@ -71,6 +71,11 @@ export default function NoticePage(): JSX.Element {
     const [selectedPersonalIds, setSelectedPersonalIds] = useState<string>("");
 
     const [keywords, setKeywords] = useState<Keyword[]>([]);
+    
+    // 검색 칩 &, | 버튼
+    // any: ||, all: &&
+    type Match = 'any' | 'all';
+    const [match, setMatch] = useState<Match>("any");
 
     // 검색
     const { searchQuery, setSearchQuery } = useOutletContext<NoticePageContext>();
@@ -164,7 +169,8 @@ export default function NoticePage(): JSX.Element {
             search: query || undefined,
             globalIds: selectedGlobalIds,          // globalIds: "1,2,3" 형태로 넘김
             personalIds: selectedPersonalIds,        // personalIds: "10,11" 형태로 넘김
-            match: 'any',
+            // match: 'any',
+            match: match,
         })
             .then((d: any) => {
                 setNotices(d?.content ?? []);
@@ -175,7 +181,7 @@ export default function NoticePage(): JSX.Element {
                 setStatus(e?.status ?? "Unknown");
             })
             .finally(() => setLoading(false));
-    }, [tab, selectedDept, page, selectedGlobalIds, selectedPersonalIds, query]);
+    }, [tab, selectedDept, page, selectedGlobalIds, selectedPersonalIds, query, match]);
 
     // 서버 태그 or 예비 칩
     const allChips = useMemo<string[]>(() => {
@@ -258,8 +264,6 @@ export default function NoticePage(): JSX.Element {
     };
 
 
-
-
     return (
         <div className="np-root">
             <div className="np-container">
@@ -321,6 +325,23 @@ export default function NoticePage(): JSX.Element {
                             );
                         })}
                     </div>
+
+                    {/* 전체 선택/해제 바 */}
+                    <div className="bulk-actions-bar-andOr">
+                        <button
+                            className="and-or-button"
+                            onClick={() => setMatch("any")}
+                            disabled={loading || match === "any"}>
+                            일부 포함
+                        </button>
+                        <button
+                            className="and-or-button"
+                            onClick={() => setMatch("all")}
+                            disabled={loading || match === "all"}>
+                            전부 포함
+                        </button>
+                    </div>
+
                 </ChipCollapse>
 
                 {/* ───────── 로딩 오버레이 (검색/헤더 유지) ───────── */}
