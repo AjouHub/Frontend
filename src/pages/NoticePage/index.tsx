@@ -9,10 +9,11 @@ import type { Keyword } from "../../types/keywords";
 import { Global_Tags } from "../../utils/tags";
 import NoticeCard from "../../components/NoticeCard";
 import ChipCollapse from "../../components/ChipCollapse";
-import { listKeywords } from "../../services/settings.service";
+import {listDepartments, listKeywords} from "../../services/settings.service";
 import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
 // import { departmentNameMap } from "../../components/departmentMap";
 import { useLocation, useOutletContext } from 'react-router-dom';
+import {departmentNameMap} from "../../components/departmentMap";
 // import { isAppEnv } from '../../services/auth.service';
 
 
@@ -45,13 +46,12 @@ interface NoticePageContext {
 export default function NoticePage(): JSX.Element {
     const location = useLocation();
 
-    const [user, setUser] = useState<UserInfo | null>(null);
-
     // 상단 탭(일반/장학/생활관/학과)
     const [tab, setTab] = useState<GeneralTabKey>("general");
 
     // 학과 탭일 때 선택된 학과 키(백엔드 type으로 사용)
-    const [deptType, setDeptType] = useState<DeptKey>("");
+    const [departments, setDepartments] = useState<DeptKey[]>([]);
+    const [selectedDept, setSelectedDept] = useState<DeptKey>("");
 
     // 목록/페이지
     const [notices, setNotices] = useState<Notice[]>([]);
@@ -115,11 +115,12 @@ export default function NoticePage(): JSX.Element {
     useEffect(() => {
         (async () => {
             try {
-                const u = await fetchUserInfo();
-                setUser(u);
+                const dep = await listDepartments();
+                setDepartments(dep);
 
-                const firstDept = u?.departments?.[0] || "";
-                setDeptType(firstDept);
+                // const firstDept = u?.departments?.[0] || "";
+                setSelectedDept(dep[0] || "");
+                console.log(selectedDept);
                 setTab("general");
 
                 const tags = await fetchSuggestedTags();
@@ -134,7 +135,6 @@ export default function NoticePage(): JSX.Element {
 
     // 유저 로드 후 북마크 목록 가져오기
     useEffect(() => {
-        if (!user) return;
         let alive = true;
         setLoading(true);
         (async () => {
@@ -148,15 +148,13 @@ export default function NoticePage(): JSX.Element {
         })();
         setLoading(false);
         return () => { alive = false; };
-    }, [user]);
+    }, [departments]);
 
     // 공지 목록 호출 부분
     useEffect(() => {
-        const typeForApi = tab === "department" ? (deptType || "general") : tab;
+        const typeForApi = tab === "department" ? selectedDept : tab;
 
         window.scrollTo({ top: 0, behavior: 'smooth' }); // 'auto'로 바꿔도 됨
-        // const scroller = document.getElementById('app-scroll-root');
-        // scroller?.scrollTo({ top: 0, behavior: 'smooth' }); // 'auto'로 바꿔도 됨
 
         setLoading(true);
         fetchNotices({
@@ -177,7 +175,7 @@ export default function NoticePage(): JSX.Element {
                 setStatus(e?.status ?? "Unknown");
             })
             .finally(() => setLoading(false));
-    }, [tab, deptType, page, selectedGlobalIds, selectedPersonalIds, query]);
+    }, [tab, selectedDept, page, selectedGlobalIds, selectedPersonalIds, query]);
 
     // 서버 태그 or 예비 칩
     const allChips = useMemo<string[]>(() => {
@@ -195,10 +193,18 @@ export default function NoticePage(): JSX.Element {
     // 칩 선택 토글
     const toggleChip = (t: string) => {
         setSelectedTags((prev) =>
-            prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+            prev.includes(t)               // 이전 상태(prev)에 t가 이미 있으면
+                ? prev.filter((x) => x !== t) // 제거 (필터로 제외)
+                : [...prev, t]                // 없으면 추가 (스프레드로 새 배열)
         );
         setPage(0);
     };
+
+    // 학과 칩 선택 토글
+    const toggleDeptChip = (t: string) => {
+        setSelectedDept(t);
+        setPage(0);
+    }
 
     // 칩 필터링 결과
     useEffect(() => {
@@ -277,6 +283,27 @@ export default function NoticePage(): JSX.Element {
                         })}
                     </nav>
                 </div>
+
+                {/* ───────── 학과 선택 칩 ───────── */}
+                {tab === "department" && (
+                    <ChipCollapse openByDefault={false}>
+                        <div className="np-dept-chips">
+                            {departments.map((c) => {
+                                const active = selectedDept.includes(c);
+                                return (
+                                    <button
+                                        key={c}
+                                        className={`np-chip ${active ? "is-active" : ""}`}
+                                        onClick={() => toggleDeptChip(c)}
+                                    >
+                                        #{departmentNameMap[c]}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </ChipCollapse>
+
+                )}
 
                 {/* ───────── 칩 영역 ───────── */}
                 <ChipCollapse openByDefault={false}>
