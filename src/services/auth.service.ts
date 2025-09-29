@@ -1,8 +1,6 @@
 import api, {API_BASE_URL} from "./api";
-import type {Keyword} from "../types/keywords";
 import {notify} from "../utils/notify";
 import {appNavigate} from "../utils/router";
-import {easing} from "@mui/material";
 
 
 //  앱(WebView) 환경 감지

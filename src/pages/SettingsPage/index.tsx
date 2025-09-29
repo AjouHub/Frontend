@@ -94,7 +94,7 @@ export default function SettingsPage() {
                         loading={loadingDepartments}
                     />
 
-                    <CollapsibleSection title="학과 선택">
+                    <CollapsibleSection title="학과 설정">
                         <DepartmentSelector
                             departments={departments} // 상태와
                             onAddDepartment={handleAddDepartment} // 핸들러 함수를
@@ -103,7 +103,7 @@ export default function SettingsPage() {
                         />
                     </CollapsibleSection>
 
-                    <CollapsibleSection title="키워드 선택">
+                    <CollapsibleSection title="키워드 설정">
                         {/* 자식에게 상태와 함수를 props로 전달 */}
                         <KeywordController
                             keywords={keywords}
@@ -114,7 +114,7 @@ export default function SettingsPage() {
                     </CollapsibleSection>
 
                     <CollapsibleTabs
-                        title="알림 선택"
+                        title="알림 설정"
                         openIndex={openIndex}
                         onTabClick={setOpenIndex}
                         items={[
@@ -144,13 +144,6 @@ export default function SettingsPage() {
                                     />), },
                         ]}
                     />
-                {/*    <CollapsibleSection title="알림 선택">*/}
-                {/*        /!* 자식에게 상태를 props로 전달 *!/*/}
-                {/*        <NotificationPreferences*/}
-                {/*            allKeywords={keywords}*/}
-                {/*            loading={keywordLoading}*/}
-                {/*        />*/}
-                {/*    </CollapsibleSection>*/}
                 </main>
             </div>
         </div>
