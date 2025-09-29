@@ -136,6 +136,26 @@ body {
     box-sizing: border-box;
 }
 
+.tabs-row {
+    display: grid;
+    grid-auto-flow: column;  /* 가로로 버튼 나열 */
+    gap: 8px;
+}
+.tab-btn {
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border, #e6e8ed);
+    background: var(--chip-bg, #eef1f6);
+    font-weight: 600;
+    cursor: pointer;
+}
+.tab-btn.is-active {
+    background: var(--aura-blue, #4a6ddb);
+    color: #fff;
+    border-color: var(--aura-blue, #4a6ddb);
+}
+
+
 /* --- 선택자(Selector) 내부 스타일 --- */
 .selector-container {
     margin-top: 16px;

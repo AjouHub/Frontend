@@ -11,9 +11,10 @@ import { notify } from "../../utils/notify";
 interface NotificationPreferencesProps {
     allKeywords: Keyword[];
     loading: boolean;
+    category: string;
 }
 
-export default function NotificationPreferences({ allKeywords, loading }: NotificationPreferencesProps) {
+export default function NotificationPreferences({ allKeywords, loading, category }: NotificationPreferencesProps) {
     const [initialSubs, setInitialSubs] = useState<number[]>([]);
     const [selected, setSelected] = useState<Set<number>>(new Set());
     const [subsLoading, setSubsLoading] = useState(true); // 구독 정보 로딩 상태
@@ -24,7 +25,7 @@ export default function NotificationPreferences({ allKeywords, loading }: Notifi
         const loadSubscriptions = async () => {
             setSubsLoading(true);
             try {
-                const subs = await listKeywordSubscriptions();
+                const subs = await listKeywordSubscriptions(category);
                 setInitialSubs(subs);
                 setSelected(new Set(subs));
             } finally {
@@ -32,7 +33,7 @@ export default function NotificationPreferences({ allKeywords, loading }: Notifi
             }
         };
         loadSubscriptions();
-    }, []);
+    }, [category]);
 
     // allKeywords가 부모로부터 변경되어 전달되면, 선택된 목록을 필터링
     useEffect(() => {
@@ -74,7 +75,7 @@ export default function NotificationPreferences({ allKeywords, loading }: Notifi
     const onSave = async () => {
         setSaving(true);
         try {
-            await saveKeywordSubscriptions(initialSubs, nextIds);
+            await saveKeywordSubscriptions(initialSubs, nextIds, category);
             // 저장 성공 후 기준값 갱신
             setInitialSubs(nextIds);
             // alert('키워드 구독 설정이 저장되었습니다.');
