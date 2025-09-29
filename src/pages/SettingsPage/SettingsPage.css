@@ -136,6 +136,26 @@ body {
     box-sizing: border-box;
 }
 
+.tabs-row {
+    display: grid;
+    grid-auto-flow: column;  /* 가로로 버튼 나열 */
+    gap: 8px;
+}
+.tab-btn {
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border, #e6e8ed);
+    background: var(--chip-bg, #eef1f6);
+    font-weight: 600;
+    cursor: pointer;
+}
+.tab-btn.is-active {
+    background: var(--aura-blue, #4a6ddb);
+    color: #fff;
+    border-color: var(--aura-blue, #4a6ddb);
+}
+
+
 /* --- 선택자(Selector) 내부 스타일 --- */
 .selector-container {
     margin-top: 16px;
@@ -292,8 +312,14 @@ button:disabled {
 }
 
 .notification-header {
+    /*margin-top: 20px;*/
     margin-bottom: 12px;
 }
+/*.notification-header.with-gap::before {*/
+/*    content: "";*/
+/*    display: block;*/
+/*    height: 20px;   !* margin-top 20px과 동일한 시각적 간격 *!*/
+/*}*/
 
 .notification-title {
     font-weight: 600;
@@ -417,4 +443,88 @@ button:disabled {
 
 .save-button:hover:not(:disabled) {
     background-color: var(--chip-background);
+}
+
+/* 스위치 */
+.switch-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.switch-group {
+    display: flex; /* 자식 요소들을 가로로 나란히 배치합니다. */
+    align-items: center; /* 세로선 중앙에 정렬합니다. */
+    gap: 80px; /* 스위치들 사이의 간격을 줍니다. */
+    /*margin-bottom: 8px;*/
+}
+
+.switch-label-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary, #1A1B1F);
+}
+
+.switch-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+/* 실제 체크박스는 숨깁니다. */
+.switch-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* 스위치의 배경(트랙) */
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+/* 스위치의 핸들(동그라미) */
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+/* 체크됐을 때 스타일 */
+.switch-input:checked + .switch-slider {
+    background-color: var(--primary-blue, #5685E6);
+}
+
+.switch-input:checked + .switch-slider:before {
+    transform: translateX(20px);
+}
+
+/* 비활성화 상태 스타일 */
+.switch-container.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* 알림 설정의 키워드 목록 애니메이션 컨테이너 */
+.keyword-list-container {
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+    /*transition: max-height 260ms ease, opacity 200ms ease;*/
 }

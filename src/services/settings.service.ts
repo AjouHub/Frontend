@@ -11,8 +11,6 @@ interface ApiResponse<T> {
     data: T;
 }
 
-
-
 // Departments
 export type DepartmentCode = string;
 
@@ -20,7 +18,7 @@ export async function listDepartments(): Promise<DepartmentCode[]> {
     try {
         const response = await api.get('/user/departments');
 
-        if (response.data.status != 'success') {
+        if (response.data.status !== 'success') {
             const error = new Error(response.data.message || '학과 정보를 불러올 수 없습니다.');
             (error as any).status = response.status;
             throw error;
@@ -65,7 +63,7 @@ export async function listKeywords(): Promise<Keyword[]> {
     try {
         const response = await api.get<ApiResponse<Keyword[]>>('/keywords');
 
-        if (response.data.status != 'success') {
+        if (response.data.status !== 'success') {
             const error = new Error(response.data.message || '키워드 정보를 불러올 수 없습니다.');
             (error as any).status = response.status;
             throw error;
@@ -74,16 +72,6 @@ export async function listKeywords(): Promise<Keyword[]> {
     } catch (error) {
         throw error;
     }
-}
-// 전역 키워드만 조회
-export async function listKeywordsGlobal(): Promise<number[]> {
-    const response = await api.get<ApiResponse<Keyword[]>>('/keywords/global');
-
-    if (response.data.status != 'success') {
-        const error = new Error(response.data.message || '전역 키워드 정보를 불러올 수 없습니다.');
-        (error as any).status = response.status;
-    }
-    return response.data.data.map(k => k.id);
 }
 
 export async function addKeyword(phrase: string): Promise<Keyword> {
@@ -100,12 +88,6 @@ export async function addKeyword(phrase: string): Promise<Keyword> {
         if (status === 409) {
             const code = data?.errors?.[0]?.code;
             const msg = data?.message;
-                // code === 'CONFLICT_WITH_GLOBAL'
-                //     ? '전역 키워드와 중복될 수 없습니다.'
-                //     : code === 'DUPLICATE_PERSONAL'
-                //         ? '이미 추가된 키워드입니다.'
-                //         : data?.message || '중복된 키워드입니다.';
-            // alert(msg);
             notify.error(msg);
         }
         // 호출부에서 더 처리할 수 있게 그대로 던짐(또는 여기서 종료해도 됨)
@@ -137,84 +119,39 @@ export async function removeKeyword(id: number): Promise<void> {
 
 
 // Notifications / FCM
-// 전역 키워드 구독 목록
-export async function listKeywordSubscriptionsGlobal(): Promise<number[]> {
-    const res = await api.get<ApiResponse<number[]>>('/keywords/subscriptions/global');
+export async function listKeywordSubscriptions(category: string): Promise<number[]> {
+    const res = await api.get<ApiResponse<number[]>>(
+        `/subscriptions/types/${category}/keywords`);
+
     if (res.data.status !== 'success' || !Array.isArray(res.data.data)) {
-        const err = new Error(res.data.message || '전역 키워드 구독 목록을 불러올 수 없습니다.');
+        const err = new Error(res.data.message || '키워드 구독 목록을 불러올 수 없습니다.');
         (err as any).status = res.status;
         throw err;
     }
     return res.data.data;
 }
-// 개인 키워드 구독 목록
-export async function listKeywordSubscriptionsPersonal(): Promise<number[]> {
-    const res = await api.get<ApiResponse<number[]>>('/keywords/subscriptions/personal');
-    if (res.data.status !== 'success' || !Array.isArray(res.data.data)) {
-        const err = new Error(res.data.message || '개인 키워드 구독 목록을 불러올 수 없습니다.');
-        (err as any).status = res.status;
-        throw err;
-    }
-    return res.data.data;
-}
-// 내가 구독 중인 키워드의 ID 목록
-export async function listKeywordSubscriptions(): Promise<number[]> {
-    const [global, personal] = await Promise.allSettled([
-        listKeywordSubscriptionsGlobal(),
-        listKeywordSubscriptionsPersonal(),
-    ]);
-
-    // 둘 다 실패한 경우 에러
-    if (global.status === 'rejected' && personal.status === 'rejected') {
-        const err = new Error('키워드 구독 목록을 불러올 수 없습니다.');
-        notify.error('키워드 구독 목록을 불러올 수 없습니다.');
-        (err as any).status = global.reason?.status ?? personal.reason?.status;
-        throw err;
-    }
-
-    // 성공한 것들만 단순 병합 (중복/정렬 없음)
-    const result: number[] = [];
-    if (global.status === 'fulfilled') result.push(...global.value);
-    if (personal.status === 'fulfilled') result.push(...personal.value);
-    return result;
-}
 
 
-
-// 전역 키워드 구독
-export async function subscribeKeywordsGlobal(id: number): Promise<void> {
-    const res = await api.post<ApiResponse<null>>(`/keywords/subscribe/${id}`);
+// 키워드 구독
+// 구독 추가
+export async function subscribeKeywords(category:string, id: number): Promise<void> {
+    const res = await api.post<ApiResponse<null>>(
+        `/subscriptions/types/${category}/keywords`,
+        undefined,
+            {params: { keywordId: id }});
     if (res.data.status !== 'success') {
-        const err = new Error(res.data.message || '전역 키워드 구독에 실패했습니다.');
-        (err as any).status = res.status;
-        throw err;
-    }
-}
-// 개인 키워드 구독
-export async function subscribeKeywordsPersonal(id: number): Promise<void> {
-    const res = await api.post<ApiResponse<null>>(`/keywords/subscribe/personal/${id}`);
-    if (res.data.status !== 'success') {
-        const err = new Error(res.data.message || '개인 키워드 구독에 실패했습니다.');
+        const err = new Error(res.data.message || '키워드 구독에 실패했습니다.');
         (err as any).status = res.status;
         throw err;
     }
 }
 
-// 키워드 구독 해제 (ids 배열) — DELETE body는 config.data에
-// 전역 키워드
-export async function unsubscribeKeywordsGlobal(id: number): Promise<void> {
-    const res = await api.delete<ApiResponse<null>>(`/keywords/subscribe/${id}`);
+// 구독 해제
+export async function unsubscribeKeywords(category:string, id: number): Promise<void> {
+    const res = await api.delete<ApiResponse<null>>(
+        `/subscriptions/types/${category}/keywords/${id}`);
     if (res.data.status !== 'success') {
-        const err = new Error(res.data.message || '전역 키워드 구독 해제에 실패했습니다.');
-        (err as any).status = res.status;
-        throw err;
-    }
-}
-// 개인 키워드
-export async function unsubscribeKeywordsPersonal(id: number): Promise<void> {
-    const res = await api.delete<ApiResponse<null>>(`/keywords/subscribe/personal/${id}`);
-    if (res.data.status !== 'success') {
-        const err = new Error(res.data.message || '개인 키워드 구독 해제에 실패했습니다.');
+        const err = new Error(res.data.message || '키워드 구독 해제에 실패했습니다.');
         (err as any).status = res.status;
         throw err;
     }
@@ -224,25 +161,41 @@ export async function unsubscribeKeywordsPersonal(id: number): Promise<void> {
  * 구독 저장 헬퍼: 이전 구독 목록(prev)과 새 구독 목록(next)의 차이를 계산해서
  * subscribe/unsubscribe 를 각각 호출.
  */
-export async function saveKeywordSubscriptions(prev: number[], next: number[]): Promise<void> {
+export async function saveKeywordSubscriptions(prev: number[], next: number[], category:string): Promise<void> {
     const prevSet = new Set(prev);
     const nextSet = new Set(next);
-
-    const globalList = new Set(await listKeywordsGlobal());
 
     const toSubscribe = next.filter((id) => !prevSet.has(id));
     const toUnsubscribe = prev.filter((id) => !nextSet.has(id));
 
     if (toSubscribe.length) {
-        for (const keyword_id of toSubscribe) {
-            if (globalList.has(keyword_id)) await subscribeKeywordsGlobal(keyword_id);
-            else await subscribeKeywordsPersonal(keyword_id);
-        }
+        for (const keyword_id of toSubscribe) await subscribeKeywords(category, keyword_id);
     }
     if (toUnsubscribe.length) {
-        for (const keyword_id of toUnsubscribe) {
-            if (globalList.has(keyword_id)) await unsubscribeKeywordsGlobal(keyword_id);
-            else await unsubscribeKeywordsPersonal(keyword_id);
-        }
+        for (const keyword_id of toUnsubscribe) await unsubscribeKeywords(category, keyword_id);
+    }
+}
+
+
+export async function subscribeType(category:string): Promise<string> {
+    const res = await api.get<ApiResponse<string>>(`/subscriptions/types/${category}`);
+
+    if (res.data.status !== 'success') {
+        const err = new Error(res.data.message || '구독 모드를 불러올 수 없습니다.');
+        (err as any).status = res.status;
+        throw err;
+    }
+    return res.data.data;
+}
+
+export async function SetSubscibeType(category:string, mode:string): Promise<void> {
+    const res = await api.post<ApiResponse<null>>(
+        `/subscriptions/types/${category}/mode`,
+        undefined,
+        {params: { value: mode }});
+    if (res.data.status !== 'success') {
+        const err = new Error(res.data.message || '구독 모드 설정에 실패했습니다.');
+        (err as any).status = res.status;
+        throw err;
     }
 }

@@ -311,20 +311,6 @@ export default function NoticePage(): JSX.Element {
 
                 {/* ───────── 칩 영역 ───────── */}
                 <ChipCollapse openByDefault={false}>
-                    <div className="np-chips">
-                        {allChips.map((c) => {
-                            const active = selectedTags.includes(c);
-                            return (
-                                <button
-                                    key={c}
-                                    className={`np-chip ${active ? "is-active" : ""}`}
-                                    onClick={() => toggleChip(c)}
-                                >
-                                    #{c}
-                                </button>
-                            );
-                        })}
-                    </div>
 
                     {/* 전체 선택/해제 바 */}
                     <div className="bulk-actions-bar-andOr">
@@ -341,6 +327,23 @@ export default function NoticePage(): JSX.Element {
                             전부 포함
                         </button>
                     </div>
+
+                    <div className="np-chips">
+                        {allChips.map((c) => {
+                            const active = selectedTags.includes(c);
+                            return (
+                                <button
+                                    key={c}
+                                    className={`np-chip ${active ? "is-active" : ""}`}
+                                    onClick={() => toggleChip(c)}
+                                >
+                                    #{c}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+
 
                 </ChipCollapse>
 

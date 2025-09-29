@@ -16,6 +16,7 @@ import {
     removeKeyword
 } from "../../services/settings.service";
 import CollapsibleSection from "../../components/CollapsibleSection";
+import CollapsibleTabs from "../../components/CollapsibleTabs";
 
 // 메인 설정 페이지
 export default function SettingsPage() {
@@ -25,7 +26,7 @@ export default function SettingsPage() {
     const [keywordLoading, setKeywordLoading] = useState(true);
     const [departments, setDepartments] = useState<string[]>([]);
     const [loadingDepartments, setLoadingDepartments] = useState(true);
-
+    const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     // 키워드 목록을 불러오는 함수
     const loadKeywords = async () => {
@@ -112,13 +113,44 @@ export default function SettingsPage() {
                         />
                     </CollapsibleSection>
 
-                    <CollapsibleSection title="알림 선택">
-                        {/* 자식에게 상태를 props로 전달 */}
-                        <NotificationPreferences
-                            allKeywords={keywords}
-                            loading={keywordLoading}
-                        />
-                    </CollapsibleSection>
+                    <CollapsibleTabs
+                        title="알림 선택"
+                        openIndex={openIndex}
+                        onTabClick={setOpenIndex}
+                        items={[
+                            { label: '일반', content: (
+                                <NotificationPreferences
+                                    allKeywords={keywords}
+                                    loading={keywordLoading}
+                                    category="general"
+                                />), },
+                            { label: '장학', content: (
+                                    <NotificationPreferences
+                                        allKeywords={keywords}
+                                        loading={keywordLoading}
+                                        category="scholarship"
+                                    />), },
+                            { label: '생활관', content: (
+                                    <NotificationPreferences
+                                        allKeywords={keywords}
+                                        loading={keywordLoading}
+                                        category="dormitory"
+                                    />), },
+                            { label: '학과', content: (
+                                    <NotificationPreferences
+                                        allKeywords={keywords}
+                                        loading={keywordLoading}
+                                        category="department"
+                                    />), },
+                        ]}
+                    />
+                {/*    <CollapsibleSection title="알림 선택">*/}
+                {/*        /!* 자식에게 상태를 props로 전달 *!/*/}
+                {/*        <NotificationPreferences*/}
+                {/*            allKeywords={keywords}*/}
+                {/*            loading={keywordLoading}*/}
+                {/*        />*/}
+                {/*    </CollapsibleSection>*/}
                 </main>
             </div>
         </div>
