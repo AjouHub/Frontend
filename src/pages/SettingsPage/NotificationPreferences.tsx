@@ -7,17 +7,21 @@ import {
 } from '../../services/settings.service';
 import { notify } from "../../utils/notify";
 import Switch from "../../components/Switch";
+import ChipCollapse from "../../components/ChipCollapse";
+import {departmentNameMap} from "../../components/departmentMap";
+import {fetchUserInfo} from "../../services/fetchUserInfo";
 
 // 부모로부터 받을 props 타입을 정의합니다.
 interface NotificationPreferencesProps {
     allKeywords: Keyword[];
     loading: boolean;
     category: string;
+    isDepartment?: boolean;
 }
 
 type Mode = 'ALL' | 'KEYWORD' | 'NONE' | null;
 
-export default function NotificationPreferences({ allKeywords, loading, category }: NotificationPreferencesProps) {
+export default function NotificationPreferences({ allKeywords, loading, category, isDepartment = false }: NotificationPreferencesProps) {
     const [initialSubs, setInitialSubs] = useState<number[]>([]);
     const [selected, setSelected] = useState<Set<number>>(new Set());
     const [subsLoading, setSubsLoading] = useState(true); // 구독 정보 로딩 상태
@@ -25,6 +29,14 @@ export default function NotificationPreferences({ allKeywords, loading, category
 
     const [isNotiEnabled, setIsNotiEnabled] = useState<boolean>(false); // 알림 ON/OFF
     const [isKeywordNotice, setIsKeywordNotice] = useState<boolean>(false); // 전체/키워드
+
+    // 학과
+    const [departments, setDepartments] = useState<string[]>([]);
+    const [selectedDept, setSelectedDept] = useState<string>('');
+
+    // 실질적 탭 (학과 때문)
+    const [effectiveCategory, setEffectiveCategory] = useState<string>('');
+
 
     // 애니메이션을 위한 상태와 ref 추가
     const [contentHeight, setContentHeight] = useState(0);
@@ -39,6 +51,18 @@ export default function NotificationPreferences({ allKeywords, loading, category
     // 키워드 목록을 보여줘야 하는 조건
     const shouldShowKeywords = isNotiEnabled && isKeywordNotice;
 
+
+    useEffect(() => {
+        setEffectiveCategory(category);
+    }, [category]);
+
+    // 학과 선택이 바뀌면 effectiveCategory를 업데이트하는 useEffect
+    useEffect(() => {
+        if (isDepartment && selectedDept) {
+            setEffectiveCategory(selectedDept);
+        }
+    }, [selectedDept, isDepartment]);
+
     useEffect(() => {
         // 구독 정보 불러오기
         const loadInitialState = async () => {
@@ -47,8 +71,8 @@ export default function NotificationPreferences({ allKeywords, loading, category
             try {
                 // API를 동시에 호출하여 효율성 증대
                 const [mode, subs] = await Promise.all([
-                    subscribeType(category),
-                    listKeywordSubscriptions(category)
+                    subscribeType(effectiveCategory),
+                    listKeywordSubscriptions(effectiveCategory)
                 ]);
 
                 // mode 값에 따라 스위치 상태 설정
@@ -79,7 +103,7 @@ export default function NotificationPreferences({ allKeywords, loading, category
             }
         };
         loadInitialState();
-    }, [category]);
+    }, [effectiveCategory]);
 
     // 스위치 상태가 변경될 때마다 서버에 mode를 저장하는 useEffect
     useEffect(() => {
@@ -91,7 +115,7 @@ export default function NotificationPreferences({ allKeywords, loading, category
 
         const setMode = async () => {
             try {
-                await SetSubscibeType(category, mode);
+                await SetSubscibeType(effectiveCategory, mode);
             } catch (e) {
                 // console.error('알림 설정 저장 실패:', e);
                 notify.error('알림 설정 변경에 실패했습니다.');
@@ -99,7 +123,7 @@ export default function NotificationPreferences({ allKeywords, loading, category
             }
         };
         setMode();
-    }, [isNotiEnabled, isKeywordNotice, category]);
+    }, [isNotiEnabled, isKeywordNotice, effectiveCategory]);
 
     // allKeywords가 부모로부터 변경되어 전달되면, 선택된 목록을 필터링
     useEffect(() => {
@@ -128,7 +152,7 @@ export default function NotificationPreferences({ allKeywords, loading, category
         }
     }, [shouldShowKeywords]);
 
-    // 높이 계산을 담당하는 useEffect 수정
+    // 높이 계산을 담당하는 useEffect
     useEffect(() => {
         if (showKeywords && contentRef.current) {
             const height = contentRef.current.scrollHeight;
@@ -141,6 +165,24 @@ export default function NotificationPreferences({ allKeywords, loading, category
             });
         }
     }, [showKeywords, allKeywords, subsLoading]);
+
+    // 학과의 설정일때만 학과 목록을 불러옴
+    useEffect(() => {
+        if (isDepartment) {
+            const loadDepartments = async () => {
+                const user = await fetchUserInfo();
+                if (user?.departments) {
+                    setDepartments(user.departments);
+                    // 첫 번째 학과를 기본 선택으로 설정
+                    if (user.departments.length > 0) {
+                        setSelectedDept(user.departments[0]);
+                    }
+                }
+            };
+            loadDepartments();
+        }
+    }, [isDepartment]);
+
 
     // 토글 핸들러
     const toggle = (id: number) => {
@@ -167,7 +209,7 @@ export default function NotificationPreferences({ allKeywords, loading, category
     const onSave = async () => {
         setSaving(true);
         try {
-            await saveKeywordSubscriptions(initialSubs, nextIds, category);
+            await saveKeywordSubscriptions(initialSubs, nextIds, effectiveCategory);
             // 저장 성공 후 기준값 갱신
             setInitialSubs(nextIds);
             notify.success('키워드 구독 설정이 저장되었습니다.');
@@ -188,6 +230,27 @@ export default function NotificationPreferences({ allKeywords, loading, category
                 <div className="np-loading-overlay">
                     <div className="np-spinner" aria-label="로딩 중" />
                 </div>
+            )}
+
+            {/* ───────── 학과 선택 칩 ───────── */}
+            {isDepartment && (
+                <ChipCollapse openByDefault={true}>
+                    <div className="np-chips">
+                        {departments.map((deptKey) => {
+                            const active = selectedDept === deptKey;
+                            return (
+                                <button
+                                    key={deptKey}
+                                    className={`np-chip ${active ? "is-active" : ""}`}
+                                    onClick={() => setSelectedDept(deptKey)}
+                                >
+                                    {/* departmentNameMap을 사용하여 한글 학과명 표시 */}
+                                    {departmentNameMap[deptKey] || deptKey}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </ChipCollapse>
             )}
 
             <div className="switch-group">
