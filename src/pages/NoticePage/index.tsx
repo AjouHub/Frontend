@@ -306,7 +306,6 @@ export default function NoticePage(): JSX.Element {
                             })}
                         </div>
                     </ChipCollapse>
-
                 )}
 
                 {/* ───────── 칩 영역 ───────── */}

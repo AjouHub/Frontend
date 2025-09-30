@@ -198,4 +198,6 @@ export async function SetSubscibeType(category:string, mode:string): Promise<voi
         (err as any).status = res.status;
         throw err;
     }
+    // 모드 저장 성공 시
+    window.AURA?.applyTypeMode?.(category, mode) // mode: "ALL" | "KEYWORD" | "NONE"
 }
