@@ -8,13 +8,19 @@ import {BookMarkPage} from "./pages/BookMarkPage";
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import NativeBridge from "./components/NativeBridge";
 import {useEffect} from "react";
 import {setAppNavigate} from "./utils/router";
+import {fetchUserAndNotifyNativeApp} from "./services/auth.service";
 
 
 function App() {
     const navigate = useNavigate();
+
+    // 앱이 처음 로드될 때 사용자 정보를 가져오고 네이티브에 알림
+    useEffect(() => {
+        fetchUserAndNotifyNativeApp();
+    }, []);
+
     useEffect(() => {
         setAppNavigate((path, opts) => navigate(path, opts));
     }, [navigate]);

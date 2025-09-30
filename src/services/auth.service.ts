@@ -1,6 +1,8 @@
 import api, {API_BASE_URL} from "./api";
 import {notify} from "../utils/notify";
 import {appNavigate} from "../utils/router";
+import {UserInfo} from "../types/user";
+import {fetchUserInfo} from "./fetchUserInfo";
 
 
 //  앱(WebView) 환경 감지
@@ -89,3 +91,21 @@ export async function redirectToGoogleOAuth(): Promise<void> {
         notify.error("네트워크 오류로 로그인 페이지를 열 수 없습니다.");
     }
 };
+
+
+/**
+ * [앱 전용] 사용자 정보를 가져온 후, 네이티브 앱에 토픽 구독을 요청합니다.
+ * 앱이 시작되거나 로그인 직후 한 번만 호출되는 것이 가장 이상적입니다.
+ */
+export async function fetchUserAndNotifyNativeApp(): Promise<void> {
+    try {
+        const user = await fetchUserInfo();
+
+        // 유저 이메일이 있고, 앱 환경일 때만 네이티브 함수 호출
+        if (user?.email && isAppEnv() && window.AURA?.ensureUserTopic) {
+            window.AURA.ensureUserTopic(String(user.email));
+        }
+    } catch (error) {
+        console.error("Failed to fetch user and notify native app:", error);
+    }
+}
