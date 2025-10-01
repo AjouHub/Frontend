@@ -17,11 +17,10 @@ interface NotificationPreferencesProps {
     loading: boolean;
     category: string;
     isDepartment?: boolean;
+    departments?: string[];
 }
 
-type Mode = 'ALL' | 'KEYWORD' | 'NONE' | null;
-
-export default function NotificationPreferences({ allKeywords, loading, category, isDepartment = false }: NotificationPreferencesProps) {
+export default function NotificationPreferences({ allKeywords, loading, category, isDepartment = false, departments = [] }: NotificationPreferencesProps) {
     const [initialSubs, setInitialSubs] = useState<number[]>([]);
     const [selected, setSelected] = useState<Set<number>>(new Set());
     const [subsLoading, setSubsLoading] = useState(true); // 구독 정보 로딩 상태
@@ -31,7 +30,7 @@ export default function NotificationPreferences({ allKeywords, loading, category
     const [isKeywordNotice, setIsKeywordNotice] = useState<boolean>(false); // 전체/키워드
 
     // 학과
-    const [departments, setDepartments] = useState<string[]>([]);
+    // const [departments, setDepartments] = useState<string[]>([]);
     const [selectedDept, setSelectedDept] = useState<string>('');
 
     // 실질적 탭 (학과 때문)
@@ -55,6 +54,17 @@ export default function NotificationPreferences({ allKeywords, loading, category
     useEffect(() => {
         setEffectiveCategory(category);
     }, [category]);
+
+    // ✅ 부모로부터 받은 departments로 기본 선택값 설정/유지
+    useEffect(() => {
+        if (!isDepartment) return;
+        if (departments.length === 0) {
+            setSelectedDept('');
+            return;
+        }
+        // 기존 선택이 여전히 유효하면 유지, 아니면 첫 번째로 초기화
+        setSelectedDept(prev => (prev && departments.includes(prev) ? prev : departments[0]));
+    }, [isDepartment, departments]);
 
     // 학과 선택이 바뀌면 effectiveCategory를 업데이트하는 useEffect
     useEffect(() => {
@@ -166,22 +176,22 @@ export default function NotificationPreferences({ allKeywords, loading, category
         }
     }, [showKeywords, allKeywords, subsLoading]);
 
-    // 학과의 설정일때만 학과 목록을 불러옴
-    useEffect(() => {
-        if (isDepartment) {
-            const loadDepartments = async () => {
-                const user = await fetchUserInfo();
-                if (user?.departments) {
-                    setDepartments(user.departments);
-                    // 첫 번째 학과를 기본 선택으로 설정
-                    if (user.departments.length > 0) {
-                        setSelectedDept(user.departments[0]);
-                    }
-                }
-            };
-            loadDepartments();
-        }
-    }, [isDepartment]);
+    // // 학과의 설정일때만 학과 목록을 불러옴
+    // useEffect(() => {
+    //     if (isDepartment) {
+    //         const loadDepartments = async () => {
+    //             const user = await fetchUserInfo();
+    //             if (user?.departments) {
+    //                 setDepartments(user.departments);
+    //                 // 첫 번째 학과를 기본 선택으로 설정
+    //                 if (user.departments.length > 0) {
+    //                     setSelectedDept(user.departments[0]);
+    //                 }
+    //             }
+    //         };
+    //         loadDepartments();
+    //     }
+    // }, [isDepartment]);
 
 
     // 토글 핸들러

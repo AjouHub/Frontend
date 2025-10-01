@@ -142,6 +142,7 @@ export default function SettingsPage() {
                                         loading={keywordLoading}
                                         category="department"
                                         isDepartment={true}
+                                        departments={departments}
                                     />), },
                         ]}
                     />
