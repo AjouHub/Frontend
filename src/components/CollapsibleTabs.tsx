@@ -7,9 +7,10 @@ interface CollapsibleTabsProps {
     items: TabItem[];               // [{label, content}]
     openIndex: number | null;
     onTabClick: (index: number | null) => void;
+    onHeightChange?: (height: number) => void; // 보고용 함수
 }
 
-export default function CollapsibleTabs({ title, items, openIndex, onTabClick }: CollapsibleTabsProps) {
+export default function CollapsibleTabs({ title, items, openIndex, onTabClick, onHeightChange }: CollapsibleTabsProps) {
     const [contentHeight, setContentHeight] = useState(0);
     const innerRef = useRef<HTMLDivElement>(null);
     // 화면에 '실제로 표시될' 컨텐츠를 위한 별도의 state
@@ -26,23 +27,27 @@ export default function CollapsibleTabs({ title, items, openIndex, onTabClick }:
         // 탭이 닫힐 때(openIndex가 null이 될 때)는 displayedContent를 안바꿈
     }, [openIndex, items]);
 
-    // 표시될 컨텐츠가 변경되면, 그 높이를 다시 계산
-    useEffect(() => {
-        if (openIndex !== null && innerRef.current) {
-            setContentHeight(innerRef.current.scrollHeight);
-        }
-    }, [openIndex, displayedContent]);
+    // // 표시될 컨텐츠가 변경되면, 그 높이를 다시 계산
+    // useEffect(() => {
+    //     if (openIndex !== null && innerRef.current) {
+    //         setContentHeight(innerRef.current.scrollHeight);
+    //     }
+    // }, [openIndex, displayedContent]);
 
     // (내용 크기 변화를 추적하는 ResizeObserver는 그대로 유지)
     useEffect(() => {
         const el = innerRef.current;
         if (!el) return;
         const ro = new ResizeObserver(() => {
-            if (openIndex !== null) setContentHeight(el.scrollHeight);
+            if (openIndex !== null) {
+                setContentHeight(el.scrollHeight);
+                // 높이가 변할 때마다 부모에게 "보고"
+                onHeightChange?.(el.scrollHeight);
+            }
         });
         ro.observe(el);
         return () => ro.disconnect();
-    }, [openIndex]);
+    }, [openIndex, displayedContent, onHeightChange]);
 
     const onClickTab = (index: number, e: React.MouseEvent) => {
         e.stopPropagation(); // 헤더 클릭 이벤트 전파 방지
