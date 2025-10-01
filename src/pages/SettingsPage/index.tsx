@@ -1,4 +1,4 @@
-import React, { useState, ReactNode, useEffect } from 'react';
+import React, {useState, ReactNode, useEffect, useRef} from 'react';
 import './SettingsPage.css'; // 새롭게 작성된 CSS 파일을 임포트합니다.
 
 // 기존 컴포넌트들을 가져옵니다.
@@ -28,6 +28,37 @@ export default function SettingsPage() {
     const [loadingDepartments, setLoadingDepartments] = useState(true);
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
+    // 초기 데이터 로딩
+    useEffect(() => {
+        (async () => {
+            await loadDepartments();
+            await loadKeywords();
+        })();
+    }, []);
+
+
+    // 자식(CollapsibleTabs)의 높이 보고를 받을 상태 추가
+    const [tabContentHeight, setTabContentHeight] = useState(0);
+    // CollapsibleTabs를 참조
+    const tabsRef = useRef<HTMLDivElement>(null);
+    // 탭이 열릴 때 스크롤을 내림
+    useEffect(() => {
+        // 탭이 '열릴' 때만 (null이 아닐 때) 스크롤 로직 실행
+        if (openIndex !== null) {
+            // 애니메이션 시간(260ms)을 고려하여 약간의 딜레이 후 스크롤
+            const timer = setTimeout(() => {
+                tabsRef.current?.scrollIntoView({
+                    behavior: 'smooth', // 부드럽게 스크롤
+                    block: 'nearest'    // 요소를 화면에 표시하기 위한 최소한의 스크롤만 수행
+                });
+            }, 100); // 0.3초 후 실행
+
+            return () => clearTimeout(timer); // 컴포넌트 unmount 시 타이머 정리
+        }
+    }, [openIndex, tabContentHeight]); // openIndex가 변경될 때마다 이 effect 실행
+
+
+
     // 키워드 목록을 불러오는 함수
     const loadKeywords = async () => {
         setKeywordLoading(true);
@@ -52,14 +83,6 @@ export default function SettingsPage() {
             setLoadingDepartments(false);
         }
     };
-
-    // 초기 데이터 로딩
-    useEffect(() => {
-        (async () => {
-            await loadDepartments();
-            await loadKeywords();
-        })();
-    }, []);
 
     // 키워드 추가 함수
     const handleAddKeyword = async (phrase: string) => {
@@ -113,39 +136,42 @@ export default function SettingsPage() {
                         />
                     </CollapsibleSection>
 
-                    <CollapsibleTabs
-                        title="알림 설정"
-                        openIndex={openIndex}
-                        onTabClick={setOpenIndex}
-                        items={[
-                            { label: '일반', content: (
-                                <NotificationPreferences
-                                    allKeywords={keywords}
-                                    loading={keywordLoading}
-                                    category="general"
-                                />), },
-                            { label: '장학', content: (
+                    <div ref={tabsRef}>
+                        <CollapsibleTabs
+                            title="알림 설정"
+                            openIndex={openIndex}
+                            onTabClick={setOpenIndex}
+                            onHeightChange={setTabContentHeight}
+                            items={[
+                                { label: '일반', content: (
                                     <NotificationPreferences
                                         allKeywords={keywords}
                                         loading={keywordLoading}
-                                        category="scholarship"
+                                        category="general"
                                     />), },
-                            { label: '생활관', content: (
-                                    <NotificationPreferences
-                                        allKeywords={keywords}
-                                        loading={keywordLoading}
-                                        category="dormitory"
-                                    />), },
-                            { label: '학과', content: (
-                                    <NotificationPreferences
-                                        allKeywords={keywords}
-                                        loading={keywordLoading}
-                                        category="department"
-                                        isDepartment={true}
-                                        departments={departments}
-                                    />), },
-                        ]}
-                    />
+                                { label: '장학', content: (
+                                        <NotificationPreferences
+                                            allKeywords={keywords}
+                                            loading={keywordLoading}
+                                            category="scholarship"
+                                        />), },
+                                { label: '생활관', content: (
+                                        <NotificationPreferences
+                                            allKeywords={keywords}
+                                            loading={keywordLoading}
+                                            category="dormitory"
+                                        />), },
+                                { label: '학과', content: (
+                                        <NotificationPreferences
+                                            allKeywords={keywords}
+                                            loading={keywordLoading}
+                                            category="department"
+                                            isDepartment={true}
+                                            departments={departments}
+                                        />), },
+                            ]}
+                        />
+                    </div>
                 </main>
             </div>
         </div>
