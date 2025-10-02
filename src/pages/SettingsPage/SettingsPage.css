@@ -522,9 +522,37 @@ button:disabled {
     opacity: 0.5;
 }
 
+
+.settings-container .mc-body {
+    transition:max-height .20s ease;
+}
+
 /* 알림 설정의 키워드 목록 애니메이션 컨테이너 */
 .keyword-list-container {
     overflow: hidden;
-    transition: max-height 0.3s ease-in-out;
-    /*transition: max-height 260ms ease, opacity 200ms ease;*/
+    /*transition: max-height 0.2s ease-in-out;*/
+    transition: max-height 260ms ease, opacity 200ms ease;
+}
+
+
+/*Logout.tsx*/
+.logout-container {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.logout-button {
+    display: flex;
+    justify-content: center;  /* 가로 중앙 */
+    align-items: center;       /* 세로 중앙 */
+    color: var(--text-primary);
+    padding: 10px 10px;
+    border-radius: 8px;
+    border: 0px solid var(--card-border, #e6e8ed);
+    background: var(--background-color);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 16px;
 }

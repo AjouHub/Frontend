@@ -9,7 +9,7 @@ import { notify } from "../../utils/notify";
 import Switch from "../../components/Switch";
 import ChipCollapse from "../../components/ChipCollapse";
 import {departmentNameMap} from "../../components/departmentMap";
-import {fetchUserInfo} from "../../services/fetchUserInfo";
+
 
 // 부모로부터 받을 props 타입을 정의합니다.
 interface NotificationPreferencesProps {
@@ -55,7 +55,7 @@ export default function NotificationPreferences({ allKeywords, loading, category
         setEffectiveCategory(category);
     }, [category]);
 
-    // ✅ 부모로부터 받은 departments로 기본 선택값 설정/유지
+    // 부모로부터 받은 departments로 기본 선택값 설정/유지
     useEffect(() => {
         if (!isDepartment) return;
         if (departments.length === 0) {
