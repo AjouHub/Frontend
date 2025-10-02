@@ -17,6 +17,7 @@ import {
 } from "../../services/settings.service";
 import CollapsibleSection from "../../components/CollapsibleSection";
 import CollapsibleTabs from "../../components/CollapsibleTabs";
+import Logout from "./Logout";
 
 // 메인 설정 페이지
 export default function SettingsPage() {
@@ -41,17 +42,19 @@ export default function SettingsPage() {
     const [tabContentHeight, setTabContentHeight] = useState(0);
     // CollapsibleTabs를 참조
     const tabsRef = useRef<HTMLDivElement>(null);
+    // 바닥 앵커
+    const bottomRef = useRef<HTMLDivElement>(null);
     // 탭이 열릴 때 스크롤을 내림
     useEffect(() => {
         // 탭이 '열릴' 때만 (null이 아닐 때) 스크롤 로직 실행
         if (openIndex !== null) {
             // 애니메이션 시간(260ms)을 고려하여 약간의 딜레이 후 스크롤
             const timer = setTimeout(() => {
-                tabsRef.current?.scrollIntoView({
+                bottomRef.current?.scrollIntoView({
                     behavior: 'smooth', // 부드럽게 스크롤
-                    block: 'nearest'    // 요소를 화면에 표시하기 위한 최소한의 스크롤만 수행
+                    block: 'end'    // 요소를 화면에 표시하기 위한 최소한의 스크롤만 수행
                 });
-            }, 100); // 0.3초 후 실행
+            }, 260); // 0.3초 후 실행
 
             return () => clearTimeout(timer); // 컴포넌트 unmount 시 타이머 정리
         }
@@ -172,6 +175,9 @@ export default function SettingsPage() {
                             ]}
                         />
                     </div>
+
+                    <Logout/>
+                    <div ref={bottomRef} style={{ height: 1}} />
                 </main>
             </div>
         </div>
