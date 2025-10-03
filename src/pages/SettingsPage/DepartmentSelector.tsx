@@ -12,10 +12,12 @@ interface DepartmentSelectorProps {
 }
 
 export default function DepartmentSelector({ departments, loading, onAddDepartment, onRemoveDepartment }: DepartmentSelectorProps) {
+    const [selectedCollege, setSelectedCollege] = useState('');
     const [selected, setSelected] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false); // 개별 동작 로딩 상태
 
-    const options = departmentGroups;
+    // const options = departmentGroups;
+    const colleges = Object.keys(departmentGroups) as string[];
 
     const onAdd = async () => {
         if (!selected) return;
@@ -23,6 +25,7 @@ export default function DepartmentSelector({ departments, loading, onAddDepartme
         try {
             await onAddDepartment(selected);
             setSelected('');
+            setSelectedCollege('');
         } finally {
             setIsSubmitting(false);
         }
@@ -41,22 +44,52 @@ export default function DepartmentSelector({ departments, loading, onAddDepartme
         <div className="department-input-container">
             {/* 'input-group' 클래스를 추가하여 CSS 스타일 적용 */}
             <div className="input-group">
+                {/*<select*/}
+                {/*    value={selected}*/}
+                {/*    onChange={(e) => setSelected(e.target.value)}*/}
+                {/*    disabled={loading}*/}
+                {/*>*/}
+                {/*    <option value="">학과 선택</option>*/}
+                {/*    {Object.entries(options).map(([group, keys]) => (*/}
+                {/*        <optgroup key={group} label={group}>*/}
+                {/*            {keys.map((key) => (*/}
+                {/*                <option key={key} value={key}>*/}
+                {/*                    {departmentNameMap[key] ?? key}*/}
+                {/*                </option>*/}
+                {/*            ))}*/}
+                {/*        </optgroup>*/}
+                {/*    ))}*/}
+                {/*</select>*/}
+
+                <select
+                    value={selectedCollege}
+                    onChange={(e) => setSelectedCollege(e.target.value)}
+                    disabled={loading}
+                    className="college-select"
+                >
+                    <option value="">단과대 선택</option>
+                    {colleges.map(college => (
+                        <option key={college} value={college}>
+                            {college}
+                        </option>
+                    ))}
+
+                </select>
+
                 <select
                     value={selected}
                     onChange={(e) => setSelected(e.target.value)}
-                    disabled={loading}
+                    disabled={loading || !selectedCollege}
+                    className="department-select"
                 >
                     <option value="">학과 선택</option>
-                    {Object.entries(options).map(([group, keys]) => (
-                        <optgroup key={group} label={group}>
-                            {keys.map((key) => (
-                                <option key={key} value={key}>
-                                    {departmentNameMap[key] ?? key}
-                                </option>
-                            ))}
-                        </optgroup>
+                    {(departmentGroups[selectedCollege] ?? []).map(department => (
+                        <option key={department} value={department}>
+                            {departmentNameMap[department] ?? department}
+                        </option>
                     ))}
                 </select>
+
                 <button onClick={onAdd} disabled={loading || !selected}>추가</button>
             </div>
 
