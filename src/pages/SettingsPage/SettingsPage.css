@@ -172,6 +172,17 @@ body {
     border-radius: 8px; box-sizing: border-box;
     height: 42px; background-color: #F1F1F1;
 }
+/* --- 여기부터 ‘단과대/학과’ 셀렉트 전용 오버라이드 --- */
+.input-group .college-select,
+.input-group .department-select {
+    flex: 1 1 0;         /* 남은 공간을 채움 */
+    min-width: 0;        /* 컨텐츠보다 더 줄어들 수 있게 (중요!) */
+
+    /* 한 줄 + 말줄임표 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .input-group select {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -186,7 +197,7 @@ body {
 }
 
 .input-group button {
-    padding: 0 18px;
+    padding: 0 14px;
     background-color: var(--button-blue);
     color: white; border: none; border-radius: 8px;
     cursor: pointer; font-size: 14px; font-weight: 600;
