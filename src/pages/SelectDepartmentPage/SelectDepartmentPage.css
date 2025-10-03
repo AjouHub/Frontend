@@ -1,0 +1,118 @@
+/* src/pages/SelectDepartmentPage/SelectDepartmentPage.css */
+
+/* --- 전체 페이지 레이아웃 --- */
+.sdp-root {
+    background-color: #f0f2f5; /* 밝은 회색 배경 */
+    min-height: 100vh;
+    padding: 24px 16px;
+    box-sizing: border-box;
+
+    --aura-blue:#4a6ddb;
+}
+
+.sdp-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* --- 헤더 --- */
+.sdp-header {
+    margin-bottom: 32px;
+    text-align: left;
+}
+
+.sdp-title {
+    font-size: 26px; /* 큼직한 제목 */
+    font-weight: 700;
+    color: #1a1b1f;
+    margin: 0 0 8px 0;
+}
+
+.sdp-subtitle {
+    font-size: 15px;
+    color: #81838a; /* 부드러운 회색 */
+    margin: 0;
+}
+
+/* --- 각 설정 섹션 --- */
+.sdp-section {
+    background-color: #ffffff; /* 흰색 카드 배경 */
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* 은은한 그림자 */
+}
+
+.sdp-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1b1f;
+    margin: 0 0 16px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eaebee; /* 제목과 내용 구분선 */
+}
+
+/* --- 알림 설정 그룹 --- */
+.fcm-group {
+    display: flex;
+    flex-direction: column;
+    /*gap: 12px; !* 각 알림 설정 사이의 간격 *!*/
+}
+
+/* 개별 알림 설정 아이템 */
+.fcm-item {
+    /* 첫 번째 아이템을 제외하고 위에 구분선을 추가합니다. */
+    border-top: 1px solid #f0f2f5;
+    margin-top: 20px;
+    padding-top: 20px;
+}
+
+.fcm-item:first-child {
+    /* 첫 번째 아이템에는 구분선과 여백이 필요 없습니다. */
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+/* 개별 알림 설정의 소제목 */
+.fcm-item-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 12px 0; /* 제목 아래에만 여백을 줍니다. */
+}
+
+/* --- 하단 완료 버튼 --- */
+.sdp-footer {
+    margin-top: 24px;
+}
+
+.sdp-submit-button {
+    width: 100%;
+    padding: 14px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: var(--aura-blue); /* 주요 파란색 */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 50px;
+}
+
+.sdp-submit-button:hover {
+    background-color: #4773d2; /* 호버 시 약간 어둡게 */
+}
+
+/* 제목(h3.fcm-item-title) 다음에 나오는 '내용' 블록 전체에 왼쪽 패딩 주기 */
+.sdp-section .fcm-item > :not(.fcm-item-title) {
+    padding-left: 12px;            /* ← 원하는 만큼 조절 */
+}
+/* 좁은 화면에서는 여백/라인 살짝 줄이기 (선택) */
+@media (max-width: 420px) {
+    .sdp-section .fcm-item > :not(.fcm-item-title) {
+        padding-left: 10px;
+        border-left-width: 2px;
+    }
+}

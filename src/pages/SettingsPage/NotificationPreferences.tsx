@@ -270,11 +270,11 @@ export default function NotificationPreferences({ allKeywords, loading, category
                     onChange={setIsNotiEnabled}
                 />
                 <Switch
-                    label={isKeywordNotice ? "키워드" : "전체"}
+                    leftLabel="전체"
+                    rightLabel="키워드"
                     checked={isKeywordNotice}
                     onChange={setIsKeywordNotice}
-                    disabled={!isNotiEnabled} // 알림이 OFF이면 disabled 처리
-                    labelWidth={40}
+                    disabled={!isNotiEnabled}
                 />
             </div>
 
