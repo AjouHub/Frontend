@@ -368,6 +368,7 @@ export default function NoticePage(): JSX.Element {
                                     onToggleBookmark={handleToggleBookmark}   // {/* ✅ 클릭 처리 */}
                                     // "onNoticeClick" 이라는 이름으로 클릭 핸들러 함수를 전달합니다.
                                     onNoticeClick={handleNoticeClick}
+                                    tabs={selectedDept}  // 선택한 학과 반환
                                 />
                             </li>
                         ))
