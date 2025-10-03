@@ -487,7 +487,7 @@ button:disabled {
 .switch-container {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     cursor: pointer;
     user-select: none;
 }
@@ -495,7 +495,8 @@ button:disabled {
 .switch-group {
     display: flex; /* 자식 요소들을 가로로 나란히 배치합니다. */
     align-items: center; /* 세로선 중앙에 정렬합니다. */
-    gap: 80px; /* 스위치들 사이의 간격을 줍니다. */
+    /*gap: 80px; !* 스위치들 사이의 간격을 줍니다. *!*/
+    gap: clamp(12px, 60vw, 80px); /* 최소 12px, 보통 화면폭의 6%, 최대 80px */
     /*margin-bottom: 8px;*/
 }
 
@@ -510,6 +511,26 @@ button:disabled {
     display: inline-block;
     width: 44px;
     height: 24px;
+}
+
+/* 좌/우 라벨용(옵션) */
+.switch-container.with-sides {
+    gap: 12px;
+}
+
+.switch-side {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.switch-side.is-active {
+    color: var(--text-primary); /* 활성 쪽 강조 (원하면 var(--text-primary)로) */
+}
+
+.switch-container.disabled .switch-side {
+    opacity: 0.6;
 }
 
 /* 실제 체크박스는 숨깁니다. */
