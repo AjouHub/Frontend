@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { departmentNameMap, departmentGroups } from '../../components/departmentMap';
-import { addDepartment, listDepartments, removeDepartment } from '../../services/settings.service';
 
 
 // 부모로부터 받을 props 타입 정의
@@ -44,23 +43,6 @@ export default function DepartmentSelector({ departments, loading, onAddDepartme
         <div className="department-input-container">
             {/* 'input-group' 클래스를 추가하여 CSS 스타일 적용 */}
             <div className="input-group input-group--two-rows">
-                {/*<select*/}
-                {/*    value={selected}*/}
-                {/*    onChange={(e) => setSelected(e.target.value)}*/}
-                {/*    disabled={loading}*/}
-                {/*>*/}
-                {/*    <option value="">학과 선택</option>*/}
-                {/*    {Object.entries(options).map(([group, keys]) => (*/}
-                {/*        <optgroup key={group} label={group}>*/}
-                {/*            {keys.map((key) => (*/}
-                {/*                <option key={key} value={key}>*/}
-                {/*                    {departmentNameMap[key] ?? key}*/}
-                {/*                </option>*/}
-                {/*            ))}*/}
-                {/*        </optgroup>*/}
-                {/*    ))}*/}
-                {/*</select>*/}
-
                 <select
                     value={selectedCollege}
                     onChange={(e) => setSelectedCollege(e.target.value)}
