@@ -6,6 +6,8 @@
     min-height: 100vh;
     padding: 24px 16px;
     box-sizing: border-box;
+
+    --aura-blue:#4a6ddb;
 }
 
 .sdp-container {
@@ -91,7 +93,7 @@
     font-size: 16px;
     font-weight: 600;
     color: #ffffff;
-    background-color: #5685e6; /* 주요 파란색 */
+    background-color: var(--aura-blue); /* 주요 파란색 */
     border: none;
     border-radius: 8px;
     cursor: pointer;
