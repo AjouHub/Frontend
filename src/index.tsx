@@ -1,13 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import {BrowserRouter, HashRouter} from 'react-router-dom';
 import App from './App';
+import {isAppEnv} from "./services/auth.service";
 
+const Router = isAppEnv() ? HashRouter : BrowserRouter;
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
     <React.StrictMode>
-        <BrowserRouter>
+        <Router>
             <App />
-        </BrowserRouter>
+        </Router>
     </React.StrictMode>
 );

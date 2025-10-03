@@ -1,0 +1,569 @@
+/* SettingsPage/SettingsPage.css */
+
+/* --- CSS 변수를 사용한 새로운 색상 팔레트 --- */
+:root {
+    --primary-blue: #5685E6;
+    --button-blue: #4773D2;
+    --background-color: #F9F9FB;
+    --chip-background: #dadbe7;
+    --toggle-chip-background: #dadbe7;
+    --border-color: #EAEBEE;
+    --text-primary: #1A1B1F;
+    --text-secondary: #81838A;
+}
+/* --- 기본 & 전체 레이아웃 --- */
+body {
+    margin: 0;
+    background-color: var(--background-color);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    color: var(--text-primary);
+}
+
+.settings-container {
+    max-width: 500px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background-color: var(--background-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-main {
+    flex-grow: 1;
+    padding: 20px 15px;
+}
+
+/* --- 헤더 --- */
+.settings-header {
+    background-color: white;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-logo {
+    font-size: 24px;
+    font-weight: 800; /* Extra Bold */
+    color: var(--primary-blue);
+    margin: 0;
+    text-align: left;
+}
+
+/* --- 프로필 카드 --- */
+.profile-card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 1px solid var(--border-color);
+}
+.profile-avatar {
+    width: 60px; height: 60px; border-radius: 50%;
+    background-color: #E0EFFF;
+    display: flex; justify-content: center; align-items: center;
+    color: var(--primary-blue);
+    flex-shrink: 0;
+}
+.profile-details {
+    width: 100%;
+}
+.detail-row {
+    display: flex;
+    font-size: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.detail-row:last-child {
+    border-bottom: none;
+}
+.detail-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    width: 50px;
+    flex-shrink: 0;
+    margin-right: 15px;
+}
+.detail-value {
+    color: var(--text-primary);
+    font-weight: 500;
+    flex-grow: 1;
+    text-align: left;
+}
+
+/* --- 아코디언(Collapsible) 카드 --- */
+.collapsible-card {
+    background-color: white;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border-color);
+}
+.collapsible-header {
+    width: 100%; display: flex;
+    justify-content: space-between; align-items: center;
+    padding: 18px 20px;
+    background-color: white;
+    border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 600; /* Semi Bold */
+    cursor: pointer; text-align: left;
+    color: var(--text-primary);
+}
+.collapsible-arrow {
+    transition: transform 0.3s ease;
+    color: var(--text-secondary);
+}
+.collapsible-arrow.open {
+    transform: rotate(180deg);
+}
+.collapsible-content {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 260ms ease, opacity 200ms ease;
+    will-change: max-height, opacity;
+}
+
+/* 열렸을 때는 투명도만 1로 (max-height는 인라인 style에서 제어) */
+.collapsible-content.open {
+    opacity: 1;
+}
+
+/* padding/border는 내부에 두어 높이 계산이 깔끔하도록 */
+.collapsible-body {
+    padding: 0 20px 20px 20px;
+    border-top: 1px solid var(--border-color);
+    box-sizing: border-box;
+}
+
+.tabs-row {
+    display: grid;
+    grid-auto-flow: column;  /* 가로로 버튼 나열 */
+    gap: 8px;
+}
+.tab-btn {
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border, #e6e8ed);
+    background: var(--chip-bg, #eef1f6);
+    font-weight: 600;
+    cursor: pointer;
+}
+.tab-btn.is-active {
+    background: var(--aura-blue, #4a6ddb);
+    color: #fff;
+    border-color: var(--aura-blue, #4a6ddb);
+}
+
+
+/* --- 선택자(Selector) 내부 스타일 --- */
+.selector-container {
+    margin-top: 16px;
+}
+.input-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    align-items: center;
+}
+.input-group select, .input-group input {
+    flex-grow: 1; padding: 10px 12px;
+    font-size: 14px; border: 1px solid var(--border-color);
+    border-radius: 8px; box-sizing: border-box;
+    height: 42px; background-color: #F1F1F1;
+}
+/* --- 여기부터 ‘단과대/학과’ 셀렉트 전용 오버라이드 --- */
+.input-group .college-select,
+.input-group .department-select {
+    flex: 1 1 0;         /* 남은 공간을 채움 */
+    min-width: 0;        /* 컨텐츠보다 더 줄어들 수 있게 (중요!) */
+
+    /* 한 줄 + 말줄임표 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.input-group select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;                /* 기본 화살표 숨기기 */
+
+    background-color: #F1F1F1;       /* 기존 배경 유지 */
+    background-image:
+            url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='11' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%2381838A' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;  /* 화살표 위치 */
+    padding-right: 36px;                     /* 화살표 자리 확보 */
+}
+
+.input-group button {
+    padding: 0 14px;
+    background-color: var(--button-blue);
+    color: white; border: none; border-radius: 8px;
+    cursor: pointer; font-size: 14px; font-weight: 600;
+    height: 42px; display: flex;
+    align-items: center; justify-content: center;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+}
+.input-group button:hover:not(:disabled) {
+    background-color: #3a62b8; /* Darker shade for hover */
+}
+
+/* --- 선택된 항목 (키워드) 칩 스타일 --- */
+.item-list-title {
+    font-size: 14px; font-weight: 600;
+    color: var(--text-primary); margin-bottom: 12px;
+}
+.item-chip-list {
+    display: flex; flex-wrap: wrap; gap: 10px;
+}
+.item-chip {
+    display: inline-flex; align-items: center;
+    padding: 6px 4px 6px 12px; /* 오른쪽 패딩 줄임 */
+    border-radius: 18px;
+    background: var(--chip-background);
+    color: var(--text-primary);
+    font-size: 14px; font-weight: 500;
+}
+.item-chip button {
+    background: var(--primary-blue);
+    color: white; border: none;
+    border-radius: 50%;
+    width: 20px; /* 크기 조정 */
+    height: 20px; /* 크기 조정 */
+    font-size: 16px; /* '×' 크기 키움 */
+    line-height: 20px; /* '×' 세로 중앙 정렬 */
+    padding: 0; cursor: pointer;
+    display: flex; justify-content: center; align-items: center;
+    margin-left: 8px;
+    flex-shrink: 0;
+    font-weight: 400; /* '×' 굵기 조정 */
+    transition: background-color 0.2s;
+}
+.item-chip button:hover:not(:disabled) {
+    background-color: #406ec8;
+}
+
+/* --- 푸터 --- */
+.settings-footer {
+    display: flex; justify-content: space-around;
+    background-color: white;
+    padding: 10px 0;
+    border-top: 1px solid var(--border-color);
+    position: sticky; bottom: 0;
+}
+.footer-item {
+    display: flex; flex-direction: column; align-items: center;
+    font-size: 12px; color: var(--text-secondary);
+    cursor: pointer; min-width: 60px;
+}
+.footer-item.active {
+    color: var(--primary-blue);
+}
+.footer-item svg {
+    width: 24px; height: 24px; margin-bottom: 2px;
+}
+
+/* --- 공통 비활성화 스타일 --- */
+button:disabled {
+    background-color: #ccc !important;
+    cursor: not-allowed;
+}
+
+/*DepartmentSelector.tsx*/
+.department-input-container {
+    margin-top: 16px;
+}
+
+/*KeywordController.tsx*/
+.keyword-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: white;
+    cursor: pointer;
+    min-height: 42px;
+    box-sizing: border-box;
+}
+
+.keyword-text {
+    color: var(--text-primary);
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.keyword-text.placeholder {
+    color: var(--text-secondary);
+}
+
+.arrow-icon {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+}
+
+.arrow-icon.open {
+    transform: rotate(180deg);
+}
+
+.keyword-input-container {
+    margin-top: 16px;
+}
+
+/* --- 알림 설정 (NotificationPreferences) 내부 스타일 --- */
+.notification-container {
+    margin-top: 16px;
+}
+
+.notification-header {
+    /*margin-top: 20px;*/
+    margin-bottom: 12px;
+}
+/*.notification-header.with-gap::before {*/
+/*    content: "";*/
+/*    display: block;*/
+/*    height: 20px;   !* margin-top 20px과 동일한 시각적 간격 *!*/
+/*}*/
+
+.notification-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+
+.notification-description {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.bulk-actions-bar {
+    margin-bottom: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.bulk-action-button {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.bulk-action-button:hover:not(:disabled) {
+    background-color: var(--chip-background);
+}
+
+.selection-status {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-left: 8px;
+}
+
+/* --- 알림 설정 토글 칩 (기존 코드 업데이트) --- */
+/* 키워드 칩 리스트가 로딩 중일 때 약간 투명하게 */
+.toggle-chip-list.loading {
+    opacity: 0.6;
+}
+
+.toggle-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.toggle-chip {
+    /* 기본 (비활성화) 스타일 - 회색 버튼 */
+    background-color: #f0f3f7; /* 시안의 회색 배경 */
+    /*background-color: var(--toggle-chip-background);*/
+    color: var(--text-secondary); /* 회색 텍스트 */
+    border: 1px solid transparent; /* 테두리는 투명하게 */
+    padding: 6px 12px;
+    border-radius: 18px; /* 시안에 맞춰 둥근 사각형으로 변경 */
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+
+.toggle-chip:hover {
+    background-color: #e6e9ee; /* 호버 시 약간 더 어둡게 */
+}
+
+.toggle-chip:hover:not(.active):not(:disabled) {
+    background-color: #e6e9ee;
+    border-color: #e6e9ee;
+}
+
+.toggle-chip.active {
+    /* 활성화 스타일 - 파란색 버튼 */
+    background-color: #eef5ff; /* 연한 파란색 배경 */
+    color: #0b5bd3; /* 진한 파란색 텍스트 */
+    border: 1px solid #1677ff; /* 파란색 테두리 */
+}
+
+.toggle-chip-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ccc;
+    transition: background-color 0.2s ease;
+}
+
+.toggle-chip.active .toggle-chip-indicator {
+    background: #1677ff;
+}
+
+
+/*변경된 내용이 없습니다. 텍스트*/
+.save-section {
+    padding-top: 15px;
+}
+
+.save-status-message {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding-left: 8px;
+}
+
+
+/*변경사항 저장 버튼*/
+.save-button {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.save-button:hover:not(:disabled) {
+    background-color: var(--chip-background);
+}
+
+/* 스위치 */
+.switch-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.switch-group {
+    display: flex; /* 자식 요소들을 가로로 나란히 배치합니다. */
+    align-items: center; /* 세로선 중앙에 정렬합니다. */
+    gap: 80px; /* 스위치들 사이의 간격을 줍니다. */
+    /*margin-bottom: 8px;*/
+}
+
+.switch-label-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary, #1A1B1F);
+}
+
+.switch-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+/* 실제 체크박스는 숨깁니다. */
+.switch-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* 스위치의 배경(트랙) */
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+/* 스위치의 핸들(동그라미) */
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+/* 체크됐을 때 스타일 */
+.switch-input:checked + .switch-slider {
+    background-color: var(--primary-blue, #5685E6);
+}
+
+.switch-input:checked + .switch-slider:before {
+    transform: translateX(20px);
+}
+
+/* 비활성화 상태 스타일 */
+.switch-container.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+
+.settings-container .mc-body {
+    transition:max-height .20s ease;
+}
+
+/* 알림 설정의 키워드 목록 애니메이션 컨테이너 */
+.keyword-list-container {
+    overflow: hidden;
+    /*transition: max-height 0.2s ease-in-out;*/
+    transition: max-height 260ms ease, opacity 200ms ease;
+}
+
+
+/*Logout.tsx*/
+.logout-container {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.logout-button {
+    display: flex;
+    justify-content: center;  /* 가로 중앙 */
+    align-items: center;       /* 세로 중앙 */
+    color: var(--text-primary);
+    padding: 10px 10px;
+    border-radius: 8px;
+    border: 0px solid var(--card-border, #e6e8ed);
+    background: var(--background-color);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 16px;
+}

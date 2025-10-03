@@ -1,0 +1,454 @@
+/* ===== AURA Notice Page – 시안 맞춤 전용 스타일 ===== */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+:root{
+    --aura-blue:#4a6ddb;
+    --aura-sky:#7cc2f4;
+    --accent-orange:#ffa852;
+    --stone-gray:#8d96a8;
+    --chip-bg:#eef1f6;
+    --chip-text:#667085;
+    /*--chip-bg:#9A9FAD;*/
+    /*--chip-text:#FFFFFF;*/
+    --card-border:#e6e8ed;
+    --card-shadow:0 1px 2px rgba(16,24,40,.06);
+    --page-x: 10px;   /* 컨테이너 좌우 패딩: 기존 16px → 10px */
+    --card-x: 12px;   /* 카드 내부 좌/우 패딩: 기존 16px → 12px */
+    --card-right: 26px;   /* ← 하트가 너무 붙어보이면 24~28px에서 조절 */
+    --icon-dark: #575757;
+
+    --card-gap: 10px; /* 카드 사이 공간 */
+
+    --appbar-x: 18px;       /* AppBar 좌우 패딩 */
+    --appbar-max: 420px;    /* 컨테이너 최대폭 */
+    /*--appbar-max: 100%;*/
+    --icon-w: 32px;         /* 검색 아이콘 버튼 폭(=높이) */
+    --left-gap: 10px;       /* 왼쪽 여백 10px 유지 */
+
+    --bottom-tab-bar-height: 64px; /* 실제 BottomTabBar 높이에 맞춰 조정 */
+}
+
+*{ box-sizing:border-box }
+html,body,#root{ height:100% }
+body{
+    margin:0;
+    background:#f7f8fa;
+    font-family:'Pretendard Variable', Pretendard, Inter, 'Noto Sans KR',
+    system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    color:#111827;
+}
+
+/* 레이아웃 */
+.np-root{
+    /*min-height:100dvh;*/
+    /*padding-bottom:88px*/
+}
+.np-container{
+    width:100%;
+    max-width:420px;
+    margin:0 auto;
+    padding:0 var(--page-x);
+} /* ← 변수 적용 */
+
+/* 웹 환경일 때만(.is-web), np-container의 하단에 탭바 높이만큼 패딩을 추가합니다. */
+.is-web .np-container {
+    padding-bottom: var(--bottom-tab-bar-height);
+}
+
+
+/* AppBar */
+.np-appbar{
+    position:sticky; top:0; z-index:10;
+    background:#fff;
+    /*border-bottom:1px solid #e9edf3;*/
+    display:grid; align-items:center; padding:12px 18px;
+    grid-template-columns: 24px 1fr 24px; /* 좌 아이콘 공간 | 로고 | 우 아이콘 공간 */
+    color: var(--icon-dark) !important;
+}
+/* outline 아이콘(=stroke 기반)일 때 두께/색도 보강 */
+.np-appbar .np-icon-btn .np-ico path {
+    stroke: var(--icon-dark) !important;
+}
+.np-appbar-side{ width:24px; height:24px }
+.np-logo{
+    margin:0; font-weight:900; font-size:28px; letter-spacing:.5px;
+    background:linear-gradient(135deg,var(--aura-blue) 15%,var(--aura-sky) 85%);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; color:transparent;
+    justify-self: center;
+}
+.np-icon-btn{
+    width:var(--icon-w); height:var(--icon-w); border-radius:9999px;
+    background:transparent; border:0;
+    color:#64748b; display:grid; place-items:center;
+    justify-self:end;         /* 그리드 오른쪽 칸 끝 */
+    transition: transform .28s ease, left .28s ease, right .28s ease;
+    z-index:16;               /* 검색 입력 레이어보다 위 */
+}
+.np-ico{ width:22px; height:22px }
+
+/* 헤더 풀블리드 컨테이너 */
+.np-header-fullbleed{
+    /* 어떤 컨테이너 안에 있어도 뷰포트 끝까지 확장 */
+    margin-left:  calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+}
+
+/* 상단 탭 */
+.np-tabs{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+    background:#fff;
+    /*margin-top:4px */
+    margin-top: 0;
+    border-bottom:1px solid #e9edf3;
+}
+.np-tab{
+    background:transparent; border:0; padding:4px 0 6px;
+    font-size:16px; font-weight:700; color:#6b7280; border-bottom:3px solid transparent;
+}
+.np-tab.is-active{
+    color:var(--aura-blue) !important;
+    border-bottom-color:var(--aura-blue) !important;
+}
+
+.np-chips{ display:flex; flex-wrap:wrap; gap:8px }
+/* 학과 칩 */
+.np-dept-chips{ display:flex; flex-wrap:wrap; gap:8px }
+.np-chip{
+    background:var(--chip-bg);
+    color:var(--chip-text);
+    padding:6px 10px;
+    border-radius:9999px;
+    font-size:12px;
+    border:0;
+    font-weight:600 }
+.np-chip.is-active{ background:var(--aura-blue); color:#fff }
+
+/*any all 버튼*/
+.bulk-actions-bar-andOr {
+    /*margin-top: 8px;*/
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;              /* 전체 너비 차지 */
+}
+.and-or-button {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.and-or-button:hover:not(:disabled) {
+    background-color: var(--chip-background);
+}
+
+
+/*-------------*/
+/* 컨테이너 *//* 컨테이너: 흰 둥근 박스가 ‘한 덩어리’로 보이게 */
+.mc{
+    position: relative;
+    background:#fff;
+    border:1px solid #edf0f4;
+    border-radius:14px;
+    box-shadow:0 1px 2px rgba(0,0,0,.03);
+    overflow:hidden;
+    width:100%;
+    margin: 12px 0;
+}
+
+/* 상단 헤더(빈 영역) – 기존 스크린샷의 둥근 상단바 */
+.mc-head{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:35px;
+    background:#fff;
+    border:0;
+    cursor:pointer;
+}
+
+.mc-head .chev{
+    width:18px;
+    height:18px;
+    color:#6f7580;
+    transition:transform .22s ease;
+}
+.mc-head .chev.down{ transform:rotate(0deg); }
+
+
+/* 본문은 max-height로 슬라이드 애니메이션 */
+.mc-body{
+    overflow:hidden;
+    transition:max-height .28s ease;
+}
+
+/* 본문 내부 패딩 – 아래 쪽은 떠있는 버튼 공간 확보 */
+.mc-inner{
+    /*padding:12px 10px 12px;*/
+    padding: 16px 10px 12px;
+}
+
+.mc-chevron{
+    transition:transform .25s ease;
+    line-height:1;
+    font-size:16px;
+}
+
+/* 펼쳐질 때 화살표 방향 전환 */
+.mc-floating.open .mc-chevron{ transform:rotate(180deg); }
+
+/* 하단 토글 바: 가로 풀폭, 흰색 직사각형 */
+.mc-toggle{
+    /*position:absolute;*/
+    position: static;
+    left:8px;
+    right:8px;
+    bottom:0px;
+
+    width: calc(100% - 16px);         /* 좌우 8px 여백 = 예전 닫힘 상태와 동일 */
+    height:35px;
+    border-radius:12px;
+
+    /* 실루엣 제거 */
+    background:transparent;
+    border:0;
+    box-shadow:none;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    /*z-index:1; !* 내용 위에 보이도록 *!*/
+    /* 모바일 탭 하이라이트 제거 */
+    -webkit-tap-highlight-color: transparent;
+    transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.mc-toggle:hover,
+.mc-toggle:active,
+.mc-toggle:focus,
+.mc-toggle:focus-visible{
+    /* 버튼 실루엣 제거 */
+    background:transparent;
+    border:0;
+    box-shadow:none;
+    outline:none;
+}
+
+/* 화살표 아이콘 크기/회전 애니메이션 */
+.mc-toggle .chev{
+    width:18px;
+    height:18px;
+    color:#6f7580;
+    transition:transform .22s ease;
+}
+.mc-toggle .chev.down{ transform:rotate(0deg); }
+.mc-toggle .chev.up  { transform:rotate(180deg); }
+
+/*---------------*/
+
+/* 리스트 */
+.np-card-list{
+    list-style:none; padding:0; margin:0; display:grid; gap:var(--card-gap);
+}
+.np-card-list>li{ list-style:none }
+.np-empty{ padding:16px; color:#94a3b8; font-size:14px }
+
+/* 카드 */
+.np-card{
+    /* 왼쪽 파란 박스 두께/간격 */
+    --ribbon-w:14px;      /* ← 시안처럼 조금 더 얇게 */
+    --ribbon-gap:10px;    /* ← 텍스트와의 거리 */
+
+    position:relative; display:flex; align-items:flex-start; gap:12px;
+    padding:16px var(--card-right) 16px calc(16px + var(--ribbon-w) + var(--ribbon-gap));  /* ← 하트 안쪽으로 */
+    background:#fff; border:1px solid var(--card-border); border-radius:12px; box-shadow:var(--card-shadow);
+    min-height:76px; overflow:hidden;
+}
+.np-card-bar{
+    position:absolute; top:0; bottom:0; left:0; width:var(--ribbon-w);
+    border-top-left-radius:12px; border-bottom-left-radius:12px;
+    background:#4A6DDB; /* background:linear-gradient(180deg,#4A6DDB 0%, #7CC2F4 100%); */
+}
+
+/* 본문/사이드 */
+.np-card-body{ flex:1 1 auto; min-width:0 }
+.np-card-title{
+    /*display:block;*/
+    display: -webkit-box;        /* 멀티라인 박스 */
+    -webkit-line-clamp: 2;       /* 최대 2줄 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;            /* 넘친 내용 숨김 */
+    font-size:16px;
+    font-weight:600;
+    color:#111827;
+    letter-spacing:0;   /* 피그마 0px */
+    line-height:1.4;
+    text-decoration:none;
+}
+.np-card-title:hover{ text-decoration:underline }
+.np-card-tags{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px }
+
+/* react-icons는 svg라서 이 정도만 있어도 충분 */
+.np-heart svg{ width:24px; height:24px }
+
+/* 태그/날짜 */
+.np-card-tag, .np-card-date{
+    font-size:12px; color:#7a8699; letter-spacing:0;
+}
+
+.np-card-side{
+    margin-left:auto; display:flex; flex-direction:column; align-items:flex-end; gap:12px; min-width:56px;
+}
+.np-heart{ background:transparent; border:0; padding:0; color:#c0c5cf }
+.np-heart-ico{ width:24px; height:24px; display:block }
+.np-card-date{ font-size:12px; color:var(--stone-gray) }
+
+/* 페이지네이션 (숫자만) */
+.np-paging{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:18px 0 10px
+}
+/* ── 페이지네이션 화살표 세로 중앙 정렬 ───────────────── */
+.np-page-arrow{
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    border: 1px solid #d0d5dd;
+    background: #fff;
+    color: #8d96a8;
+    font-size: 18px;
+    /* 핵심: 글자 기준선 영향 제거 + 중앙 배치 */
+    display: flex;               /* grid 사용해도 OK: display:grid; place-items:center; */
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+    transform: translateY(-1px);
+}
+.np-page-arrow:disabled{ opacity:.4 }
+.np-page-nums{ display:flex; align-items:center; gap:18px }
+.np-page-txt{ background:transparent; border:0; padding:0; font-size:14px; font-weight:700; color:#667085 }
+.np-page-txt.is-active{ color:var(--aura-blue) }
+
+/* 상태 */
+.np-loading,.np-error{ padding:16px; color:#475467; font-size:14px }
+.np-error{ color:#dc2626 }
+
+
+/* 검색 오버레이 */
+.np-search{
+    position: absolute;
+    left: var(--appbar-x);
+    right: var(--appbar-x);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 15; /* 아이콘(16)보다 아래 */
+    transition: opacity .2s ease;
+}
+
+.np-search.is-open{
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) translateX(0);
+}
+/* 뒤로가기(닫기) 아이콘 버튼 */
+.np-search-back{
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: transparent;
+    color: #667085;
+    cursor: pointer;
+}
+/* 입력창 */
+.np-search-input{
+    flex: 1;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #e6e8ed;
+    border-radius: 10px;
+    font-size: 14px;
+    background: #fff;
+    margin-left: 40px;
+}
+.np-search-input:focus{
+    outline: none;
+    border-color: var(--aura-blue);
+    box-shadow: 0 0 0 2px rgba(74,109,219,.12);
+}
+
+.np-search-cancel{
+    height: 36px;
+    padding: 0 8px;
+    border: 0;
+    background: transparent;
+    color: #667085;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* 검색 아이콘이 왼쪽으로 살짝 이동(애니메이션) */
+.np-icon-btn {
+    transition: transform .25s ease,
+    opacity .2s ease;
+}
+.np-icon-btn.is-search-open{
+    position: absolute;
+    top: 50%;
+    right: var(--appbar-x);   /* 시작 기준: 오른쪽 패딩 */
+    transform:
+            translateY(-50%)
+            translateX(
+                    calc(
+                            -1 * ( min(100vw, var(--appbar-max))        /* AppBar 실제 가로폭 */
+                            - (var(--appbar-x) * 2)              /* 좌우 패딩 제외 */
+                            - var(--icon-w)                      /* 아이콘 너비 */
+                            - var(--left-gap) )                  /* 왼쪽 10px 여백 남김 */
+                    )
+            );
+}
+
+
+/* ===== 로딩 오버레이: 헤더/검색은 그대로, 본문만 흐림 ===== */
+.np-loading-overlay{
+    position: fixed;
+    left: 0; right: 0;
+    top: 56px;              /* AppBar 높이에 맞춰 조절 */
+    /*bottom: 64px;           !* 하단 탭 높이에 맞춰 조절 *!*/
+    bottom: 0;
+    background: rgba(255,255,255,.6);
+    backdrop-filter: blur(1.5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;    /* 검색폼(z=3)보다 낮게, 카드들보다 높게 */
+    font-size: 14px;
+    color: #475467;
+}
+
+/* 심플 스피너 */
+.np-spinner{
+    width: 28px; height: 28px;
+    border: 3px solid #d7dbe5;
+    border-top-color: var(--aura-blue);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
