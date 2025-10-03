@@ -70,7 +70,7 @@ export default function NoticeCard({
     };
 
     // department가 관리자 -> 소프트웨어학과
-    const departmentDisplayName = notice.department === '관리자' ? departmentNameMap[tabs ?? ""] : notice.department;
+    const departmentDisplayName = notice.department === '관리자' || notice.department === 'none' ? departmentNameMap[tabs ?? ""] : notice.department;
 
     return (
         <div className="np-card">
