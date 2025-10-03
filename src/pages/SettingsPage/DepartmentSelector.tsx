@@ -43,7 +43,7 @@ export default function DepartmentSelector({ departments, loading, onAddDepartme
     return (
         <div className="department-input-container">
             {/* 'input-group' 클래스를 추가하여 CSS 스타일 적용 */}
-            <div className="input-group">
+            <div className="input-group input-group--two-rows">
                 {/*<select*/}
                 {/*    value={selected}*/}
                 {/*    onChange={(e) => setSelected(e.target.value)}*/}
@@ -73,7 +73,6 @@ export default function DepartmentSelector({ departments, loading, onAddDepartme
                             {college}
                         </option>
                     ))}
-
                 </select>
 
                 <select

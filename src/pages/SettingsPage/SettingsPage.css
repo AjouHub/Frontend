@@ -172,6 +172,33 @@ body {
     border-radius: 8px; box-sizing: border-box;
     height: 42px; background-color: #F1F1F1;
 }
+
+/* 두 줄 레이아웃 전용 */
+.input-group.input-group--two-rows {
+    display: grid;                 /* flex → grid */
+    grid-template-columns: 1fr auto;         /* 왼쪽: 유동폭, 오른쪽: 버튼 */
+    grid-template-areas:
+    "college college"            /* 1행: 단과대 셀렉트가 두 칸 모두 차지 */
+    "department add";            /* 2행: 학과 셀렉트 + 버튼 */
+    column-gap: 8px;
+    row-gap: 8px;
+    align-items: center;
+}
+
+/* 그리드 영역 매핑 */
+.input-group--two-rows .college-select { grid-area: college; width: 100%; }
+.input-group--two-rows .department-select { grid-area: department; }
+.input-group--two-rows button { grid-area: add; }
+
+/* grid 환경에서 넘침/말줄임 + 축소 허용 */
+.input-group--two-rows .college-select,
+.input-group--two-rows .department-select {
+    min-width: 0;                  /* 중요: 축소 허용 */
+    white-space: nowrap;           /* 한 줄 */
+    overflow: hidden;              /* 넘침 숨김 */
+    text-overflow: ellipsis;       /* … 처리 */
+}
+
 /* --- 여기부터 ‘단과대/학과’ 셀렉트 전용 오버라이드 --- */
 .input-group .college-select,
 .input-group .department-select {
@@ -197,7 +224,7 @@ body {
 }
 
 .input-group button {
-    padding: 0 14px;
+    padding: 0 18px;
     background-color: var(--button-blue);
     color: white; border: none; border-radius: 8px;
     cursor: pointer; font-size: 14px; font-weight: 600;
