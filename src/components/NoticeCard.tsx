@@ -4,7 +4,7 @@ import {
     IoHeart as RawHeart,
 } from "react-icons/io5";
 import { setNoticeBookmark } from "../services/bookMark.service";
-import { formatNoticeDate } from "../utils/date";
+import { formatNoticeDate, isNew } from "../utils/date";
 import {departmentNameMap} from "./departmentMap";
 
 // 아이콘 캐스팅(타입 충돌 우회)
@@ -20,7 +20,7 @@ type NoticeCardProps = {
         link: string;
         category?: string;
         department?: string;
-        date?: string;
+        date: string;
         tags?: string[];
     };
     leftBarColor: string;
@@ -102,6 +102,9 @@ export default function NoticeCard({
                             )}
                             {departmentDisplayName && (
                                 <span className="np-card-tag">#{departmentDisplayName}</span>
+                            )}
+                            {isNew(notice.date, 1) && (
+                                <span className="np-card-tag">#오늘</span>
                             )}
                         </>
                     )}
