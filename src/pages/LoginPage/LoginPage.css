@@ -20,7 +20,8 @@
     align-items: center;
     text-align: center;
     padding: 20px;
-    flex-grow: 1; /* 남은 공간을 모두 채움 */
+    /*flex-grow: 1; !* 남은 공간을 모두 채움 *!*/
+    min-height: 100%;   /* 컨테이너 자체가 꽉 차도록 */
 }
 
 /* 새로 추가된 메인 컨텐츠 래퍼 */
@@ -28,8 +29,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* 내용을 수직 중앙에 배치 */
-    flex-grow: 1; /* 남은 공간을 모두 차지하여 푸터를 아래로 밀어냄 */
+    /*justify-content: center; !* 내용을 수직 중앙에 배치 *!*/
+    /*flex-grow: 1; !* 남은 공간을 모두 차지하여 푸터를 아래로 밀어냄 *!*/
+    flex: 0 0 auto;     /* ★ 더 이상 키우지 않음 */
+    margin-block: auto; /* ★ 위아래 auto → 세로 가운데 정렬 */
 }
 
 
