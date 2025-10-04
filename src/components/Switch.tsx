@@ -5,7 +5,7 @@ interface SwitchProps {
     onChange: (checked: boolean) => void;
     disabled?: boolean;
     label?: string;  // 기존 단일 라벨
-    labelWidth?: number; // 1. 라벨 너비를 위한 prop 추가
+    labelWidth?: number; // 라벨 너비를 위한 prop 추가
 
     // 추가: 좌/우 라벨(동시 제공 시 단일 라벨 대신 사용)
     leftLabel?: string;
@@ -49,7 +49,7 @@ const Switch: React.FC<SwitchProps> = ({ checked, onChange, disabled = false, la
                             checked={checked}
                             onChange={handleChange}
                             disabled={disabled}
-                            className="switch-input"
+                            className={`switch-input${hasSideLabels ? ' labels' : ''}`}
                         />
                         <span className="switch-slider" />
                     </label>
