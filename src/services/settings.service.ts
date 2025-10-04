@@ -108,6 +108,7 @@ export async function removeKeyword(id: number): Promise<void> {
             const msg = data?.message;
             notify.error(msg);
         }
+        else if (status === 500) notify.error("구독 중인 키워드는 제거할 수 없습니다.");
         console.error('키워드 제거 에러:', e);
         // alert('키워드 제거에 실패했습니다.');
         // notify.warn('키워드 제거에 실패했습니다.');
