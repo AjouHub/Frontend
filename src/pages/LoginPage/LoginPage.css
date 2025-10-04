@@ -1,0 +1,82 @@
+/* --- 전체 페이지 레이아웃 --- */
+.lp-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #F0F4F8; /* 시안의 은은한 푸른빛 배경 */
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+}
+
+.lp-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+
+/* --- 텍스트 스타일 --- */
+.lp-welcome-text {
+    font-size: 18px;
+    font-weight: 500;
+    color: #6B7280; /* 회색 텍스트 */
+    margin: 0;
+}
+
+/* --- AURA 로고 스타일 --- */
+.lp-logo {
+    /*margin: 0;*/
+    font-weight: 900;
+    letter-spacing: .5px;
+    background: linear-gradient(135deg, var(--aura-blue, #4a6ddb) 15%, var(--aura-sky, #7cc2f4) 85%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+
+    font-size: 72px;
+    margin-top: 4px;
+    margin-bottom: 12px;
+}
+
+.lp-introduction {
+    font-size: 16px;
+    font-weight: 500;
+    color: #4B5563;
+    margin: 0 0 48px 0; /* 버튼과의 간격을 넉넉하게 */
+}
+
+/* --- Google 로그인 버튼 --- */
+.lp-google-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background-color: #FFFFFF;
+    color: #374151; /* 어두운 회색 텍스트 */
+    border: 1px solid #E5E7EB; /* 옅은 회색 테두리 */
+    border-radius: 8px;
+    padding: 12px 65px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease-in-out;
+}
+
+.lp-google-button:hover {
+    background-color: #F9FAFB; /* 호버 시 약간 회색으로 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.lp-google-button span {
+    line-height: 1; /* 아이콘과 텍스트 세로 정렬 */
+}
+
+/* --- 하단 텍스트 --- */
+.lp-footer-text {
+    margin-top: 120px; /* 버튼과 충분한 간격 */
+    font-size: 12px;
+    color: #9CA3AF;
+}
