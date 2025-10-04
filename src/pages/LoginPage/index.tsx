@@ -35,9 +35,8 @@ export default function LoginPage() {
                         <span>Google로 로그인</span>
                     </button>
                 </div>
-
-                <p className="lp-footer-text">이 앱은 아주대학교 공식 사업과 무관합니다.</p>
             </div>
+            <p className="lp-footer-text">이 앱은 아주대학교 공식 사업과 무관합니다.</p>
         </div>
     );
 }
