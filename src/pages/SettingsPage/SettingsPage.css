@@ -253,7 +253,7 @@ body {
 
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     padding: 6px 6px 6px 12px;
     background: var(--chip-bg);
     border: 2px solid var(--chip-primary);
@@ -270,8 +270,8 @@ body {
     color: #fff;
     border: none;
     border-radius: 50%;
-    width: 20px;                   /* 동일 */
-    height: 20px;                  /* 동일 */
+    width: 18px;                   /* 동일 */
+    height: 18px;                  /* 동일 */
     font-size: 16px;               /* 동일 (X) */
     line-height: 20px;             /* 세로 중앙 */
     padding: 0;
@@ -408,7 +408,7 @@ button:disabled {
 }
 
 .bulk-actions-bar {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     display: flex;
     gap: 8px;
     align-items: center;
@@ -443,7 +443,7 @@ button:disabled {
 .toggle-chip-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
 }
 
 .toggle-chip {
@@ -451,14 +451,14 @@ button:disabled {
     background-color: #f0f3f7; /* 시안의 회색 배경 */
     /*background-color: var(--toggle-chip-background);*/
     color: var(--text-secondary); /* 회색 텍스트 */
-    border: 1px solid transparent; /* 테두리는 투명하게 */
+    border: 2px solid transparent; /* 테두리는 투명하게 */
     padding: 6px 12px;
     border-radius: 18px; /* 시안에 맞춰 둥근 사각형으로 변경 */
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 550;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -479,7 +479,7 @@ button:disabled {
     /*color: #0b5bd3; !* 진한 파란색 텍스트 *!*/
     /*border: 1px solid #1677ff; !* 파란색 테두리 *!*/
     color: var(--aura-blue);
-    border: 1px solid var(--aura-blue);
+    border: 2px solid var(--aura-blue);
 }
 
 .toggle-chip-indicator {
