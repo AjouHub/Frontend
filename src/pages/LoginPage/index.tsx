@@ -26,13 +26,16 @@ export default function LoginPage() {
     return (
         <div className="lp-root">
             <div className="lp-container">
-                <h2 className="lp-welcome-text">환영합니다</h2>
-                <h1 className="lp-logo">AURA</h1>
-                <h3 className="lp-introduction">아주대학교 공지사항을 알림으로 받아보세요.</h3>
-                <button className="lp-google-button" onClick={handleLogin}>
-                    <GoogleIcon />
-                    <span>Google로 로그인</span>
-                </button>
+                <div className="lp-main-content">
+                    <h2 className="lp-welcome-text">환영합니다</h2>
+                    <h1 className="lp-logo">AURA</h1>
+                    <h3 className="lp-introduction">아주대학교 공지사항을 알림으로 받아보세요.</h3>
+                    <button className="lp-google-button" onClick={handleLogin}>
+                        <GoogleIcon />
+                        <span>Google로 로그인</span>
+                    </button>
+                </div>
+
                 <p className="lp-footer-text">이 앱은 아주대학교 공식 사업과 무관합니다.</p>
             </div>
         </div>
