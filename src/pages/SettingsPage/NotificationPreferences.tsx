@@ -11,6 +11,13 @@ import ChipCollapse from "../../components/ChipCollapse";
 import {departmentNameMap} from "../../components/departmentMap";
 
 
+// 카테고리 키 -> 한글 라벨
+const categoryLabelMap: Record<string, string> = {
+    general: '일반 공지사항',
+    scholarship: '장학 공지사항',
+    dormitory: '생활관 공지사항',
+};
+
 // 부모로부터 받을 props 타입을 정의합니다.
 interface NotificationPreferencesProps {
     allKeywords: Keyword[];
@@ -176,23 +183,6 @@ export default function NotificationPreferences({ allKeywords, loading, category
         }
     }, [showKeywords, allKeywords, subsLoading]);
 
-    // // 학과의 설정일때만 학과 목록을 불러옴
-    // useEffect(() => {
-    //     if (isDepartment) {
-    //         const loadDepartments = async () => {
-    //             const user = await fetchUserInfo();
-    //             if (user?.departments) {
-    //                 setDepartments(user.departments);
-    //                 // 첫 번째 학과를 기본 선택으로 설정
-    //                 if (user.departments.length > 0) {
-    //                     setSelectedDept(user.departments[0]);
-    //                 }
-    //             }
-    //         };
-    //         loadDepartments();
-    //     }
-    // }, [isDepartment]);
-
 
     // 토글 핸들러
     const toggle = (id: number) => {
@@ -230,6 +220,34 @@ export default function NotificationPreferences({ allKeywords, loading, category
             setSaving(false);
         }
     };
+
+    // 현재 탭/학과의 라벨 (학과 탭이면 선택 학과명 우선)
+    const normCategory = (category ?? '').trim().toLowerCase();
+    const isDeptCtx = isDepartment || normCategory.startsWith('department.');
+
+    const targetLabel = useMemo(() => {
+        if (isDeptCtx) {
+            const candidate =
+                (selectedDept?.trim()) ||
+                (departments?.[0]?.trim()) ||
+                (category?.trim()) ||
+                '';
+            if (candidate) {
+                return departmentNameMap[candidate] ?? '학과 공지사항';
+            }
+            return '학과 공지사항';
+        }
+
+        // 시스템 카테고리(일반/장학/생활관 등)
+        return categoryLabelMap[normCategory] ?? (category || '공지사항');
+    }, [isDeptCtx, selectedDept, departments, category]);
+
+    // 스위치 상태에 따른 요약 문구
+    const summaryText = useMemo(() => {
+        if (!isNotiEnabled) return `${targetLabel}의 알림을 받지 않습니다.`;
+        if (isKeywordNotice) return `${targetLabel}의 선택한 키워드가 포함된 알림만 받습니다.`;
+        return `${targetLabel}의 모든 알림을 받습니다.`;
+    }, [isNotiEnabled, isKeywordNotice, targetLabel]);
 
     const isBusy = loading || subsLoading || saving
 
@@ -276,6 +294,10 @@ export default function NotificationPreferences({ allKeywords, loading, category
                     onChange={setIsKeywordNotice}
                     disabled={!isNotiEnabled}
                 />
+            </div>
+
+            <div className="notification-description after-switch" role="status" aria-live="polite">
+                {summaryText}
             </div>
 
             <div
