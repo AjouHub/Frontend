@@ -1,77 +1,129 @@
-/* --- 전체 페이지 레이아웃 --- */
+/* ===== LoginPage.css (reset & layout) ===== */
+
+/* 루트: 앱(WebView) 가용 높이 100% 기준 */
 .lp-root {
-    /* WebView 가용 영역 100% 기준 */
+    position: relative;            /* absolute footer 기준 */
     height: 100%;
     min-height: 100%;
     background-color: #F0F4F8;
 
-    /* 2행 그리드: 1) 메인 영역(가변)  2) 푸터(자연 높이) */
+    /* 2행 그리드: 1) 메인  2) 푸터(자연 높이) */
     display: grid;
     grid-template-rows: 1fr auto;
 }
 
-/* 메인 컨텐츠 래퍼: 1행에 배치 + 수직/수평 중앙 정렬 */
+/* 메인 컨테이너: 중앙 정렬 */
 .lp-container {
-    grid-row: 1;
-    min-height: 0;                  /* ← grid 자식 수축 허용 (중요) */
+    grid-row: 1;                   /* 1행(메인 영역) */
+    min-height: 0;                 /* grid 자식 수축 허용 (중요) */
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;        /* 수직 가운데 */
+    justify-content: center;       /* 수직 중앙 */
     text-align: center;
-    padding: 20px;
+    /* 푸터가 겹치지 않도록 바닥 여유 (safe-area 포함) */
+    padding: 24px 20px calc(24px + max(env(safe-area-inset-bottom, 0px), 16px));
     box-sizing: border-box;
+    width: 100%;
 }
 
-/* 푸터: 2행(항상 하단) */
-.lp-footer-text {
-    grid-row: 2;
-    justify-self: center;
-    align-self: end;
-    margin: 0 0 env(safe-area-inset-bottom, 0px) 0;
-    padding: 16px 0;
-    font-size: 12px;
-    color: #9CA3AF;
+/* 메인 블록 너비 제한(가독성) */
+.lp-main-content {
+    width: 100%;
+    max-width: 520px;
 }
 
-/* --- 텍스트/버튼 스타일은 그대로 --- */
+/* ===== Typography ===== */
 .lp-welcome-text {
     font-size: 18px;
-    font-weight: 500;
+    font-weight: 600;
     color: #6B7280;
-    margin: 0;
+    margin: 0 0 8px 0;
 }
 
+/* AURA 로고: 먼저 단색 폴백, 지원되면 그라데이션 업그레이드 */
 .lp-logo {
     font-weight: 900;
     letter-spacing: .5px;
-    background: linear-gradient(135deg, var(--aura-blue, #4a6ddb) 15%, var(--aura-sky, #7cc2f4) 85%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
     font-size: 72px;
-    margin-top: 4px;
-    margin-bottom: 12px;
+    margin: 6px 0 12px 0;
+    line-height: 1.05;
+    color: #4a6ddb; /* 폴백 단색 */
+}
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+    .lp-logo {
+        background: linear-gradient(135deg, var(--aura-blue, #4a6ddb) 15%, var(--aura-sky, #7cc2f4) 85%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        display: inline-block; /* 일부 WebView에서 필요 */
+    }
 }
 
-.lp-introduction { font-size: 16px; font-weight: 500; color: #4B5563; margin: 0 0 48px 0; }
+.lp-introduction {
+    font-size: 16px;
+    font-weight: 500;
+    color: #4B5563;
+    margin: 0 0 28px 0;
+}
 
+/* ===== Google 버튼 ===== */
 .lp-google-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
 
-    background-color: #fff; color: #374151; border: 1px solid #E5E7EB;
-    border-radius: 8px; padding: 12px 65px; font-size: 16px; font-weight: 600;
-    cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
-    transition: all .2s ease-in-out;
+    background-color: #FFFFFF;
+    color: #374151;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+
+    padding: 12px 64px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+
+    box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+    transition: background-color .2s ease, box-shadow .2s ease, transform .02s ease-in;
 }
-.lp-google-button:hover {
-    background:#F9FAFB;
-    box-shadow: 0 2px 4px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+.lp-google-button:hover { background-color: #F9FAFB; }
+.lp-google-button:active { transform: translateY(1px); }
+.lp-google-button span { line-height: 1; }
+
+/* ===== Footer: 항상 화면 맨 아래 ===== */
+.lp-footer-text {
+    position: absolute;
+
+    /* ▶ 수평 정확히 중앙 고정 */
+    left: 50%;
+    transform: translateX(-50%);
+
+    /* ▶ 본문 폭에 맞게: 좌우 여백 포함한 가로폭 제한 */
+    width: calc(100% - 40px);   /* 20px 좌우 패딩과 동일하게 */
+    max-width: 520px;           /* 메인 컨텐츠와 동일한 최대폭 */
+    box-sizing: border-box;
+
+    /* ▶ 화면 맨 아래(탭바 위)로 띄우기 + 안전영역 고려 */
+    bottom: calc(64px + max(env(safe-area-inset-bottom, 0px), 8px));
+
+    /* ▶ 텍스트 중앙 정렬 + 좌우 안전영역 패딩 */
+    text-align: center;
+    padding: 12px 0;
+    padding-inline: max(env(safe-area-inset-left, 0px), 0px)
+    max(env(safe-area-inset-right, 0px), 0px);
+
+    margin: 0;
+    font-size: 12px;
+    color: #9CA3AF;
 }
-.lp-google-button span {
-    line-height: 1;
+
+/* ===== Responsive micro tweaks ===== */
+@media (max-width: 360px) {
+    .lp-logo { font-size: 56px; }
+    .lp-google-button { padding: 12px 48px; font-size: 15px; }
+}
+@media (min-width: 481px) {
+    .lp-introduction { margin-bottom: 36px; }
 }
