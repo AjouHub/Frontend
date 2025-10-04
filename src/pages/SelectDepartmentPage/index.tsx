@@ -118,14 +118,14 @@ export default function SelectDepartmentPage() {
                         <div className={`fcm-item ${!hasDepartments ? 'fcm-item-disabled' : ''}`}>
                             <h3 className="fcm-item-title">학과 공지 알림</h3>
 
-                            {/* 3. 학과가 없을 때 안내 메시지 표시 */}
+                            {/* 학과가 없을 때 안내 메시지 표시 */}
                             {!hasDepartments && (
                                 <p className="fcm-disabled-message">
                                     학과를 먼저 등록해주세요.
                                 </p>
                             )}
 
-                            {/* 4. 학과가 있을 때만 NotificationPreferences를 활성화하여 렌더링 */}
+                            {/* 학과가 있을 때만 NotificationPreferences를 활성화하여 렌더링 */}
                             <div style={{ pointerEvents: hasDepartments ? 'auto' : 'none' }}>
                                 <NotificationPreferences
                                     allKeywords={keywords}

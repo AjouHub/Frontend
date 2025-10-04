@@ -594,6 +594,11 @@ button:disabled {
 }
 
 
+/* 스위치 아래 현재 상태 요약 */
+.notification-description.after-switch {
+    margin-top: 8px;
+}
+
 /*Logout.tsx*/
 .logout-container {
     margin-top: 16px;
