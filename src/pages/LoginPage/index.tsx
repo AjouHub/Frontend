@@ -68,7 +68,7 @@ export default function LoginPage() {
                     </button>
                 </div>
             </div>
-            <p className="lp-footer-text">이 앱은 아주대학교 공식 사업과 무관합니다.</p>
+            <p className="lp-footer-text">이 애플리케이션은 아주대학교 공식 사업과 무관합니다.</p>
         </div>
     );
 }
