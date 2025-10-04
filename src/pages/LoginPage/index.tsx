@@ -19,6 +19,38 @@ export default function LoginPage() {
         handleOAuthCallback();
     }, []);
 
+    // 풀스크린 클래스 + JS 기반 vh 보정
+    useEffect(() => {
+        const root = document.documentElement;
+
+        const applyVH = () => {
+            // 실제 보이는 높이 기준 1vh 계산
+            root.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+        };
+
+        // 로그인 페이지 동안만 풀스크린 모드 클래스 부여
+        root.classList.add('aura-fullscreen');
+        applyVH();
+
+        // 앱이 보내는 풀스크린 토글 이벤트 처리
+        const onFullscreen = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail?.on) root.classList.add('aura-fullscreen');
+            else root.classList.remove('aura-fullscreen');
+            applyVH();
+        };
+
+        window.addEventListener('resize', applyVH);
+        window.addEventListener('aura:fullscreen', onFullscreen as EventListener);
+
+        return () => {
+            window.removeEventListener('resize', applyVH);
+            window.removeEventListener('aura:fullscreen', onFullscreen as EventListener);
+            root.classList.remove('aura-fullscreen');
+            root.style.removeProperty('--vh');
+        };
+    }, []);
+
     async function handleLogin(){
         await redirectToGoogleOAuth();
     };
