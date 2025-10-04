@@ -43,9 +43,9 @@ html.aura-fullscreen .lp-root {
     width: calc(100% - 40px);               /* 본문과 동일 좌우 여백 */
     max-width: 520px;
     text-align: center;
-    margin: 0 0 8px 0;
-    font-size: 12px;
-    color: #9CA3AF;
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    color: #77828c;
 }
 
 /* === 타이포 & 버튼 === */
