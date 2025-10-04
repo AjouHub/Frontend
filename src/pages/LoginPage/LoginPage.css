@@ -33,6 +33,9 @@
     /*flex-grow: 1; !* 남은 공간을 모두 차지하여 푸터를 아래로 밀어냄 *!*/
     flex: 0 0 auto;     /* ★ 더 이상 키우지 않음 */
     margin-block: auto; /* ★ 위아래 auto → 세로 가운데 정렬 */
+
+    margin-top: clamp(16px, 8vh, 64px);
+    margin-bottom: auto;
 }
 
 
