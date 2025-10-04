@@ -580,7 +580,15 @@ button:disabled {
     cursor: not-allowed;
     opacity: 0.5;
 }
+/* 좌/우 라벨 스위치: 키워드 선택(checked)일 때 */
+.switch-input.labels:checked + .switch-slider {
+    background-color: var(--primary-blue, #5685E6);
+}
 
+/* 좌/우 라벨 스위치: 전체 선택(unchecked)일 때 */
+.switch-input.labels:not(:disabled):not(:checked) + .switch-slider {
+    background-color: var(--primary-blue, #5685E6);
+}
 
 .settings-container .mc-body {
     transition:max-height .20s ease;
