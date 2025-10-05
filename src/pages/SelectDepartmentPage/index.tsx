@@ -1,5 +1,4 @@
 import React, {useEffect, useRef, useState} from 'react';
-import { useNavigate } from 'react-router-dom';
 import NotificationPreferences, {NotificationPreferencesHandle} from "../SettingsPage/NotificationPreferences";
 import {Keyword} from "../../types/keywords";
 import {addDepartment, listDepartments, listKeywords, removeDepartment} from "../../services/settings.service";
@@ -12,7 +11,6 @@ export default function SelectDepartmentPage() {
     const [keywords, setKeywords] = useState<Keyword[]>([]);
     const [loading, setLoading] = useState(false);
     const [departments, setDepartments] = useState<string[]>([]);
-    const navigate = useNavigate();
 
     const hasDepartments = departments.length > 0;
 
