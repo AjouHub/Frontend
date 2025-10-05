@@ -9,7 +9,7 @@ export default function RequireOnboarding() {
     // location 변경될 때마다 signUp 플래그 재계산
     useEffect(() => {
         const params = new URLSearchParams(location.search);
-        const byQuery = params.get('signup') === 'true';
+        const byQuery = params.get('signUp') === 'true';
         const byState = (location.state as any)?.signUp === true;
         const bySession = sessionStorage.getItem('justSignedUp') === '1';
 
