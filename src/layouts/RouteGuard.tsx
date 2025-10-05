@@ -8,35 +8,42 @@ export default function RequireOnboarding() {
     const [hasDept, setHasDept] = useState<boolean>(false);
     const location = useLocation();
 
+    // ✅ location.pathname을 의존성에 추가하여 경로 변경 시마다 재확인
     useEffect(() => {
         let alive = true;
+        setLoading(true); // 재확인 시작
+
         (async () => {
             try {
                 const list = await listDepartments();
                 if (alive) setHasDept(Boolean(list && list.length > 0));
             } catch {
-                if (alive) setHasDept(false); // 에러 시 온보딩 필요로 간주
+                if (alive) setHasDept(false);
             } finally {
                 if (alive) setLoading(false);
             }
         })();
-        return () => { alive = false; };
-    }, []);
 
-    if (loading) return null; // 필요하면 로딩 스피너 넣어도 OK
+        return () => { alive = false; };
+    }, [location.pathname]); // 경로 변경 시마다 실행
+
+    if (loading) return null;
 
     const path = location.pathname;
 
-    // 가드 예외 경로들: 여기서는 리다이렉트 X
     const guardBypass =
         path.startsWith('/login') ||
         path.startsWith('/auth/error') ||
         path.startsWith('/select-department');
 
     if (!guardBypass && !hasDept) {
-        // 학과 없으면 온보딩으로
         return <Navigate to="/select-department" replace state={{ from: location }} />;
     }
 
-    return <Outlet />; // ✅ 보호된 라우트렌더
+    // 부서 있는데 온보딩 페이지면 메인으로 (루프 방지)
+    if (hasDept && path === '/select-department') {
+        return <Navigate to="/notice" replace />;
+    }
+
+    return <Outlet />;
 }

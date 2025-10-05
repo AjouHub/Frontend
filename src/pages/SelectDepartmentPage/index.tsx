@@ -72,9 +72,15 @@ export default function SelectDepartmentPage() {
                 hasDepartments ? deptRef.current?.save?.() : Promise.resolve(),
             ]);
         } finally {
-            // 앱(네이티브)에게 온보딩 종료 알리기 (웹에서는 그냥 무시됨)
-            window.AURA?.onboardingComplete?.();
-            appNavigate('/notice', { replace: true });
+            // 네이티브에 알림
+            if (window.AURA?.onboardingComplete) {
+                window.AURA.onboardingComplete();
+            }
+
+            // 약간의 딜레이 후 이동 (서버 저장 완료 대기)
+            setTimeout(() => {
+                appNavigate('/notice', { replace: true });
+            }, 100);
         }
     };
 
