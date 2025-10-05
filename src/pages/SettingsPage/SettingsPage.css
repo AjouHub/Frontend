@@ -536,8 +536,11 @@ button:disabled {
     display: flex; /* 자식 요소들을 가로로 나란히 배치합니다. */
     align-items: center; /* 세로선 중앙에 정렬합니다. */
     /*gap: 80px; !* 스위치들 사이의 간격을 줍니다. *!*/
-    gap: clamp(12px, 60vw, 80px); /* 최소 12px, 보통 화면폭의 6%, 최대 80px */
+    /*gap: clamp(12px, 60vw, 80px); !* 최소 12px, 보통 화면폭의 6%, 최대 80px *!*/
     /*margin-bottom: 8px;*/
+    justify-content: space-between; /* 좌/우로 벌리기 */
+    gap: 12px;                      /* 고정(적당히 작게) */
+    flex-wrap: nowrap;              /* 줄바꿈 방지 */
 }
 
 .switch-label-text {
@@ -661,7 +664,7 @@ button:disabled {
     color: var(--text-primary);
     padding: 10px 10px;
     border-radius: 8px;
-    border: 0px solid var(--card-border, #e6e8ed);
+    border: 0 solid var(--card-border, #e6e8ed);
     background: var(--background-color);
     font-weight: 600;
     font-size: 14px;
