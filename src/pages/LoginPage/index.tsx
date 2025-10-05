@@ -66,6 +66,7 @@ export default function LoginPage() {
                         <GoogleIcon />
                         <span>Google로 로그인</span>
                     </button>
+                    <h3 className="lp-subtxt">아주대학교 계정으로만 로그인 가능합니다.</h3>
                 </div>
             </div>
             <p className="lp-footer-text">이 애플리케이션은 아주대학교 공식 사업과 무관합니다.</p>

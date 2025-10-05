@@ -14,6 +14,7 @@ import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.
 // import { departmentNameMap } from "../../components/departmentMap";
 import { useLocation, useOutletContext } from 'react-router-dom';
 import {departmentNameMap} from "../../components/departmentMap";
+import {handleOAuthCallback} from "../../services/auth.service";
 // import { isAppEnv } from '../../services/auth.service';
 
 
@@ -113,8 +114,12 @@ export default function NoticePage(): JSX.Element {
             .join(",");  // "1,2,3" 형태로 반환
     };
 
-    // ✅ 북마크 ID 집합
+    // 북마크 ID 집합
     const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
+
+    useEffect(() => {
+        handleOAuthCallback();
+    }, []);
 
     // 초기 데이터 (유저 + 추천 태그)
     useEffect(() => {

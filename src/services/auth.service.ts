@@ -1,7 +1,6 @@
-import api, {API_BASE_URL} from "./api";
+import {API_BASE_URL} from "./api";
 import {notify} from "../utils/notify";
 import {appNavigate} from "../utils/router";
-import {UserInfo} from "../types/user";
 import {fetchUserInfo} from "./fetchUserInfo";
 
 
@@ -15,26 +14,21 @@ export function isAppEnv(): boolean {
     return (process.env.REACT_APP_RUNTIME || '').toLowerCase() === 'app';
 }
 
-/** OAuth 콜백 처리: /?signUp=... 만 보고 라우팅 + 쿼리 정리 */
+// OAuth 콜백 처리: /?signUp=... 만 보고 라우팅 + 쿼리 정리
 export const handleOAuthCallback = (): void => {
-    const { pathname, search } = window.location;     // 예: "/" 와 "?signUp=false&x=1"
+    const { search } = window.location;     // 예: "/" 와 "?signUp=false&x=1"
     if (!search) return;
 
     const params = new URLSearchParams(search);
     const signUp = params.get('signUp');
     if (signUp == null) return;
 
-    // URL에서 signUp만 제거(다른 쿼리는 유지)
-    params.delete('signUp');
-    const cleaned = params.toString();
-    const newUrl = cleaned ? `${pathname}?${cleaned}` : pathname;
-    window.history.replaceState({}, '', newUrl);
-
     // 분기 이동
     const target = signUp.toLowerCase() === 'true'
         ? '/select-department'
         : '/notice';
-
+    console.log(target);
+    appNavigate(target);
     appNavigate(target, { replace: true });
 };
 
