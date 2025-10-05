@@ -182,6 +182,10 @@ export function BookMarkPage(): JSX.Element {
                     </section>
                 ))}
 
+                {notices.length == 0 && (
+                    <div className="np-empty">북마크한 공지사항이 없습니다.</div>
+                )}
+
                 {/* ───────── 로딩 오버레이 (검색/헤더 유지) ───────── */}
                 {loading && (
                     <div className="np-loading-overlay">
