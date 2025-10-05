@@ -1,4 +1,4 @@
-import React, { JSX, useEffect, useState } from "react";
+import React, {JSX, useEffect, useMemo, useState} from "react";
 import { fetchUserInfo } from "../../services/fetchUserInfo";
 import type { UserInfo } from "../../types/user";
 import type { BookMark } from "../../types/bookmark";
@@ -25,14 +25,6 @@ const tabColorMap = new Map<string, string>([
     ["department", LAVENDER_PURPLE],
 ]);
 
-/* 정렬 우선순위 테이블 */
-const TYPE_ORDER: Record<GeneralTabKey, number> = {
-    general: 0,
-    scholarship: 1,
-    dormitory: 2,
-    department: 3,
-};
-
 /* 들어오는 문자열을 내부 키로 정규화 */
 const normalizeType = (raw?: string): GeneralTabKey => {
     const head = (raw ?? "").toLowerCase().split(".")[0]; // 'department.software' → 'department'
@@ -45,6 +37,41 @@ const normalizeType = (raw?: string): GeneralTabKey => {
     }
 };
 
+// 섹션 데이터 타입
+type NoticeSection = {
+    key: GeneralTabKey;
+    label: string;
+    items: BookMark[];
+    count: number;
+};
+const SECTION_ORDER: GeneralTabKey[] = ["general", "scholarship", "dormitory", "department"];
+const SECTION_NAME_LABEL: Record<GeneralTabKey, string> = {
+    general: "일반 공지사항",
+    scholarship: "장학 공지사항",
+    dormitory: "생활관 공지사항",
+    department: "학과 공지사항",
+};
+function groupNoticesByType(list: BookMark[]): NoticeSection[] {
+    const sectionList: Record<GeneralTabKey, BookMark[]> = {
+        general: [], scholarship: [], dormitory: [], department: []
+    };
+
+    // 한 번에 그룹핑
+    for (const n of list) {
+        sectionList[normalizeType(n.type)].push(n);
+    }
+
+    // 섹션 배열로 변환
+    return SECTION_ORDER
+        .map((k) => ({
+            key: k,
+            label: SECTION_NAME_LABEL[k],
+            items: sectionList[k],
+            count: sectionList[k].length,
+        }))
+        .filter((s) => s.count > 0); // 비어있으면 렌더 스킵
+}
+
 const getLeftBarColor = (cat?: string)=>
     tabColorMap.get(cat ?? "") ?? LAVENDER_PURPLE;
 
@@ -53,22 +80,12 @@ export function BookMarkPage(): JSX.Element {
 
     // 목록/페이지
     const [notices, setNotices] = useState<BookMark[]>([]);
-    // const [page, setPage] = useState(0);
-    // const [totalPages, setTotalPages] = useState(1);
 
     // 상태
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [status, setStatus] = useState<number | string | null>(null);
 
-    // 공지사항 type으로 정렬
-    function sortNoticesByType(list: BookMark[]): BookMark[] {
-        return [...list].sort((a, b) => {
-            const ka = normalizeType(a.type);
-            const kb = normalizeType(b.type);
-            return TYPE_ORDER[ka] - TYPE_ORDER[kb];
-        });
-    }
 
     // 북마크 ID 집합
     const [bookmarksID, setBookmarksID] = useState<Set<string>>(new Set());
@@ -76,7 +93,7 @@ export function BookMarkPage(): JSX.Element {
         setLoading(true);
         try {
             const items = await listNoticeBookmarks();
-            setNotices(sortNoticesByType(items)); // 화면에 표시될 공지 목록을 업데이트
+            setNotices(items);
             setBookmarksID(new Set(items.map(b => String(b.id))));
         } catch (e) {
             console.warn('북마크 목록 로드 실패:', e);
@@ -130,32 +147,40 @@ export function BookMarkPage(): JSX.Element {
         }
     };
 
+    // 항목 별로 구분한 공지사항
+    const sections = useMemo(
+        () => groupNoticesByType(notices),
+        [notices]
+    );
+
 
     return (
         <div className="np-root">
             <div className="np-bookmark-container">
-                {/* ───────── 공지 카드 리스트 ───────── */}
-                <ul className="np-card-list">
-                    {notices.length > 0 ? (
-                        notices.map((n) => (
-                            <li key={n.id}>
-                                <NoticeCard
-                                    notice={n}
-                                    // leftBarColor={AURA_BLUE}
-                                    leftBarColor={getLeftBarColor(n.type)}
-                                    dateColor={STONE_GRAY}
-                                    heartColor="#EF4C43"
-                                    heartOffColor="#C0C5CF"
-                                    isBookmarked={bookmarksID.has(n.id)}       // {/* ✅ 하트 ON/OFF */}
-                                    onToggleBookmark={handleToggleBookmark}   // {/* ✅ 클릭 처리 */}
-                                    onNoticeClick={handleNoticeClick}
-                                />
-                            </li>
-                        ))
-                    ) : (
-                        <li className="np-empty">저장한 공지사항이 없습니다.</li>
-                    )}
-                </ul>
+                {sections.map((sec) => (
+                    <section key={sec.key} className="np-section">
+                        <div className="np-section-header">
+                            <h3 className="np-section-title">{sec.label}</h3>
+                        </div>
+
+                        <ul className="np-card-list">
+                            {sec.items.map((n) => (
+                                <li key={n.id}>
+                                    <NoticeCard
+                                        notice={n}
+                                        leftBarColor={getLeftBarColor(n.type)}
+                                        dateColor={STONE_GRAY}
+                                        heartColor="#EF4C43"
+                                        heartOffColor="#C0C5CF"
+                                        isBookmarked={bookmarksID.has(n.id)}       // {/* ✅ 하트 ON/OFF */}
+                                        onToggleBookmark={handleToggleBookmark}   // {/* ✅ 클릭 처리 */}
+                                        onNoticeClick={handleNoticeClick}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                ))}
 
                 {/* ───────── 로딩 오버레이 (검색/헤더 유지) ───────── */}
                 {loading && (
