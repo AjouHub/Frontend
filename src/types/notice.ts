@@ -14,6 +14,14 @@ export type NoticePage = {
     pageable: {
         pageNumber: number;
         pageSize: number;
+        offset?: number;
+        sort?: {
+            sorted: boolean;
+            unsorted: boolean;
+            empty: boolean;
+        }
+        paged?: boolean;
+        unpaged?: boolean;
     };
     totalElements: number;
     totalPages: number;
@@ -22,4 +30,5 @@ export type NoticePage = {
     numberOfElements: number;
     size: number;
     number: number;
+    empty?: false;
 };

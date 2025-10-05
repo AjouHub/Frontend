@@ -5,3 +5,7 @@
 .is-web .np-bookmark-container {
     padding-bottom: calc(var(--card-gap) + var(--bottom-tab-bar-height));
 }
+
+.np-section-title {
+    margin-left: 16px
+}

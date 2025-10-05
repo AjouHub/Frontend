@@ -21,7 +21,6 @@ type NoticeCardProps = {
         category?: string;
         department?: string;
         date: string;
-        tags?: string[];
     };
     leftBarColor: string;
     dateColor: string;
@@ -90,30 +89,19 @@ export default function NoticeCard({
                 </a>
 
                 <div className="np-card-tags">
-                    {notice.tags?.length ? (
-                        notice.tags.map((t) => (
-                            <span key={t} className="np-card-tag">#{t}</span>
-                        ))
-                    ) : (
-                        <>
-                            {/* category가 'none'이 아닐 때만 렌더링 */}
-                            {notice.category && notice.category !== 'none' && (
-                                <span className="np-card-tag">#{notice.category}</span>
-                            )}
-                            {departmentDisplayName && (
-                                <span className="np-card-tag">#{departmentDisplayName}</span>
-                            )}
-                            {isNew(notice.date, 1) && (
-                                <span className="np-card-tag">#오늘</span>
-                            )}
-                        </>
+                    {isNew(notice.date, 1) && (
+                        <span className="np-card-tag today">#오늘</span>
+                    )}
+                    {notice.category && notice.category !== 'none' && (
+                        <span className="np-card-tag">#{notice.category}</span>
+                    )}
+                    {departmentDisplayName && (
+                        <span className="np-card-tag">#{departmentDisplayName}</span>
                     )}
                 </div>
             </div>
 
             {/* 우측 – 하트 + 날짜 */}
-
-
             <div className="np-card-side">
                 <button
                     className="np-heart"
