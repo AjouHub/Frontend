@@ -63,13 +63,26 @@ export default function SelectDepartmentPage() {
     };
 
     // 설정 완료
-    const handleOnClick  = () => {
-        notificationPrefsRef.current?.save();
-        appNavigate('/notice');
-    }
-    
-    // ref 리모컨 생성
-    const notificationPrefsRef = useRef<NotificationPreferencesHandle>(null);
+    const handleOnClick = async () => {
+        try {
+            await Promise.all([
+                generalRef.current?.save?.(),
+                scholarshipRef.current?.save?.(),
+                dormRef.current?.save?.(),
+                hasDepartments ? deptRef.current?.save?.() : Promise.resolve(),
+            ]);
+        } finally {
+            // 앱(네이티브)에게 온보딩 종료 알리기 (웹에서는 그냥 무시됨)
+            window.AURA?.onboardingComplete?.();
+            appNavigate('/notice', { replace: true });
+        }
+    };
+
+    // 섹션별 리모컨
+    const generalRef = useRef<NotificationPreferencesHandle>(null);
+    const scholarshipRef = useRef<NotificationPreferencesHandle>(null);
+    const dormRef = useRef<NotificationPreferencesHandle>(null);
+    const deptRef = useRef<NotificationPreferencesHandle>(null);
 
     return (
         <div className="sdp-root">
@@ -95,7 +108,7 @@ export default function SelectDepartmentPage() {
                         <div className="fcm-item">
                             <h3 className="fcm-item-title">일반 공지 알림</h3>
                             <NotificationPreferences
-                                ref={notificationPrefsRef}
+                                ref={generalRef}
                                 allKeywords={keywords}
                                 loading={loading}
                                 category="general"
@@ -104,7 +117,7 @@ export default function SelectDepartmentPage() {
                         <div className="fcm-item">
                             <h3 className="fcm-item-title">장학 공지 알림</h3>
                             <NotificationPreferences
-                                ref={notificationPrefsRef}
+                                ref={scholarshipRef}
                                 allKeywords={keywords}
                                 loading={loading}
                                 category="scholarship"
@@ -113,7 +126,7 @@ export default function SelectDepartmentPage() {
                         <div className="fcm-item">
                             <h3 className="fcm-item-title">생활관 공지 알림</h3>
                             <NotificationPreferences
-                                ref={notificationPrefsRef}
+                                ref={dormRef}
                                 allKeywords={keywords}
                                 loading={loading}
                                 category="dormitory"
@@ -133,7 +146,7 @@ export default function SelectDepartmentPage() {
                             {/* 학과가 있을 때만 NotificationPreferences를 활성화하여 렌더링 */}
                             <div style={{ pointerEvents: hasDepartments ? 'auto' : 'none' }}>
                                 <NotificationPreferences
-                                    ref={notificationPrefsRef}
+                                    ref={deptRef}
                                     allKeywords={keywords}
                                     loading={loading}
                                     // 첫 번째 학과를 category로 전달, 없으면 빈 문자열
