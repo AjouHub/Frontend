@@ -12,6 +12,7 @@ import {useEffect} from "react";
 import {setAppNavigate} from "./utils/router";
 import {fetchUserAndNotifyNativeApp} from "./services/auth.service";
 import {LoginErrorPage} from "./pages/LoginErrorPage";
+import RequireOnboarding from "./layouts/RequireDepartment";
 
 
 function App() {
@@ -33,7 +34,11 @@ function App() {
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
 
-                <Route element={<AppLayout />}>
+                <Route element={
+                    <RequireOnboarding>
+                        <AppLayout />
+                    </RequireOnboarding>
+                }>
                     <Route index element={<NoticePage />} />
 
                     {/* 탭 항목들 */}
