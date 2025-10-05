@@ -12,7 +12,7 @@ import {useEffect} from "react";
 import {setAppNavigate} from "./utils/router";
 import {fetchUserAndNotifyNativeApp} from "./services/auth.service";
 import {LoginErrorPage} from "./pages/LoginErrorPage";
-import RequireOnboarding from "./layouts/RequireDepartment";
+import RequireOnboarding from "./layouts/RouteGuard";
 
 
 function App() {
@@ -29,29 +29,25 @@ function App() {
 
     return (
         <>
-            {/*<NativeBridge />*/}
-
             <Routes>
+                {/* 가드 밖 */}
                 <Route path="/login" element={<LoginPage />} />
-
-                <Route element={
-                    <RequireOnboarding>
-                        <AppLayout />
-                    </RequireOnboarding>
-                }>
-                    <Route index element={<NoticePage />} />
-
-                    {/* 탭 항목들 */}
-                    <Route path="/notice" element={<NoticePage />} />
-                    <Route path="/bookmark" element={<BookMarkPage />} />
-                    <Route path="/settings" element={<SettingsPage />} />
-
-                    {/* 탭엔 없지만 화면은 보여야 하는 경로들도 모두 여기 */}
+                <Route path="/auth/error" element={<LoginErrorPage />} />
+                <Route element={<AppLayout />}>
                     <Route path="/select-department" element={<SelectDepartmentPage />} />
-                    <Route path="/auth/error" element={<LoginErrorPage />} />
-
-                    <Route path="*" element={<NoticePage />} />
                 </Route>
+
+                {/* 가드 안 (보호구간) */}
+                <Route element={<RequireOnboarding />}>
+                    <Route element={<AppLayout />}>
+                        <Route index element={<NoticePage />} />
+                        <Route path="/notice" element={<NoticePage />} />
+                        <Route path="/bookmark" element={<BookMarkPage />} />
+                        <Route path="/settings" element={<SettingsPage />} />
+                    </Route>
+                </Route>
+
+                <Route path="*" element={<NoticePage />} />
             </Routes>
 
             {/* ✅ 전역 토스트 컨테이너 (앱에서 1번만 렌더) */}
