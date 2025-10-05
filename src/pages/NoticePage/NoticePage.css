@@ -210,7 +210,7 @@ body{
     position: static;
     left:8px;
     right:8px;
-    bottom:0px;
+    bottom:0;
 
     width: calc(100% - 16px);         /* 좌우 8px 여백 = 예전 닫힘 상태와 동일 */
     height:35px;

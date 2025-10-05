@@ -1,9 +1,7 @@
-import React, { JSX, useEffect, useMemo, useState } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import { fetchUserInfo } from "../../services/fetchUserInfo";
-import { fetchNotices } from "../../services/fetchNotices";
 import type { UserInfo } from "../../types/user";
 import type { BookMark } from "../../types/bookmark";
-import { Global_Tags } from "../../utils/tags";
 import NoticeCard from "../../components/NoticeCard";
 import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
 import "./BookMarkPage.css";
@@ -17,7 +15,6 @@ const TEAL_GREEN = "#0D47A1";
 const LAVENDER_PURPLE = "#000080";
 
 type GeneralTabKey = "general" | "scholarship" | "dormitory" | "department";
-type DeptKey = string;
 
 
 // 북마크 카드 색깔
@@ -56,8 +53,8 @@ export function BookMarkPage(): JSX.Element {
 
     // 목록/페이지
     const [notices, setNotices] = useState<BookMark[]>([]);
-    const [page, setPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(1);
+    // const [page, setPage] = useState(0);
+    // const [totalPages, setTotalPages] = useState(1);
 
     // 상태
     const [loading, setLoading] = useState(true);
