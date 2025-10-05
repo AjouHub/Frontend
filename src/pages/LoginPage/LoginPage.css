@@ -49,7 +49,7 @@ html.aura-fullscreen .lp-root {
 }
 
 /* === 타이포 & 버튼 === */
-.lp-welcome-text { font-size: 18px; font-weight: 600; color: #6B7280; margin: 0 0 8px; }
+.lp-welcome-text { font-size: 20px; font-weight: 750; color: #6B7280; margin: 0 0 8px; }
 
 /* 로고: 단색 폴백 + 지원시 그라데이션 */
 .lp-logo {
@@ -64,7 +64,9 @@ html.aura-fullscreen .lp-root {
     }
 }
 
-.lp-introduction { font-size: 16px; font-weight: 500; color: #4B5563; margin: 0 0 28px; }
+.lp-introduction { font-size: 17px; font-weight: 600; color: #4B5563; margin: 0 0 28px; }
+.lp-subtxt { font-size: 14px; color: #77828c; font-weight: 520; margin: 0 0 28px; }
+
 
 .lp-google-button {
     display: inline-flex; align-items: center; justify-content: center; gap: 12px;
@@ -72,6 +74,7 @@ html.aura-fullscreen .lp-root {
     padding: 12px 64px; font-size: 16px; font-weight: 700; cursor: pointer;
     box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
     transition: background-color .2s, box-shadow .2s, transform .02s;
+    margin-bottom: 8px;
 }
 .lp-google-button:hover { background: #F9FAFB; }
 .lp-google-button:active { transform: translateY(1px); }

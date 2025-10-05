@@ -5,7 +5,7 @@ import {appNavigate} from "../../utils/router";
 export function LoginErrorPage() {
 
     useEffect(() => {
-        notify.info('아주대 계정으로만 로그인하세요.')
+        notify.info('아주대학교 계정만 로그인 가능합니다.')
         appNavigate('/login');
     }, []);
 
