@@ -1,4 +1,3 @@
-// pages/NoticePage/index.tsx
 import React, { JSX, useEffect, useMemo, useState } from "react";
 import { fetchUserInfo } from "../../services/fetchUserInfo";
 import { fetchNotices } from "../../services/fetchNotices";

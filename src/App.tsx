@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import {useEffect} from "react";
 import {setAppNavigate} from "./utils/router";
 import {fetchUserAndNotifyNativeApp} from "./services/auth.service";
+import {LoginErrorPage} from "./pages/LoginErrorPage";
 
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
 
                     {/* 탭엔 없지만 화면은 보여야 하는 경로들도 모두 여기 */}
                     <Route path="/select-department" element={<SelectDepartmentPage />} />
+                    <Route path="/auth/error" element={<LoginErrorPage />} />
 
                     <Route path="*" element={<NoticePage />} />
                 </Route>
