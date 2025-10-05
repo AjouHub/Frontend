@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react';
 import type { Keyword } from '../../types/keywords';
 import {
     listKeywordSubscriptions,
@@ -18,6 +18,11 @@ const categoryLabelMap: Record<string, string> = {
     dormitory: '생활관 공지사항',
 };
 
+// 부모에게 노출할 함수의 타입. 리모컨의 버튼 정의
+export interface NotificationPreferencesHandle {
+    save: () => Promise<void>;
+}
+
 // 부모로부터 받을 props 타입을 정의합니다.
 interface NotificationPreferencesProps {
     allKeywords: Keyword[];
@@ -27,7 +32,7 @@ interface NotificationPreferencesProps {
     departments?: string[];
 }
 
-export default function NotificationPreferences({ allKeywords, loading, category, isDepartment = false, departments = [] }: NotificationPreferencesProps) {
+const NotificationPreferences = forwardRef<NotificationPreferencesHandle, NotificationPreferencesProps>(({ allKeywords, loading, category, isDepartment = false, departments = [] }, ref) => {
     const [initialSubs, setInitialSubs] = useState<number[]>([]);
     const [selected, setSelected] = useState<Set<number>>(new Set());
     const [subsLoading, setSubsLoading] = useState(true); // 구독 정보 로딩 상태
@@ -56,6 +61,9 @@ export default function NotificationPreferences({ allKeywords, loading, category
 
     // 키워드 목록을 보여줘야 하는 조건
     const shouldShowKeywords = isNotiEnabled && isKeywordNotice;
+
+    // ref가 있으면 부모가 제어하는 것으로 간주
+    const isExternallyControlled = !!ref;
 
 
     useEffect(() => {
@@ -249,6 +257,11 @@ export default function NotificationPreferences({ allKeywords, loading, category
         return `${targetLabel}의 모든 알림을 받습니다.`;
     }, [isNotiEnabled, isKeywordNotice, targetLabel]);
 
+    // useImperativeHandle을 사용해 onSave 함수를 'save'라는 이름으로 외부에 노출
+    useImperativeHandle(ref, () => ({
+        save: onSave
+    }));
+
     const isBusy = loading || subsLoading || saving
 
     return (
@@ -370,18 +383,22 @@ export default function NotificationPreferences({ allKeywords, loading, category
                             </div>
 
                             {/* 저장 바 */}
-                            <div className="save-section">
-                                <button onClick={onSave} disabled={!changed || saving} className="save-button">
-                                    {saving ? '저장 중…' : '변경사항 저장'}
-                                </button>
-                                {!changed && (
-                                    <span className="save-status-message">변경된 내용이 없습니다.</span>
-                                )}
-                            </div>
+                            {!isExternallyControlled && (
+                                <div className="save-section">
+                                    <button onClick={onSave} disabled={!changed || saving} className="save-button">
+                                        {saving ? '저장 중…' : '변경사항 저장'}
+                                    </button>
+                                    {!changed && (
+                                        <span className="save-status-message">변경된 내용이 없습니다.</span>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
             </div>
         </div>
     );
-}
+});
+
+export default NotificationPreferences;

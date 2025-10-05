@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
-import NotificationPreferences from "../SettingsPage/NotificationPreferences";
+import NotificationPreferences, {NotificationPreferencesHandle} from "../SettingsPage/NotificationPreferences";
 import {Keyword} from "../../types/keywords";
 import {addDepartment, listDepartments, listKeywords, removeDepartment} from "../../services/settings.service";
 import DepartmentSelector from "../SettingsPage/DepartmentSelector";
@@ -66,8 +66,12 @@ export default function SelectDepartmentPage() {
 
     // 설정 완료
     const handleOnClick  = () => {
+        notificationPrefsRef.current?.save();
         appNavigate('/notice');
     }
+    
+    // ref 리모컨 생성
+    const notificationPrefsRef = useRef<NotificationPreferencesHandle>(null);
 
     return (
         <div className="sdp-root">
@@ -93,6 +97,7 @@ export default function SelectDepartmentPage() {
                         <div className="fcm-item">
                             <h3 className="fcm-item-title">일반 공지 알림</h3>
                             <NotificationPreferences
+                                ref={notificationPrefsRef}
                                 allKeywords={keywords}
                                 loading={loading}
                                 category="general"
@@ -101,6 +106,7 @@ export default function SelectDepartmentPage() {
                         <div className="fcm-item">
                             <h3 className="fcm-item-title">장학 공지 알림</h3>
                             <NotificationPreferences
+                                ref={notificationPrefsRef}
                                 allKeywords={keywords}
                                 loading={loading}
                                 category="scholarship"
@@ -109,6 +115,7 @@ export default function SelectDepartmentPage() {
                         <div className="fcm-item">
                             <h3 className="fcm-item-title">생활관 공지 알림</h3>
                             <NotificationPreferences
+                                ref={notificationPrefsRef}
                                 allKeywords={keywords}
                                 loading={loading}
                                 category="dormitory"
@@ -128,6 +135,7 @@ export default function SelectDepartmentPage() {
                             {/* 학과가 있을 때만 NotificationPreferences를 활성화하여 렌더링 */}
                             <div style={{ pointerEvents: hasDepartments ? 'auto' : 'none' }}>
                                 <NotificationPreferences
+                                    ref={notificationPrefsRef}
                                     allKeywords={keywords}
                                     loading={loading}
                                     // 첫 번째 학과를 category로 전달, 없으면 빈 문자열
