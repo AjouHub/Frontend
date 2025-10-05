@@ -1,10 +1,10 @@
 // pages/NoticePage/index.tsx
 import React, { JSX, useEffect, useMemo, useState } from "react";
 import "./NoticePage.css";
-import { fetchUserInfo } from "../../services/fetchUserInfo";
+// import { fetchUserInfo } from "../../services/fetchUserInfo";
 import { fetchNotices } from "../../services/fetchNotices";
 import type { Notice } from "../../types/notice";
-import type { UserInfo } from "../../types/user";
+// import type { UserInfo } from "../../types/user";
 import type { Keyword } from "../../types/keywords";
 import { Global_Tags } from "../../utils/tags";
 import NoticeCard from "../../components/NoticeCard";
@@ -14,7 +14,7 @@ import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.
 // import { departmentNameMap } from "../../components/departmentMap";
 import { useLocation, useOutletContext } from 'react-router-dom';
 import {departmentNameMap} from "../../components/departmentMap";
-import {handleOAuthCallback} from "../../services/auth.service";
+// import {handleOAuthCallback} from "../../services/auth.service";
 // import { isAppEnv } from '../../services/auth.service';
 
 
@@ -117,9 +117,9 @@ export default function NoticePage(): JSX.Element {
     // 북마크 ID 집합
     const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
 
-    useEffect(() => {
-        handleOAuthCallback();
-    }, []);
+    // useEffect(() => {
+    //     handleOAuthCallback();
+    // }, []);
 
     // 초기 데이터 (유저 + 추천 태그)
     useEffect(() => {
