@@ -1,4 +1,4 @@
-import {Routes, Route, useNavigate} from 'react-router-dom';
+import {Routes, Route, useNavigate, useLocation} from 'react-router-dom';
 import AppLayout from './layouts/AppLayout';
 import LoginPage from './pages/LoginPage';
 import SelectDepartmentPage from "./pages/SelectDepartmentPage";
@@ -17,40 +17,54 @@ import RequireOnboarding from "./layouts/RouteGuard";
 
 function App() {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        setAppNavigate((path, opts) => navigate(path, opts));
+    }, [navigate]);
+
+    // ✅ OAuth 콜백 처리
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const signUp = params.get('signUp');
+
+        if (signUp != null) {
+            // ✅ signUp=true면 sessionStorage에 플래그 저장
+            if (signUp.toLowerCase() === 'true') {
+                sessionStorage.setItem('justSignedUp', '1');
+            }
+
+            const target = signUp.toLowerCase() === 'true'
+                ? '/select-department'
+                : '/notice';
+
+            console.log('OAuth callback detected, navigating to:', target);
+            navigate(target, { replace: true });
+        }
+    }, [location.search, navigate]);
 
     // 앱이 처음 로드될 때 사용자 정보를 가져오고 네이티브에 알림
     useEffect(() => {
         fetchUserAndNotifyNativeApp();
     }, []);
 
-    useEffect(() => {
-        setAppNavigate((path, opts) => navigate(path, opts));
-    }, [navigate]);
-
     return (
         <>
             <Routes>
-                {/* 가드 밖 */}
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/auth/error" element={<LoginErrorPage />} />
-                <Route element={<AppLayout />}>
-                    <Route path="/select-department" element={<SelectDepartmentPage />} />
-                </Route>
-
-                {/* 가드 안 (보호구간) */}
                 <Route element={<RequireOnboarding />}>
                     <Route element={<AppLayout />}>
                         <Route index element={<NoticePage />} />
                         <Route path="/notice" element={<NoticePage />} />
                         <Route path="/bookmark" element={<BookMarkPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/select-department" element={<SelectDepartmentPage />} />
+                        <Route path="/auth/error" element={<LoginErrorPage />} />
+                        <Route path="*" element={<NoticePage />} />
                     </Route>
                 </Route>
-
-                <Route path="*" element={<NoticePage />} />
             </Routes>
 
-            {/* ✅ 전역 토스트 컨테이너 (앱에서 1번만 렌더) */}
             <ToastContainer
                 position="top-center"
                 autoClose={2200}
