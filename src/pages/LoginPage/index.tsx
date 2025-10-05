@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { handleOAuthCallback, redirectToGoogleOAuth } from "../../services/auth.service";
+// import { handleOAuthCallback, redirectToGoogleOAuth } from "../../services/auth.service";
 import "./LoginPage.css"
+import {redirectToGoogleOAuth} from "../../services/auth.service";
 
 // Google 로고 아이콘 SVG
 const GoogleIcon = () => (
@@ -15,9 +16,9 @@ const GoogleIcon = () => (
 
 
 export default function LoginPage() {
-    useEffect(() => {
-        handleOAuthCallback();
-    }, []);
+    // useEffect(() => {
+    //     handleOAuthCallback();
+    // }, []);
 
     // 풀스크린 클래스 + JS 기반 vh 보정
     useEffect(() => {
