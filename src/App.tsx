@@ -26,43 +26,46 @@ function App() {
     }, [navigate]);
 
     useEffect(() => {
-        if (hasProcessedOAuth.current) {
+        // ✅ sessionStorage에서 플래그 확인
+        const processed = sessionStorage.getItem('oauthProcessed');
+        if (processed === '1') {
+            console.log('[App] OAuth already processed in this session');
             return;
         }
 
-        // ✅ React Router 대신 window.location 직접 사용
         const params = new URLSearchParams(window.location.search);
         const signUp = params.get('signUp');
 
-        console.log('[App] OAuth check (window.location):', JSON.stringify({
-            windowPathname: window.location.pathname,
+        console.log('[App] OAuth check:', JSON.stringify({
             windowSearch: window.location.search,
-            reactRouterPathname: location.pathname,
-            reactRouterSearch: location.search,
             signUp: signUp,
-            hasProcessedOAuth: hasProcessedOAuth.current
+            processed: processed
         }));
 
         if (signUp !== null) {
-            hasProcessedOAuth.current = true;
+            // 처리했다고 표시
+            sessionStorage.setItem('oauthProcessed', '1');
+
+            // URL에서 쿼리 제거
+            const newParams = new URLSearchParams(window.location.search);
+            newParams.delete('signUp');
+            const newSearch = newParams.toString();
+            const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '');
+            window.history.replaceState(null, '', newUrl);
 
             if (signUp.toLowerCase() === 'true') {
                 sessionStorage.setItem('justSignedUp', '1');
-                console.log('[App] ✅ Set justSignedUp=1 in sessionStorage');
-                console.log('[App] 🚀 Navigating to /select-department');
+                console.log('[App] ✅ Set justSignedUp=1, removed signUp query');
 
                 navigate('/select-department', {
                     replace: true,
                     state: { signUp: true }
                 });
             } else {
-                console.log('[App] 🚀 Navigating to /notice (signUp=false)');
                 navigate('/notice', { replace: true });
             }
-        } else {
-            console.log('[App] No signUp query in window.location');
         }
-    }, [navigate]); // location 의존성 제거
+    }, [navigate]);
 
     // 앱이 처음 로드될 때 사용자 정보를 가져오고 네이티브에 알림
     useEffect(() => {
