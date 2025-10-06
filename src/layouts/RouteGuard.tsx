@@ -8,16 +8,21 @@ export default function RequireOnboarding() {
     const [isChecking, setIsChecking] = useState(true);
 
     useEffect(() => {
+        // ✅ window.location 직접 사용
+        const windowParams = new URLSearchParams(window.location.search);
         const params = new URLSearchParams(location.search);
+        const byWindowQuery = windowParams.get('signUp') === 'true';
         const byQuery = params.get('signUp') === 'true';
         const byState = (location.state as any)?.signUp === true;
         const bySession = sessionStorage.getItem('justSignedUp') === '1';
-        const shouldSignUp = byQuery || byState || bySession;
+        const shouldSignUp = byWindowQuery || byQuery || byState || bySession;
 
         console.log('[RequireOnboarding] Check:', JSON.stringify({
+            windowSearch: window.location.search,
+            reactRouterSearch: location.search,
             pathname: location.pathname,
-            search: location.search,
             state: location.state,
+            byWindowQuery,
             byQuery,
             byState,
             bySession,
@@ -29,7 +34,7 @@ export default function RequireOnboarding() {
 
         if (bySession && shouldSignUp) {
             sessionStorage.removeItem('justSignedUp');
-            console.log('[RequireOnboarding] ✅ Consumed and removed justSignedUp flag');
+            console.log('[RequireOnboarding] ✅ Consumed justSignedUp flag');
         }
 
         setIsChecking(false);
