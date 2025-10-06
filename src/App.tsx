@@ -27,7 +27,6 @@ function App() {
 
     // OAuth 콜백 처리 (개선된 버전)
     useEffect(() => {
-        // 이미 처리했으면 스킵
         if (hasProcessedOAuth.current) {
             return;
         }
@@ -35,28 +34,31 @@ function App() {
         const params = new URLSearchParams(location.search);
         const signUp = params.get('signUp');
 
-        console.log('[App] Current location:', {
+        console.log('[App] OAuth check:', JSON.stringify({
             pathname: location.pathname,
             search: location.search,
-            signUp: signUp
-        });
+            signUp: signUp,
+            hasProcessedOAuth: hasProcessedOAuth.current
+        }));
 
         if (signUp !== null) {
             hasProcessedOAuth.current = true;
 
-            // ✅ signUp=true면 sessionStorage에 플래그 저장
             if (signUp.toLowerCase() === 'true') {
                 sessionStorage.setItem('justSignedUp', '1');
-                console.log('[App] Set justSignedUp flag in sessionStorage');
+                console.log('[App] ✅ Set justSignedUp=1 in sessionStorage');
+                console.log('[App] 🚀 Navigating to /select-department with state');
 
-                // 앱 환경에서는 직접 navigate 대신 state로 전달
                 navigate('/select-department', {
                     replace: true,
                     state: { signUp: true }
                 });
             } else {
+                console.log('[App] 🚀 Navigating to /notice (signUp=false)');
                 navigate('/notice', { replace: true });
             }
+        } else {
+            console.log('[App] No signUp query, skipping OAuth processing');
         }
     }, [location.search, navigate]);
 
