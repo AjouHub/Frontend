@@ -26,7 +26,7 @@ function App() {
     }, [navigate]);
 
     useEffect(() => {
-        // ✅ sessionStorage에서 플래그 확인
+        // sessionStorage에서 플래그 확인
         const processed = sessionStorage.getItem('oauthProcessed');
         if (processed === '1') {
             console.log('[App] OAuth already processed in this session');
