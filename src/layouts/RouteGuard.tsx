@@ -8,50 +8,44 @@ export default function RequireOnboarding() {
     const [isChecking, setIsChecking] = useState(true);
 
     useEffect(() => {
-        // 디버깅을 위한 로그
-        console.log('[RequireOnboarding] Location changed:', {
-            pathname: location.pathname,
-            search: location.search,
-            state: location.state,
-            key: location.key
-        });
-
-        // signUp 플래그 체크
         const params = new URLSearchParams(location.search);
         const byQuery = params.get('signUp') === 'true';
         const byState = (location.state as any)?.signUp === true;
         const bySession = sessionStorage.getItem('justSignedUp') === '1';
-
         const shouldSignUp = byQuery || byState || bySession;
 
-        console.log('[RequireOnboarding] SignUp flags:', {
+        console.log('[RequireOnboarding] Check:', JSON.stringify({
+            pathname: location.pathname,
+            search: location.search,
+            state: location.state,
             byQuery,
             byState,
             bySession,
-            shouldSignUp
-        });
+            shouldSignUp,
+            sessionStorageValue: sessionStorage.getItem('justSignedUp')
+        }));
 
         setSignUp(shouldSignUp);
 
-        // one-shot 플래그는 소모 (단, 실제로 사용된 경우에만)
         if (bySession && shouldSignUp) {
             sessionStorage.removeItem('justSignedUp');
-            console.log('[RequireOnboarding] Removed justSignedUp from sessionStorage');
+            console.log('[RequireOnboarding] ✅ Consumed and removed justSignedUp flag');
         }
 
         setIsChecking(false);
-    }, [location.pathname, location.search, location.state]); // 의존성 수정
+    }, [location.pathname, location.search, location.state]);
 
-    // 초기 체크 중일 때는 렌더링 대기
+    // 렌더 부분에도 로그 추가
     if (isChecking) {
-        return null; // 또는 로딩 스피너
+        console.log('[RequireOnboarding] Still checking...');
+        return null;
     }
 
-    // signUp일 때만 온보딩으로 강제 이동
     if (signUp && location.pathname !== '/select-department') {
-        console.log('[RequireOnboarding] Redirecting to /select-department');
-        return <Navigate to="/select-department" replace state={{ from: location }} />;
+        console.log('[RequireOnboarding] 🚀 Redirecting to /select-department (signUp=true)');
+        return <Navigate to="/select-department" replace state={{from: location}}/>;
     }
 
-    return <Outlet />;
+    console.log('[RequireOnboarding] ✅ Rendering Outlet (signUp=' + signUp + ')');
+    return <Outlet/>;
 }
