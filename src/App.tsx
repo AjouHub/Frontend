@@ -25,18 +25,20 @@ function App() {
         setAppNavigate((path, opts) => navigate(path, opts));
     }, [navigate]);
 
-    // OAuth 콜백 처리 (개선된 버전)
     useEffect(() => {
         if (hasProcessedOAuth.current) {
             return;
         }
 
-        const params = new URLSearchParams(location.search);
+        // ✅ React Router 대신 window.location 직접 사용
+        const params = new URLSearchParams(window.location.search);
         const signUp = params.get('signUp');
 
-        console.log('[App] OAuth check:', JSON.stringify({
-            pathname: location.pathname,
-            search: location.search,
+        console.log('[App] OAuth check (window.location):', JSON.stringify({
+            windowPathname: window.location.pathname,
+            windowSearch: window.location.search,
+            reactRouterPathname: location.pathname,
+            reactRouterSearch: location.search,
             signUp: signUp,
             hasProcessedOAuth: hasProcessedOAuth.current
         }));
@@ -47,7 +49,7 @@ function App() {
             if (signUp.toLowerCase() === 'true') {
                 sessionStorage.setItem('justSignedUp', '1');
                 console.log('[App] ✅ Set justSignedUp=1 in sessionStorage');
-                console.log('[App] 🚀 Navigating to /select-department with state');
+                console.log('[App] 🚀 Navigating to /select-department');
 
                 navigate('/select-department', {
                     replace: true,
@@ -58,9 +60,9 @@ function App() {
                 navigate('/notice', { replace: true });
             }
         } else {
-            console.log('[App] No signUp query, skipping OAuth processing');
+            console.log('[App] No signUp query in window.location');
         }
-    }, [location.search, navigate]);
+    }, [navigate]); // location 의존성 제거
 
     // 앱이 처음 로드될 때 사용자 정보를 가져오고 네이티브에 알림
     useEffect(() => {
