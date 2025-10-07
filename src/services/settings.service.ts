@@ -202,3 +202,13 @@ export async function SetSubscibeType(category:string, mode:string): Promise<voi
     // 모드 저장 성공 시
     window.AURA?.applyTypeMode?.(category, mode) // mode: "ALL" | "KEYWORD" | "NONE"
 }
+
+
+// 로그아웃 쿠키 삭제
+export async function deleteCookie(): Promise<void> {
+    try {
+        await api.post('/auth/logout');
+    } catch (e) {
+        throw e;
+    }
+}
