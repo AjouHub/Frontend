@@ -28,7 +28,8 @@
 
     --bottom-tab-bar-height: 64px; /* 실제 BottomTabBar 높이에 맞춰 조정 */
 
-    --app-bar-height: 62px;
+    --appbar-web-height: 62px;
+    --appbar-app-height: 36px;
     --safe-top: 0px;
 }
 
@@ -106,10 +107,10 @@ body{
     border-bottom: 1px solid #E9ECF3;
 }
 .is-web .np-header-sticky {
-    top: calc(var(--app-bar-height) + var(--safe-top));
+    top: calc(var(--appbar-web-height) + var(--safe-top));
 }
 .is-app .no-header-sticky {
-    top: calc(var(--safe-top));
+    top: calc(var(--appbar-app-height) + var(--safe-top));
 }
 
 /* 상단 탭 */
