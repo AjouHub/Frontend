@@ -77,10 +77,15 @@ export default function SelectDepartmentPage() {
                 window.AURA.onboardingComplete();
             }
 
-            // 약간의 딜레이 후 이동 (서버 저장 완료 대기)
-            setTimeout(() => {
-                appNavigate('/notice', { replace: true });
-            }, 100);
+            // 세션 플래그 확실히 제거 (이중 안전장치)
+            sessionStorage.removeItem('justSignedUp');
+
+            // state를 명시적으로 비우고 이동
+            // replace: true로 히스토리 스택 정리
+            appNavigate('/notice', {
+                replace: true,
+                state: {} // state 완전히 비우기
+            });
         }
     };
 

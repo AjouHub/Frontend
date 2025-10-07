@@ -25,8 +25,8 @@ function App() {
         setAppNavigate((path, opts) => navigate(path, opts));
     }, [navigate]);
 
+    // App.tsx의 useEffect 수정
     useEffect(() => {
-        // sessionStorage에서 플래그 확인
         const processed = sessionStorage.getItem('oauthProcessed');
         if (processed === '1') {
             console.log('[App] OAuth already processed in this session');
@@ -34,7 +34,7 @@ function App() {
         }
 
         const params = new URLSearchParams(window.location.search);
-        const signUp = params.get('signUp');
+        const signUp = params.get('signUp') || params.get('signup'); // 대소문자 모두 체크
 
         console.log('[App] OAuth check:', JSON.stringify({
             windowSearch: window.location.search,
@@ -43,12 +43,12 @@ function App() {
         }));
 
         if (signUp !== null) {
-            // 처리했다고 표시
             sessionStorage.setItem('oauthProcessed', '1');
 
-            // URL에서 쿼리 제거
+            // URL에서 쿼리 파라미터 제거
             const newParams = new URLSearchParams(window.location.search);
             newParams.delete('signUp');
+            newParams.delete('signup');
             const newSearch = newParams.toString();
             const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '');
             window.history.replaceState(null, '', newUrl);
@@ -57,10 +57,8 @@ function App() {
                 sessionStorage.setItem('justSignedUp', '1');
                 console.log('[App] ✅ Set justSignedUp=1, removed signUp query');
 
-                navigate('/select-department', {
-                    replace: true,
-                    state: { signUp: true }
-                });
+                // state를 전달하지 않음 (세션 플래그로만 판단하도록)
+                navigate('/select-department', { replace: true });
             } else {
                 navigate('/notice', { replace: true });
             }
