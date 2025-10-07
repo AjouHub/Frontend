@@ -108,6 +108,9 @@ body{
 .is-web .np-header-sticky {
     top: calc(var(--app-bar-height) + var(--safe-top));
 }
+.is-app .no-header-sticky {
+    top: calc(var(--safe-top));
+}
 
 /* 상단 탭 */
 .np-tabs{
