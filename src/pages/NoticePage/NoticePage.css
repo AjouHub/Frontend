@@ -101,10 +101,12 @@ body{
 /* 상단 탭을 고정 */
 .np-header-sticky {
     position: sticky; /* iOS의 구형 WebKit에선 -webkit-sticky도 병행 가능 */
-    top: calc(var(--app-bar-height) + var(--safe-top));
     z-index: 200;                 /* 카드/로딩보다 위에 오도록 */
     background: #fff;             /* 스크롤 시 내용과 겹치지 않게 배경 */
     border-bottom: 1px solid #E9ECF3;
+}
+.is-web .np-header-sticky {
+    top: calc(var(--app-bar-height) + var(--safe-top));
 }
 
 /* 상단 탭 */
