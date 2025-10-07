@@ -29,7 +29,7 @@
     --bottom-tab-bar-height: 64px; /* 실제 BottomTabBar 높이에 맞춰 조정 */
 
     --appbar-web-height: 62px;
-    --appbar-app-height: 50px;
+    --appbar-app-height: 0px;
     --safe-top: 0px;
 }
 
@@ -109,7 +109,7 @@ body{
 .is-web .np-header-sticky {
     top: calc(var(--appbar-web-height) + var(--safe-top));
 }
-.is-app .no-header-sticky {
+.is-app .np-header-sticky {
     top: calc(var(--appbar-app-height) + var(--safe-top));
 }
 
