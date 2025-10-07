@@ -27,9 +27,9 @@ const AppBar: React.FC<AppBarProps> = ({ searchQuery, setSearchQuery }) => {
     const onClickSearch = () => setSearchOpen(true);
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newTerm = e.target.value;
-        // 2. 입력할 때마다 부모의 상태를 즉시 업데이트
+        // 입력할 때마다 부모의 상태를 즉시 업데이트
         setSearchQuery(newTerm);
-        // 3. URL도 실시간으로 업데이트 (히스토리가 쌓이지 않도록 replace: true 사용)
+        // URL도 실시간으로 업데이트 (히스토리가 쌓이지 않도록 replace: true 사용)
         navigate(`/notice?q=${encodeURIComponent(newTerm)}`, { replace: true });
     };
     const onSubmitSearch = (e: React.FormEvent) => {

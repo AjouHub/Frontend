@@ -276,7 +276,7 @@ export default function NoticePage(): JSX.Element {
         <div className="np-root">
             <div className="np-container">
                 {/* ───────── 상단 탭 ───────── */}
-                <div className="np-header-fullbleed">
+                <div className="np-header-fullbleed np-header-sticky">
                     <nav className="np-tabs">
                         {TOP_TABS.map((t) => {
                             const active = tab === t.key;

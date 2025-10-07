@@ -27,6 +27,9 @@
     --left-gap: 10px;       /* 왼쪽 여백 10px 유지 */
 
     --bottom-tab-bar-height: 64px; /* 실제 BottomTabBar 높이에 맞춰 조정 */
+
+    --app-bar-height: 62px;
+    --safe-top: 0px;
 }
 
 *{ box-sizing:border-box }
@@ -93,6 +96,15 @@ body{
     /* 어떤 컨테이너 안에 있어도 뷰포트 끝까지 확장 */
     margin-left:  calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+}
+
+/* 상단 탭을 고정 */
+.np-header-sticky {
+    position: sticky; /* iOS의 구형 WebKit에선 -webkit-sticky도 병행 가능 */
+    top: calc(var(--app-bar-height) + var(--safe-top));
+    z-index: 200;                 /* 카드/로딩보다 위에 오도록 */
+    background: #fff;             /* 스크롤 시 내용과 겹치지 않게 배경 */
+    border-bottom: 1px solid #E9ECF3;
 }
 
 /* 상단 탭 */
