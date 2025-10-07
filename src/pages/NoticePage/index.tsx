@@ -94,11 +94,14 @@ export default function NoticePage(): JSX.Element {
 
     // 서버 키워드 → phrase[] 로 변환
     async function fetchSuggestedTags(): Promise<string[]> {
-        // const list = await listKeywords();
-        setKeywords(await listKeywords());
-        const phrases = keywords
+        const list = await listKeywords();
+        setKeywords(list);
+        
+        // 방금 받아온 데이터를 직접 사용
+        const phrases = list
             .map((k) => (k.phrase ?? "").trim())
             .filter((p) => p.length > 0);
+
         return Array.from(new Set(phrases));
     }
 
