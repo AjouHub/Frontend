@@ -7,21 +7,16 @@ export default function RequireOnboarding() {
 
     // 매 렌더링마다 재평가 (useState 사용 X)
     const checkSignUp = () => {
-        // 1. 현재 URL의 쿼리 파라미터 체크
+        // 현재 URL의 쿼리 파라미터 체크
         const params = new URLSearchParams(location.search);
         const byQuery = params.get('signUp') === 'true' || params.get('signup') === 'true';
-
-        // 2. location state 체크
+        // location state 체크
         const byState = (location.state as any)?.signUp === true;
-
-        // 3. sessionStorage 체크
+        // sessionStorage 체크
         const bySession = sessionStorage.getItem('justSignedUp') === '1';
 
         console.log('[RequireOnboarding] Check:', JSON.stringify({
-            pathname: location.pathname,
-            byQuery,
-            byState,
-            bySession,
+            pathname: location.pathname, byQuery, byState, bySession,
             result: byQuery || byState || bySession
         }));
 
@@ -38,6 +33,16 @@ export default function RequireOnboarding() {
             }
         }
     }, [location.pathname]);
+
+    // signUp=false면 즉시 /notice 로 이동
+    {
+        const p = new URLSearchParams(location.search);
+        const signUpParam = p.get('signUp');
+
+        if (signUpParam === 'false' && location.pathname !== '/notice') {
+            return <Navigate to="/notice" replace />;
+        }
+    }
 
     // 현재 signUp 조건 체크
     const shouldRedirect = checkSignUp();

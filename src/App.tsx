@@ -1,5 +1,5 @@
 // App.tsx
-import {Routes, Route, useNavigate, useLocation} from 'react-router-dom';
+import {Routes, Route, useNavigate} from 'react-router-dom';
 import AppLayout from './layouts/AppLayout';
 import LoginPage from './pages/LoginPage';
 import SelectDepartmentPage from "./pages/SelectDepartmentPage";
@@ -9,7 +9,7 @@ import {BookMarkPage} from "./pages/BookMarkPage";
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {useEffect, useRef} from "react";
+import {useEffect} from "react";
 import {setAppNavigate} from "./utils/router";
 import {fetchUserAndNotifyNativeApp, isAppEnv} from "./services/auth.service";
 import {LoginErrorPage} from "./pages/LoginErrorPage";
@@ -18,8 +18,8 @@ import RequireOnboarding from "./layouts/RouteGuard";
 
 function App() {
     const navigate = useNavigate();
-    const location = useLocation();
-    const hasProcessedOAuth = useRef(false);
+    // const location = useLocation();
+    // const hasProcessedOAuth = useRef(false);
 
     useEffect(() => {
         setAppNavigate((path, opts) => navigate(path, opts));
