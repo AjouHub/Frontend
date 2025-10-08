@@ -14,6 +14,7 @@ import {setAppNavigate} from "./utils/router";
 import {fetchUserAndNotifyNativeApp, isAppEnv} from "./services/auth.service";
 import {LoginErrorPage} from "./pages/LoginErrorPage";
 import RequireOnboarding from "./layouts/RouteGuard";
+import AboutPage from "./pages/AboutPage";
 
 
 function App() {
@@ -86,6 +87,7 @@ function App() {
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/select-department" element={<SelectDepartmentPage />} />
                         <Route path="/auth/error" element={<LoginErrorPage />} />
+                        <Route path="/about" element={<AboutPage />} />
                         <Route path="*" element={<NoticePage />} />
                     </Route>
                 </Route>
