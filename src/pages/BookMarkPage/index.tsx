@@ -46,10 +46,10 @@ type NoticeSection = {
 };
 const SECTION_ORDER: GeneralTabKey[] = ["general", "scholarship", "dormitory", "department"];
 const SECTION_NAME_LABEL: Record<GeneralTabKey, string> = {
-    general: "일반 공지사항",
-    scholarship: "장학 공지사항",
-    dormitory: "생활관 공지사항",
-    department: "학과 공지사항",
+    general: "일반",
+    scholarship: "장학",
+    dormitory: "생활관",
+    department: "학과",
 };
 function groupNoticesByType(list: BookMark[]): NoticeSection[] {
     const sectionList: Record<GeneralTabKey, BookMark[]> = {
@@ -160,25 +160,28 @@ export function BookMarkPage(): JSX.Element {
                 {sections.map((sec) => (
                     <section key={sec.key} className="np-section">
                         <div className="np-section-header">
-                            <h3 className="np-section-title">{sec.label}</h3>
-                        </div>
+                            {/*<h3 className="np-section-title">{sec.label} 공지사항</h3>*/}
+                            {/*<h3 className="np-section-title"></h3>*/}
 
-                        <ul className="np-card-list">
-                            {sec.items.map((n) => (
-                                <li key={n.id}>
-                                    <NoticeCard
-                                        notice={n}
-                                        leftBarColor={getLeftBarColor(n.type)}
-                                        dateColor={STONE_GRAY}
-                                        heartColor="#EF4C43"
-                                        heartOffColor="#C0C5CF"
-                                        isBookmarked={bookmarksID.has(n.id)}       // {/* ✅ 하트 ON/OFF */}
-                                        onToggleBookmark={handleToggleBookmark}   // {/* ✅ 클릭 처리 */}
-                                        onNoticeClick={handleNoticeClick}
-                                    />
-                                </li>
-                            ))}
-                        </ul>
+                            <ul className="np-card-list">
+                                {sec.items.map((n) => (
+                                    <li key={n.id}>
+                                        <NoticeCard
+                                            notice={n}
+                                            leftBarColor={getLeftBarColor(n.type)}
+                                            dateColor={STONE_GRAY}
+                                            heartColor="#EF4C43"
+                                            heartOffColor="#C0C5CF"
+                                            isBookmarked={bookmarksID.has(n.id)}       // {/* ✅ 하트 ON/OFF */}
+                                            onToggleBookmark={handleToggleBookmark}   // {/* ✅ 클릭 처리 */}
+                                            onNoticeClick={handleNoticeClick}
+                                            tabs={sec.label}
+                                            isBookmarkPage={true}
+                                        />
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </section>
                 ))}
 

@@ -7,5 +7,14 @@
 }
 
 .np-section-title {
-    margin-left: 16px
+    margin-left: 16px;
+    margin-bottom: 10px;
+}
+
+.np-section {
+    margin-bottom: 20px;
+}
+
+.np-card-tag.tabs {
+    color: var(--aura-blue);
 }
