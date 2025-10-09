@@ -175,7 +175,6 @@ export default function BookMarkPage(): JSX.Element {
                                             isBookmarked={bookmarksID.has(n.id)}       // {/* ✅ 하트 ON/OFF */}
                                             onToggleBookmark={handleToggleBookmark}   // {/* ✅ 클릭 처리 */}
                                             onNoticeClick={handleNoticeClick}
-                                            tabs={sec.label}
                                             isBookmarkPage={true}
                                         />
                                     </li>

@@ -16,6 +16,7 @@ const IoHeartOutline = RawHeartOutline as unknown as React.ComponentType<IconPro
 type NoticeCardProps = {
     notice: {
         id: string;
+        type: string;
         title: string;
         link: string;
         category?: string;
@@ -29,7 +30,7 @@ type NoticeCardProps = {
     isBookmarked?: boolean;  // 부모가 상태를 줄 때 (컨트롤드)
     onToggleBookmark?: (id: string, next: boolean) => void;
     onNoticeClick: (event: React.MouseEvent<HTMLAnchorElement>, link: string) => void;
-    tabs?: string;           // 현재 탭(학과 이름용)
+    // tabs?: string;           // 현재 탭(학과 이름용)
     isBookmarkPage?: boolean;  // 북마크 페이지라면 앞에 #카테고리 붙이기
 };
 
@@ -42,7 +43,6 @@ export default function NoticeCard({
                                        isBookmarked,
                                        onToggleBookmark,
                                        onNoticeClick,
-                                       tabs,
                                        isBookmarkPage,
                                    }: NoticeCardProps) {
     // 컨트롤드 prop이 없을 때만 내부 로컬 상태 사용
@@ -70,8 +70,8 @@ export default function NoticeCard({
         }
     };
 
-    // department가 관리자 -> 소프트웨어학과
-    const departmentDisplayName = notice.department === '관리자' || notice.department === 'none' ? departmentNameMap[tabs ?? ""] : notice.department;
+    // department가 관리자 -> 확과명
+    const departmentDisplayName = notice.department === '관리자' || notice.department === 'none' ? departmentNameMap[notice.type ?? ""] : notice.department;
 
     return (
         <div className="np-card">
@@ -92,7 +92,7 @@ export default function NoticeCard({
 
                 <div className="np-card-tags">
                     {isBookmarkPage && (
-                        <span className="np-card-tag tabs">#{tabs}</span>
+                        <span className="np-card-tag tabs">#{departmentNameMap[notice.type ?? ""]}</span>
                     )}
                     {isNew(notice.date, 1) && (
                         <span className="np-card-tag today">#오늘</span>
