@@ -73,6 +73,23 @@ export async function listKeywords(): Promise<Keyword[]> {
         throw error;
     }
 }
+// globalKeywords
+export async function listGlobalKeywords(): Promise<Keyword[]> {
+    try {
+        const response = await api.get<ApiResponse<Keyword[]>>('/keywords/global');
+
+        if (response.data.status !== 'success') {
+            const error = new Error(response.data.message || '전역 키워드 정보를 불러올 수 없습니다.');
+            (error as any).status = response.status;
+            throw error;
+        }
+        return response.data.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+
 
 export async function addKeyword(phrase: string): Promise<Keyword> {
     try {

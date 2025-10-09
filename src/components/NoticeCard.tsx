@@ -30,6 +30,7 @@ type NoticeCardProps = {
     onToggleBookmark?: (id: string, next: boolean) => void;
     onNoticeClick: (event: React.MouseEvent<HTMLAnchorElement>, link: string) => void;
     tabs?: string;           // 현재 탭(학과 이름용)
+    isBookmarkPage?: boolean;  // 북마크 페이지라면 앞에 #카테고리 붙이기
 };
 
 export default function NoticeCard({
@@ -42,6 +43,7 @@ export default function NoticeCard({
                                        onToggleBookmark,
                                        onNoticeClick,
                                        tabs,
+                                       isBookmarkPage,
                                    }: NoticeCardProps) {
     // 컨트롤드 prop이 없을 때만 내부 로컬 상태 사용
     const [markedLocal, setMarkedLocal] = useState(false);
@@ -89,6 +91,9 @@ export default function NoticeCard({
                 </a>
 
                 <div className="np-card-tags">
+                    {isBookmarkPage && (
+                        <span className="np-card-tag tabs">#{tabs}</span>
+                    )}
                     {isNew(notice.date, 1) && (
                         <span className="np-card-tag today">#오늘</span>
                     )}
