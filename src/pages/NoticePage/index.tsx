@@ -6,7 +6,7 @@ import { fetchNotices } from "../../services/fetchNotices";
 import type { Notice } from "../../types/notice";
 // import type { UserInfo } from "../../types/user";
 import type { Keyword } from "../../types/keywords";
-import { Global_Tags } from "../../utils/tags";
+import { getGlobalTags, DEFAULT_GLOBAL_TAGS } from "../../utils/tags";
 import NoticeCard from "../../components/NoticeCard";
 import ChipCollapse from "../../components/ChipCollapse";
 import {listDepartments, listKeywords} from "../../services/settings.service";
@@ -66,12 +66,13 @@ export default function NoticePage(): JSX.Element {
 
     // 칩(해시태그)
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
-    const [suggestedTags, setSuggestedTags] = useState<string[]>(Global_Tags);
+    const [suggestedTags, setSuggestedTags] = useState<string[]>(DEFAULT_GLOBAL_TAGS);
 
-    const [selectedGlobalIds, setGlobalIds] = useState<string>("");
+    const [selectedGlobalIds, setSelectedGlobalIds] = useState<string>("");
     const [selectedPersonalIds, setSelectedPersonalIds] = useState<string>("");
 
     const [keywords, setKeywords] = useState<Keyword[]>([]);
+    const [Global_Tags, setGlobal_Tags] = useState<string[]>(DEFAULT_GLOBAL_TAGS); // phrase만
     
     // 검색 칩 &, | 버튼
     // any: ||, all: &&
@@ -146,6 +147,13 @@ export default function NoticePage(): JSX.Element {
         })();
     }, []);
 
+    // 전역 키워드 phrase 배열 불러오기
+    useEffect(() => {
+        let alive = true;
+        getGlobalTags().then(tags => { if (alive) setGlobal_Tags(tags); });
+        return () => { alive = false; };
+    }, []); // ← 한 번만 호출
+
     // 유저 로드 후 북마크 목록 가져오기
     useEffect(() => {
         let alive = true;
@@ -162,6 +170,19 @@ export default function NoticePage(): JSX.Element {
         setLoading(false);
         return () => { alive = false; };
     }, [departments]);
+
+    // 칩 필터링 결과
+    useEffect(() => {
+        // Global_Tags에 해당하는 태그 ID와 개인 태그 ID를 별도로 구분하여 매핑
+        const newGlobalIds = mapTagsToIds(selectedTags.filter(tag => Global_Tags.includes(tag)));
+        const newPersonalIds = mapTagsToIds(selectedTags.filter(tag => !Global_Tags.includes(tag)));
+
+        // 상태 업데이트
+        setSelectedGlobalIds(newGlobalIds);
+        setSelectedPersonalIds(newPersonalIds);
+
+    }, [selectedTags, keywords]);  // selectedTags나 keywords가 변경될 때마다 실행
+
 
     // 공지 목록 호출 부분
     useEffect(() => {
@@ -219,19 +240,6 @@ export default function NoticePage(): JSX.Element {
         setSelectedDept(t);
         setPage(0);
     }
-
-    // 칩 필터링 결과
-    useEffect(() => {
-        // Global_Tags에 해당하는 태그 ID와 개인 태그 ID를 별도로 구분하여 매핑
-        const newGlobalIds = mapTagsToIds(selectedTags.filter(tag => Global_Tags.includes(tag)));
-        const newPersonalIds = mapTagsToIds(selectedTags.filter(tag => !Global_Tags.includes(tag)));
-
-        // 상태 업데이트
-        setGlobalIds(newGlobalIds);
-        setSelectedPersonalIds(newPersonalIds);
-    }, [selectedTags, keywords]);  // selectedTags나 keywords가 변경될 때마다 실행
-
-
 
     // 실제 토글 로직(비동기) — id는 string
     const handleToggleBookmark = async (id: string, next: boolean) => {

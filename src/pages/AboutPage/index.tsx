@@ -1,65 +1,54 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./AboutPage.css";
+import { getSkuDetails, purchaseConsumable } from "../../lib/playBilling";
 
-/** 빌드/배포 시 주입되면 표시됨(없으면 기본값) */
-// const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? "0.1.0";
-// const GIT_SHA = (import.meta.env.VITE_GIT_SHA ?? "").slice(0, 7);
-// const BUILD_TIME = import.meta.env.VITE_BUILD_TIME ?? "";
+const SKUS = ["donation_1000", "donation_3000", "donation_5000"];
 
-/** 외부 리소스 */
+// 외부 리소스
 const ORG_URL = "https://github.com/AjouHub";
 const FRONTEND_URL = "https://github.com/AjouHub/Frontend";
 const BACKEND_URL  = "https://github.com/AjouHub/Backend";
 const ANDROID_URL  = "https://github.com/AjouHub/Android";
 const FIGMA_URL    = "https://www.figma.com/design/HQw9DPxbkUBsTJTL2EhDWY/AURA?node-id=0-1";
 const ISSUE_URL    = "https://github.com/AjouHub/Frontend/issues/new/choose";
-const CONTACT_EMAIL = "team@ajouhub.dev"; // 실제 메일로 바꿔주세요
-
-/** 후원 프리셋(원) */
-type Amount = 1000 | 3000 | 5000 | 10000;
-const PRESETS: Amount[] = [1000, 3000, 5000, 10000];
+const CONTACT_EMAIL = "team@ajouhub.dev";
 
 export default function AboutPage() {
-    /** 후원(ko-fi 스타일) 상태 */
-    const [amount, setAmount] = useState<Amount | number>(3000);
-    const [custom, setCustom] = useState("");
-    const [nickname, setNickname] = useState("");
-    const [message, setMessage] = useState("");
-    const [anon, setAnon] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [items, setItems] = useState<{ id: string; title: string; price: string }[]>([]);
+    const [msg, setMsg] = useState("");
+    const [loading, setLoading] = useState(true);
 
-    const finalAmount = useMemo(() => {
-        const n = Number(custom.replace(/[^\d]/g, ""));
-        return custom ? Math.max(1000, Math.min(500000, n || 0)) : Number(amount);
-    }, [amount, custom]);
+    useEffect(() => {
+        (async () => {
+            try {
+                const details = await getSkuDetails(SKUS);
+                setItems(
+                    details.map(d => ({
+                        id: d.itemId,
+                        title: d.title,
+                        price: new Intl.NumberFormat(navigator.language, {
+                            style: "currency",
+                            currency: d.price.currency
+                        }).format(d.price.value)
+                    }))
+                );
+                setMsg("");
+            } catch (e: any) {
+                // TWA가 아니거나 Digital Goods 미지원 환경
+                setMsg(e?.message || "이 환경에서는 인앱 결제가 지원되지 않습니다.");
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, []);
 
-    const startSupport = async () => {
-        if (!finalAmount || finalAmount < 1000) {
-            alert("최소 후원 금액은 1,000원입니다.");
-            return;
-        }
-        setLoading(true);
+    const donate = async (sku: string) => {
         try {
-            /** 백엔드의 KakaoPay ready 엔드포인트(직접 연동 A안) */
-            const res = await fetch("/api/support/ready", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({
-                    amount: finalAmount,
-                    nickname: anon ? "익명" : nickname?.trim(),
-                    message: message?.trim(),
-                    anonymous: anon,
-                    returnUrl: window.location.origin + "/support/thanks",
-                }),
-            });
-            if (!res.ok) throw new Error("ready failed");
-            const { orderId, redirectUrl } = await res.json();
-            sessionStorage.setItem("lastDonationOrderId", orderId);
-            window.location.href = redirectUrl; // 카카오페이 앱/웹로 이동
-        } catch (e) {
-            alert("후원 연결에 실패했습니다. 잠시 후 다시 시도해주세요.");
-        } finally {
-            setLoading(false);
+            setMsg("구매 창을 여는 중…");
+            await purchaseConsumable(sku, "/api/play/ack"); // 서버리스/백엔드 ack 엔드포인트
+            setMsg("후원해주셔서 감사합니다! 🎉");
+        } catch (e: any) {
+            setMsg(`실패: ${e?.message ?? "구매가 취소되었거나 오류가 발생했습니다."}`);
         }
     };
 
@@ -74,7 +63,7 @@ export default function AboutPage() {
 
     return (
         <div className="about-root">
-            {/* 상단 헤더 영역(앱 스타일과 톤 맞춤) */}
+            {/* 헤더 */}
             <section className="about-hero card">
                 <div className="about-brand">AURA</div>
                 <p className="about-desc">
@@ -83,70 +72,47 @@ export default function AboutPage() {
             </section>
 
             <div className="about-grid">
-                {/* 후원 카드 */}
+                {/* 후원(인앱 결제) */}
                 <section className="card support-card">
                     <h2 className="card-title">직접 후원</h2>
-                    <p className="card-sub">커피 한 잔 값으로 AURA를 응원해 주세요 ☕️</p>
+                    <p className="card-sub">서버비를 위한 자발적 후원입니다. 추가 기능/콘텐츠 제공 없음.</p>
 
-                    <div className="support-amounts">
-                        {PRESETS.map(v => (
-                            <button key={v}
-                                    className={`chip ${!custom && amount === v ? "is-active" : ""}`}
-                                    onClick={() => { setAmount(v); setCustom(""); }}>
-                                ₩{v.toLocaleString()}
-                            </button>
-                        ))}
-                        <div className="chip custom-chip">
-                            <input
-                                inputMode="numeric"
-                                placeholder="직접 입력"
-                                value={custom}
-                                onChange={(e) => setCustom(e.target.value)}
-                            />
-                            <span>원</span>
+                    {loading && (
+                        <div className="skeleton-wrap">
+                            <div className="skeleton-btn" />
+                            <div className="skeleton-btn" />
+                            <div className="skeleton-btn" />
                         </div>
-                    </div>
+                    )}
 
-                    <div className="support-fields">
-                        <label className="row">
-                            <span>닉네임</span>
-                            <input
-                                disabled={anon}
-                                placeholder="표시용(선택)"
-                                value={nickname}
-                                onChange={(e) => setNickname(e.target.value)}
-                            />
-                        </label>
-                        <label className="row">
-                            <span>메시지</span>
-                            <input
-                                placeholder="응원 한마디(선택)"
-                                maxLength={60}
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                            />
-                        </label>
-                        <label className="check">
-                            <input type="checkbox" checked={anon} onChange={() => setAnon(v => !v)} />
-                            <span>익명으로 후원하기</span>
-                        </label>
-                    </div>
+                    {!loading && items.length > 0 && (
+                        <div className="support-buttons">
+                            {items.map(it => (
+                                <button
+                                    key={it.id}
+                                    className="btn-primary wide"
+                                    onClick={() => donate(it.id)}
+                                >
+                                    {it.title} — {it.price} 후원하기
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
-                    <div className="support-summary">
-                        <span>후원 금액</span>
-                        <strong>₩{finalAmount.toLocaleString()}</strong>
-                    </div>
+                    {!loading && items.length === 0 && (
+                        <p className="muted small">
+                            {msg || "인앱 결제 정보가 확인되지 않았습니다. AURA 앱에서 다시 시도해주세요."}
+                        </p>
+                    )}
 
-                    <button className="btn-primary wide" disabled={loading} onClick={startSupport}>
-                        {loading ? "연결 중..." : "카카오페이로 후원하기"}
-                    </button>
+                    {msg && items.length > 0 && <p className="muted small">{msg}</p>}
 
                     <p className="footnote">
-                        후원금은 서버·도메인 등 프로젝트 운영에 사용되며 기부금 영수증은 발급되지 않습니다.
+                        결제·환불은 Google Play 기준을 따릅니다. 문의: {CONTACT_EMAIL}
                     </p>
                 </section>
 
-                {/* 개발자/리소스 카드 */}
+                {/* 개발자/리소스 */}
                 <section className="card">
                     <h2 className="card-title">개발자 & 리소스</h2>
                     <ul className="links">
@@ -164,7 +130,7 @@ export default function AboutPage() {
                     </a>
                 </section>
 
-                {/* 데이터/정책 카드 */}
+                {/* 데이터/정책 */}
                 <section className="card">
                     <h2 className="card-title">데이터 & 정책</h2>
                     <ul className="bullets">
@@ -174,13 +140,14 @@ export default function AboutPage() {
                     </ul>
                 </section>
 
-                {/* 버전 정보 카드 */}
+                {/* 버전 정보 (원하면 주입해서 사용) */}
                 <section className="card">
                     <h2 className="card-title">버전 정보</h2>
                     <div className="meta">
-                        {/*<div><span>Version</span><strong>{APP_VERSION}</strong></div>*/}
-                        {/*{GIT_SHA && <div><span>Commit</span><code>{GIT_SHA}</code></div>}*/}
-                        {/*{BUILD_TIME && <div><span>Built</span><time>{BUILD_TIME}</time></div>}*/}
+                        {/* <div><span>Version</span><strong>{APP_VERSION}</strong></div>
+            {GIT_SHA && <div><span>Commit</span><code>{GIT_SHA}</code></div>}
+            {BUILD_TIME && <div><span>Built</span><time>{BUILD_TIME}</time></div>} */}
+                        <div className="muted small">배포 정보는 빌드 시 주입됩니다.</div>
                     </div>
                 </section>
             </div>
