@@ -19,8 +19,6 @@ import RequireOnboarding from "./layouts/RouteGuard";
 
 function App() {
     const navigate = useNavigate();
-    // const location = useLocation();
-    // const hasProcessedOAuth = useRef(false);
 
     useEffect(() => {
         setAppNavigate((path, opts) => navigate(path, opts));
