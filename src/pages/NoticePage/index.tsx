@@ -59,8 +59,8 @@ export default function NoticePage(): JSX.Element {
     const [status, setStatus] = useState<number | string | null>(null);
 
     // 칩(해시태그)
-    const [selectedTags, setSelectedTags] = useState<string[]>([]);
-    const [suggestedTags, setSuggestedTags] = useState<string[]>(DEFAULT_GLOBAL_TAGS);
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);   // 선택한 키워드의 phrase
+    const [suggestedTags, setSuggestedTags] = useState<string[]>(DEFAULT_GLOBAL_TAGS);  // keywords의 phrase만
 
     const [selectedGlobalIds, setSelectedGlobalIds] = useState<string>("");
     const [selectedPersonalIds, setSelectedPersonalIds] = useState<string>("");
@@ -188,7 +188,6 @@ export default function NoticePage(): JSX.Element {
             search: query || undefined,
             globalIds: selectedGlobalIds,          // globalIds: "1,2,3" 형태로 넘김
             personalIds: selectedPersonalIds,        // personalIds: "10,11" 형태로 넘김
-            // match: 'any',
             match: match,
         })
             .then((d: any) => {

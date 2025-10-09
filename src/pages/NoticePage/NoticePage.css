@@ -29,7 +29,7 @@
 
     --bottom-tab-bar-height: 64px; /* 실제 BottomTabBar 높이에 맞춰 조정 */
 
-    --appbar-web-height: 62px;
+    --appbar-web-height: 58px;
     --appbar-app-height: 0px;
     --safe-top: 0px;
 }

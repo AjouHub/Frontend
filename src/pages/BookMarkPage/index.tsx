@@ -75,7 +75,7 @@ function groupNoticesByType(list: BookMark[]): NoticeSection[] {
 const getLeftBarColor = (cat?: string)=>
     tabColorMap.get(cat ?? "") ?? LAVENDER_PURPLE;
 
-export function BookMarkPage(): JSX.Element {
+export default function BookMarkPage(): JSX.Element {
     const [user, setUser] = useState<UserInfo | null>(null);
 
     // 목록/페이지
