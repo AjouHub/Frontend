@@ -1,21 +1,15 @@
-// pages/NoticePage/index.tsx
 import React, { JSX, useEffect, useMemo, useState } from "react";
 import "./NoticePage.css";
-// import { fetchUserInfo } from "../../services/fetchUserInfo";
 import { fetchNotices } from "../../services/fetchNotices";
 import type { Notice } from "../../types/notice";
-// import type { UserInfo } from "../../types/user";
 import type { Keyword } from "../../types/keywords";
 import { getGlobalTags, DEFAULT_GLOBAL_TAGS } from "../../utils/tags";
 import NoticeCard from "../../components/NoticeCard";
 import ChipCollapse from "../../components/ChipCollapse";
 import {listDepartments, listKeywords} from "../../services/settings.service";
 import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
-// import { departmentNameMap } from "../../components/departmentMap";
 import { useLocation, useOutletContext } from 'react-router-dom';
 import {departmentNameMap} from "../../components/departmentMap";
-// import {handleOAuthCallback} from "../../services/auth.service";
-// import { isAppEnv } from '../../services/auth.service';
 
 
 // 색상 토큰
@@ -121,9 +115,12 @@ export default function NoticePage(): JSX.Element {
     // 북마크 ID 집합
     const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
 
-    // useEffect(() => {
-    //     handleOAuthCallback();
-    // }, []);
+    // 전역 키워드 phrase 배열 불러오기
+    useEffect(() => {
+        let alive = true;
+        getGlobalTags().then(tags => { if (alive) setGlobal_Tags(tags); });
+        return () => { alive = false; };
+    }, []);
 
     // 초기 데이터 (유저 + 추천 태그)
     useEffect(() => {
@@ -146,13 +143,6 @@ export default function NoticePage(): JSX.Element {
             }
         })();
     }, []);
-
-    // 전역 키워드 phrase 배열 불러오기
-    useEffect(() => {
-        let alive = true;
-        getGlobalTags().then(tags => { if (alive) setGlobal_Tags(tags); });
-        return () => { alive = false; };
-    }, []); // ← 한 번만 호출
 
     // 유저 로드 후 북마크 목록 가져오기
     useEffect(() => {
