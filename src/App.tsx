@@ -5,7 +5,8 @@ import LoginPage from './pages/LoginPage';
 import SelectDepartmentPage from "./pages/SelectDepartmentPage";
 import NoticePage from "./pages/NoticePage";
 import SettingsPage from "./pages/SettingsPage";
-import {BookMarkPage} from "./pages/BookMarkPage";
+import BookMarkPage from "./pages/BookMarkPage";
+import AboutPage from "./pages/AboutPage";
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -14,7 +15,6 @@ import {setAppNavigate} from "./utils/router";
 import {fetchUserAndNotifyNativeApp, isAppEnv} from "./services/auth.service";
 import {LoginErrorPage} from "./pages/LoginErrorPage";
 import RequireOnboarding from "./layouts/RouteGuard";
-import AboutPage from "./pages/AboutPage";
 
 
 function App() {
