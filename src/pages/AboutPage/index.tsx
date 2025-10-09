@@ -1,54 +1,85 @@
 import React, { useEffect, useState } from "react";
 import "./AboutPage.css";
-import { getSkuDetails, purchaseConsumable } from "../../lib/playBilling";
+import {
+    getSkuDetails,
+    purchaseConsumable,
+    isPlayBillingAvailable,
+} from "../../lib/playBilling";
 
 const SKUS = ["donation_1000", "donation_3000", "donation_5000"];
 
 // 외부 리소스
 const ORG_URL = "https://github.com/AjouHub";
 const FRONTEND_URL = "https://github.com/AjouHub/Frontend";
-const BACKEND_URL  = "https://github.com/AjouHub/Backend";
-const ANDROID_URL  = "https://github.com/AjouHub/Android";
-const FIGMA_URL    = "https://www.figma.com/design/HQw9DPxbkUBsTJTL2EhDWY/AURA?node-id=0-1";
-const ISSUE_URL    = "https://github.com/AjouHub/Frontend/issues/new/choose";
+const BACKEND_URL = "https://github.com/AjouHub/Backend";
+const ANDROID_URL = "https://github.com/AjouHub/Android";
+const FIGMA_URL =
+    "https://www.figma.com/design/HQw9DPxbkUBsTJTL2EhDWY/AURA?node-id=0-1";
+const ISSUE_URL = "https://github.com/AjouHub/Frontend/issues/new/choose";
 const CONTACT_EMAIL = "team@ajouhub.dev";
 
 export default function AboutPage() {
     const [items, setItems] = useState<{ id: string; title: string; price: string }[]>([]);
     const [msg, setMsg] = useState("");
     const [loading, setLoading] = useState(true);
+    const [purchasingSku, setPurchasingSku] = useState<string | null>(null);
 
     useEffect(() => {
+        let alive = true;
         (async () => {
             try {
+                setLoading(true);
+
+                // 1) Digital Goods 지원 여부 선확인
+                const supported = await isPlayBillingAvailable();
+                if (!supported) {
+                    if (!alive) return;
+                    setItems([]);
+                    setMsg("이 환경에서는 인앱 결제가 지원되지 않습니다. AURA 앱에서 다시 시도해주세요.");
+                    return;
+                }
+
+                // 2) SKU 상세 불러오기
                 const details = await getSkuDetails(SKUS);
+                if (!alive) return;
+
                 setItems(
-                    details.map(d => ({
+                    details.map((d) => ({
                         id: d.itemId,
                         title: d.title,
+                        // d.price.value가 문자열일 수 있음 → 숫자로 변환 후 통화 포맷
                         price: new Intl.NumberFormat(navigator.language, {
                             style: "currency",
-                            currency: d.price.currency
-                        }).format(d.price.value)
+                            currency: d.price.currency,
+                        }).format(Number(d.price.value)),
                     }))
                 );
                 setMsg("");
             } catch (e: any) {
-                // TWA가 아니거나 Digital Goods 미지원 환경
+                if (!alive) return;
+                setItems([]);
                 setMsg(e?.message || "이 환경에서는 인앱 결제가 지원되지 않습니다.");
             } finally {
-                setLoading(false);
+                if (alive) setLoading(false);
             }
         })();
+        return () => {
+            alive = false;
+        };
     }, []);
 
     const donate = async (sku: string) => {
         try {
+            setPurchasingSku(sku);
             setMsg("구매 창을 여는 중…");
-            await purchaseConsumable(sku, "/api/play/ack"); // 서버리스/백엔드 ack 엔드포인트
+            // ✅ 백엔드 없이 프론트만: ack 엔드포인트 제거
+            await purchaseConsumable(sku);
             setMsg("후원해주셔서 감사합니다! 🎉");
         } catch (e: any) {
-            setMsg(`실패: ${e?.message ?? "구매가 취소되었거나 오류가 발생했습니다."}`);
+            const m = e?.message ?? "구매가 취소되었거나 오류가 발생했습니다.";
+            setMsg(`실패: ${m}`);
+        } finally {
+            setPurchasingSku(null);
         }
     };
 
@@ -87,13 +118,14 @@ export default function AboutPage() {
 
                     {!loading && items.length > 0 && (
                         <div className="support-buttons">
-                            {items.map(it => (
+                            {items.map((it) => (
                                 <button
                                     key={it.id}
                                     className="btn-primary wide"
                                     onClick={() => donate(it.id)}
+                                    disabled={!!purchasingSku}
                                 >
-                                    {it.title} — {it.price} 후원하기
+                                    {purchasingSku === it.id ? "처리 중…" : `${it.title} — ${it.price} 후원하기`}
                                 </button>
                             ))}
                         </div>
