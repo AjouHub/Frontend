@@ -6,7 +6,6 @@ import SelectDepartmentPage from "./pages/SelectDepartmentPage";
 import NoticePage from "./pages/NoticePage";
 import SettingsPage from "./pages/SettingsPage";
 import BookMarkPage from "./pages/BookMarkPage";
-import AboutPage from "./pages/AboutPage";
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -85,7 +84,6 @@ function App() {
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/select-department" element={<SelectDepartmentPage />} />
                         <Route path="/auth/error" element={<LoginErrorPage />} />
-                        <Route path="/about" element={<AboutPage />} />
                         <Route path="*" element={<NoticePage />} />
                     </Route>
                 </Route>
