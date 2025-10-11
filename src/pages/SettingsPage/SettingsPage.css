@@ -652,7 +652,7 @@ button:disabled {
 
 /*Logout.tsx*/
 .logout-container {
-    margin-top: 16px;
+    /*margin-top: 16px;*/
     display: flex;
     justify-content: center;
 }
@@ -670,4 +670,26 @@ button:disabled {
     font-size: 14px;
     cursor: pointer;
     margin-bottom: 16px;
+}
+
+/*AboutPage.tsx*/
+.about-container {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.about-button {
+    /*display: flex;*/
+    /*justify-content: center;  !* 가로 중앙 *!*/
+    align-items: center;       /* 세로 중앙 */
+    color: var(--text-primary);
+    padding: 10px 10px;
+    border-radius: 8px;
+    border: 0 solid var(--card-border, #e6e8ed);
+    background: var(--background-color);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    /*margin-bottom: 16px;*/
 }

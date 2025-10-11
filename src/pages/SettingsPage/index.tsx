@@ -6,6 +6,8 @@ import AccountInfo from './AccountInfo';
 import DepartmentSelector from './DepartmentSelector';
 import KeywordController from './KeywordController';
 import NotificationPreferences from './NotificationPreferences';
+import Logout from "./Logout";
+import AboutPage from "./AboutPage";
 import {Keyword} from "../../types/keywords";
 import {
     addDepartment,
@@ -17,7 +19,7 @@ import {
 } from "../../services/settings.service";
 import CollapsibleSection from "../../components/CollapsibleSection";
 import CollapsibleTabs from "../../components/CollapsibleTabs";
-import Logout from "./Logout";
+
 
 // 메인 설정 페이지
 export default function SettingsPage() {
@@ -176,6 +178,7 @@ export default function SettingsPage() {
                         />
                     </div>
 
+                    <AboutPage/>
                     <Logout/>
                     <div ref={bottomRef} style={{ height: 1}} />
                 </main>
