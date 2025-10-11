@@ -24,8 +24,8 @@ export default function AboutPage() {
         if (!ABOUT_PAGE_URL) return;
 
         // 앱(WebView) + 네이티브 브리지가 있으면 오버레이 웹뷰로 열기
-        if (window.AURA?.openNotice && isAppEnv()) {
-            window.AURA.openNotice(ABOUT_PAGE_URL);
+        if (window.AURA?.openAbout && isAppEnv()) {
+            window.AURA.openAbout(ABOUT_PAGE_URL);
             return;
         }
 
