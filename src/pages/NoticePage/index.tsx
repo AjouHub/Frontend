@@ -1,20 +1,15 @@
-// pages/NoticePage/index.tsx
 import React, { JSX, useEffect, useMemo, useState } from "react";
 import "./NoticePage.css";
-import { fetchUserInfo } from "../../services/fetchUserInfo";
 import { fetchNotices } from "../../services/fetchNotices";
 import type { Notice } from "../../types/notice";
-import type { UserInfo } from "../../types/user";
 import type { Keyword } from "../../types/keywords";
-import { Global_Tags } from "../../utils/tags";
+import { getGlobalTags, DEFAULT_GLOBAL_TAGS } from "../../utils/tags";
 import NoticeCard from "../../components/NoticeCard";
 import ChipCollapse from "../../components/ChipCollapse";
 import {listDepartments, listKeywords} from "../../services/settings.service";
 import { listNoticeBookmarks, setNoticeBookmark } from "../../services/bookMark.service";
-// import { departmentNameMap } from "../../components/departmentMap";
 import { useLocation, useOutletContext } from 'react-router-dom';
 import {departmentNameMap} from "../../components/departmentMap";
-// import { isAppEnv } from '../../services/auth.service';
 
 
 // 색상 토큰
@@ -64,13 +59,14 @@ export default function NoticePage(): JSX.Element {
     const [status, setStatus] = useState<number | string | null>(null);
 
     // 칩(해시태그)
-    const [selectedTags, setSelectedTags] = useState<string[]>([]);
-    const [suggestedTags, setSuggestedTags] = useState<string[]>(Global_Tags);
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);   // 선택한 키워드의 phrase
+    const [suggestedTags, setSuggestedTags] = useState<string[]>(DEFAULT_GLOBAL_TAGS);  // keywords의 phrase만
 
-    const [selectedGlobalIds, setGlobalIds] = useState<string>("");
+    const [selectedGlobalIds, setSelectedGlobalIds] = useState<string>("");
     const [selectedPersonalIds, setSelectedPersonalIds] = useState<string>("");
 
     const [keywords, setKeywords] = useState<Keyword[]>([]);
+    const [Global_Tags, setGlobal_Tags] = useState<string[]>(DEFAULT_GLOBAL_TAGS); // phrase만
     
     // 검색 칩 &, | 버튼
     // any: ||, all: &&
@@ -93,11 +89,14 @@ export default function NoticePage(): JSX.Element {
 
     // 서버 키워드 → phrase[] 로 변환
     async function fetchSuggestedTags(): Promise<string[]> {
-        // const list = await listKeywords();
-        setKeywords(await listKeywords());
-        const phrases = keywords
+        const list = await listKeywords();
+        setKeywords(list);
+        
+        // 방금 받아온 데이터를 직접 사용
+        const phrases = list
             .map((k) => (k.phrase ?? "").trim())
             .filter((p) => p.length > 0);
+
         return Array.from(new Set(phrases));
     }
 
@@ -113,8 +112,15 @@ export default function NoticePage(): JSX.Element {
             .join(",");  // "1,2,3" 형태로 반환
     };
 
-    // ✅ 북마크 ID 집합
+    // 북마크 ID 집합
     const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
+
+    // 전역 키워드 phrase 배열 불러오기
+    useEffect(() => {
+        let alive = true;
+        getGlobalTags().then(tags => { if (alive) setGlobal_Tags(tags); });
+        return () => { alive = false; };
+    }, []);
 
     // 초기 데이터 (유저 + 추천 태그)
     useEffect(() => {
@@ -155,6 +161,19 @@ export default function NoticePage(): JSX.Element {
         return () => { alive = false; };
     }, [departments]);
 
+    // 칩 필터링 결과
+    useEffect(() => {
+        // Global_Tags에 해당하는 태그 ID와 개인 태그 ID를 별도로 구분하여 매핑
+        const newGlobalIds = mapTagsToIds(selectedTags.filter(tag => Global_Tags.includes(tag)));
+        const newPersonalIds = mapTagsToIds(selectedTags.filter(tag => !Global_Tags.includes(tag)));
+
+        // 상태 업데이트
+        setSelectedGlobalIds(newGlobalIds);
+        setSelectedPersonalIds(newPersonalIds);
+
+    }, [selectedTags, keywords]);  // selectedTags나 keywords가 변경될 때마다 실행
+
+
     // 공지 목록 호출 부분
     useEffect(() => {
         const typeForApi = tab === "department" ? selectedDept : tab;
@@ -169,7 +188,6 @@ export default function NoticePage(): JSX.Element {
             search: query || undefined,
             globalIds: selectedGlobalIds,          // globalIds: "1,2,3" 형태로 넘김
             personalIds: selectedPersonalIds,        // personalIds: "10,11" 형태로 넘김
-            // match: 'any',
             match: match,
         })
             .then((d: any) => {
@@ -211,19 +229,6 @@ export default function NoticePage(): JSX.Element {
         setSelectedDept(t);
         setPage(0);
     }
-
-    // 칩 필터링 결과
-    useEffect(() => {
-        // Global_Tags에 해당하는 태그 ID와 개인 태그 ID를 별도로 구분하여 매핑
-        const newGlobalIds = mapTagsToIds(selectedTags.filter(tag => Global_Tags.includes(tag)));
-        const newPersonalIds = mapTagsToIds(selectedTags.filter(tag => !Global_Tags.includes(tag)));
-
-        // 상태 업데이트
-        setGlobalIds(newGlobalIds);
-        setSelectedPersonalIds(newPersonalIds);
-    }, [selectedTags, keywords]);  // selectedTags나 keywords가 변경될 때마다 실행
-
-
 
     // 실제 토글 로직(비동기) — id는 string
     const handleToggleBookmark = async (id: string, next: boolean) => {
@@ -268,7 +273,7 @@ export default function NoticePage(): JSX.Element {
         <div className="np-root">
             <div className="np-container">
                 {/* ───────── 상단 탭 ───────── */}
-                <div className="np-header-fullbleed">
+                <div className="np-header-fullbleed np-header-sticky">
                     <nav className="np-tabs">
                         {TOP_TABS.map((t) => {
                             const active = tab === t.key;

@@ -66,7 +66,14 @@ export const departmentNameMap: { [key: string]: string } = {
     'department.pre': '자유전공학부',
 
     /* 국제학부 */
-    'department.isa': '국제학부'
+    'department.isa': '국제학부',
+
+
+    /* 일반, 장학, 생활관 (북마크 페이지 카드 띄우기 용) */
+    'general': '일반',
+    'scholarship': '장학',
+    'dormitory': '생활관'
+
 };
 
 

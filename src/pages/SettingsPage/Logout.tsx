@@ -1,9 +1,12 @@
-import React, {JSX, useEffect, useState} from 'react';
+import React from 'react';
+import { deleteCookie } from "../../services/settings.service";
+import { appNavigate } from "../../utils/router";
 
 export default function Logout() {
 
-    const handleLogout = () => {
-        return ;
+    const handleLogout = async () => {
+        await deleteCookie();
+        appNavigate('/login');
     }
 
     return (

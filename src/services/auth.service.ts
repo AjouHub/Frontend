@@ -1,40 +1,45 @@
-import api, {API_BASE_URL} from "./api";
+import {API_BASE_URL} from "./api";
 import {notify} from "../utils/notify";
 import {appNavigate} from "../utils/router";
-import {UserInfo} from "../types/user";
 import {fetchUserInfo} from "./fetchUserInfo";
 
 
 //  앱(WebView) 환경 감지
 export function isAppEnv(): boolean {
     const usp = new URLSearchParams(window.location.search);
-    if (usp.get('embed') === 'app') return true;
-    if ((window as any).ReactNativeWebView) return true;
-    // 필요시 UA 플래그도 추가
-    if (navigator.userAgent.includes('AURA-App')) return true;
-    return (process.env.REACT_APP_RUNTIME || '').toLowerCase() === 'app';
+    const embedParam = usp.get('embed') === 'app';
+    const hasReactNative = !!(window as any).ReactNativeWebView;
+    const hasAuraUA = navigator.userAgent.includes('AURA-App');
+    const envVar = (process.env.REACT_APP_RUNTIME || '').toLowerCase() === 'app';
+
+    const result = embedParam || hasReactNative || hasAuraUA || envVar;
+
+    console.log('[Auth] isAppEnv check:', JSON.stringify({
+        embedParam,
+        hasReactNative,
+        hasAuraUA,
+        envVar,
+        result
+    }));
+
+    return result;
 }
 
-/** OAuth 콜백 처리: /?signUp=... 만 보고 라우팅 + 쿼리 정리 */
+// OAuth 콜백 처리: /?signUp=... 만 보고 라우팅 + 쿼리 정리
 export const handleOAuthCallback = (): void => {
-    const { pathname, search } = window.location;     // 예: "/" 와 "?signUp=false&x=1"
+    const { search } = window.location;     // 예: "/" 와 "?signUp=false&x=1"
     if (!search) return;
 
     const params = new URLSearchParams(search);
     const signUp = params.get('signUp');
     if (signUp == null) return;
 
-    // URL에서 signUp만 제거(다른 쿼리는 유지)
-    params.delete('signUp');
-    const cleaned = params.toString();
-    const newUrl = cleaned ? `${pathname}?${cleaned}` : pathname;
-    window.history.replaceState({}, '', newUrl);
-
     // 분기 이동
     const target = signUp.toLowerCase() === 'true'
         ? '/select-department'
         : '/notice';
-
+    console.log(target);
+    appNavigate(target);
     appNavigate(target, { replace: true });
 };
 

@@ -1,13 +1,13 @@
-// ✅ 상단 import
 import React, { useState } from "react";
 import {
     IoHeartOutline as RawHeartOutline,
     IoHeart as RawHeart,
 } from "react-icons/io5";
 import { setNoticeBookmark } from "../services/bookMark.service";
-import { formatNoticeDate } from "../utils/date";
+import { formatNoticeDate, isNew } from "../utils/date";
+import {departmentNameMap} from "./departmentMap";
 
-// ✅ 아이콘 캐스팅(타입 충돌 우회)
+// 아이콘 캐스팅(타입 충돌 우회)
 type IconProps = { size?: number; color?: string; className?: string };
 const IoHeart = RawHeart as unknown as React.ComponentType<IconProps>;
 const IoHeartOutline = RawHeartOutline as unknown as React.ComponentType<IconProps>;
@@ -16,12 +16,12 @@ const IoHeartOutline = RawHeartOutline as unknown as React.ComponentType<IconPro
 type NoticeCardProps = {
     notice: {
         id: string;
+        type: string;
         title: string;
         link: string;
         category?: string;
         department?: string;
-        date?: string;
-        tags?: string[];
+        date: string;
     };
     leftBarColor: string;
     dateColor: string;
@@ -30,6 +30,8 @@ type NoticeCardProps = {
     isBookmarked?: boolean;  // 부모가 상태를 줄 때 (컨트롤드)
     onToggleBookmark?: (id: string, next: boolean) => void;
     onNoticeClick: (event: React.MouseEvent<HTMLAnchorElement>, link: string) => void;
+    // tabs?: string;           // 현재 탭(학과 이름용)
+    isBookmarkPage?: boolean;  // 북마크 페이지라면 앞에 #카테고리 붙이기
 };
 
 export default function NoticeCard({
@@ -41,6 +43,7 @@ export default function NoticeCard({
                                        isBookmarked,
                                        onToggleBookmark,
                                        onNoticeClick,
+                                       isBookmarkPage,
                                    }: NoticeCardProps) {
     // 컨트롤드 prop이 없을 때만 내부 로컬 상태 사용
     const [markedLocal, setMarkedLocal] = useState(false);
@@ -49,13 +52,13 @@ export default function NoticeCard({
     const handleToggle = async () => {
         const next = !marked;
 
-        // 1) 부모가 관리하면 부모 콜백만 호출
+        // 부모가 관리하면 부모 콜백만 호출
         if (onToggleBookmark) {
             onToggleBookmark(notice.id, next);
             return;
         }
 
-        // 2) 내부에서 관리하면 낙관적 업데이트 + 서버 호출
+        // 내부에서 관리하면 낙관적 업데이트 + 서버 호출
         setMarkedLocal(next);
         try {
             await setNoticeBookmark(notice.id, next);
@@ -66,6 +69,9 @@ export default function NoticeCard({
             alert((e as any)?.message ?? "북마크 처리에 실패했습니다.");
         }
     };
+
+    // department가 관리자 -> 확과명
+    const departmentDisplayName = notice.department === '관리자' || notice.department === 'none' ? departmentNameMap[notice.type ?? ""] : notice.department;
 
     return (
         <div className="np-card">
@@ -85,26 +91,22 @@ export default function NoticeCard({
                 </a>
 
                 <div className="np-card-tags">
-                    {notice.tags?.length ? (
-                        notice.tags.map((t) => (
-                            <span key={t} className="np-card-tag">#{t}</span>
-                        ))
-                    ) : (
-                        <>
-                            {notice.category && (
-                                <span className="np-card-tag">#{notice.category}</span>
-                            )}
-                            {notice.department && (
-                                <span className="np-card-tag">#{notice.department}</span>
-                            )}
-                        </>
+                    {isBookmarkPage && (
+                        <span className="np-card-tag tabs">#{departmentNameMap[notice.type ?? ""]}</span>
+                    )}
+                    {isNew(notice.date, 1) && (
+                        <span className="np-card-tag today">#오늘</span>
+                    )}
+                    {notice.category && notice.category !== 'none' && (
+                        <span className="np-card-tag">#{notice.category}</span>
+                    )}
+                    {departmentDisplayName && (
+                        <span className="np-card-tag">#{departmentDisplayName}</span>
                     )}
                 </div>
             </div>
 
             {/* 우측 – 하트 + 날짜 */}
-
-
             <div className="np-card-side">
                 <button
                     className="np-heart"

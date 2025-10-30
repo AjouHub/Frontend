@@ -7,6 +7,7 @@
     --aura-sky:#7cc2f4;
     --accent-orange:#ffa852;
     --stone-gray:#8d96a8;
+    --very-peri:#6667AB;
     --chip-bg:#eef1f6;
     --chip-text:#667085;
     /*--chip-bg:#9A9FAD;*/
@@ -27,6 +28,10 @@
     --left-gap: 10px;       /* 왼쪽 여백 10px 유지 */
 
     --bottom-tab-bar-height: 64px; /* 실제 BottomTabBar 높이에 맞춰 조정 */
+
+    --appbar-web-height: 58px;
+    --appbar-app-height: 0px;
+    --safe-top: 0px;
 }
 
 *{ box-sizing:border-box }
@@ -93,6 +98,20 @@ body{
     /* 어떤 컨테이너 안에 있어도 뷰포트 끝까지 확장 */
     margin-left:  calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+}
+
+/* 상단 탭을 고정 */
+.np-header-sticky {
+    position: sticky; /* iOS의 구형 WebKit에선 -webkit-sticky도 병행 가능 */
+    z-index: 200;                 /* 카드/로딩보다 위에 오도록 */
+    background: #fff;             /* 스크롤 시 내용과 겹치지 않게 배경 */
+    border-bottom: 1px solid #E9ECF3;
+}
+.is-web .np-header-sticky {
+    top: calc(var(--appbar-web-height) + var(--safe-top));
+}
+.is-app .np-header-sticky {
+    top: calc(var(--appbar-app-height) + var(--safe-top));
 }
 
 /* 상단 탭 */
@@ -210,7 +229,7 @@ body{
     position: static;
     left:8px;
     right:8px;
-    bottom:0px;
+    bottom:0;
 
     width: calc(100% - 16px);         /* 좌우 8px 여백 = 예전 닫힘 상태와 동일 */
     height:35px;
@@ -301,6 +320,10 @@ body{
 /* 태그/날짜 */
 .np-card-tag, .np-card-date{
     font-size:12px; color:#7a8699; letter-spacing:0;
+}
+.np-card-tag.today {
+    /*color: var(--aura-sky);*/
+    color: var(--aura-blue);
 }
 
 .np-card-side{

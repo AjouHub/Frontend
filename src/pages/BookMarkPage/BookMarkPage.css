@@ -5,3 +5,16 @@
 .is-web .np-bookmark-container {
     padding-bottom: calc(var(--card-gap) + var(--bottom-tab-bar-height));
 }
+
+.np-section-title {
+    margin-left: 16px;
+    margin-bottom: 10px;
+}
+
+.np-section {
+    margin-bottom: 20px;
+}
+
+.np-card-tag.tabs {
+    color: var(--aura-blue);
+}

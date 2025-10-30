@@ -2,6 +2,7 @@
 
 /* --- CSS 변수를 사용한 새로운 색상 팔레트 --- */
 :root {
+    --aura-blue:#4a6ddb;
     --primary-blue: #5685E6;
     --button-blue: #4773D2;
     --background-color: #F9F9FB;
@@ -21,7 +22,7 @@ body {
 
 .settings-container {
     max-width: 500px;
-    min-height: 100vh;
+    min-height: 100dvh;
     margin: 0 auto;
     background-color: var(--background-color);
     display: flex;
@@ -172,6 +173,33 @@ body {
     border-radius: 8px; box-sizing: border-box;
     height: 42px; background-color: #F1F1F1;
 }
+
+/* 두 줄 레이아웃 전용 */
+.input-group.input-group--two-rows {
+    display: grid;                 /* flex → grid */
+    grid-template-columns: 1fr auto;         /* 왼쪽: 유동폭, 오른쪽: 버튼 */
+    grid-template-areas:
+    "college college"            /* 1행: 단과대 셀렉트가 두 칸 모두 차지 */
+    "department add";            /* 2행: 학과 셀렉트 + 버튼 */
+    column-gap: 8px;
+    row-gap: 8px;
+    align-items: center;
+}
+
+/* 그리드 영역 매핑 */
+.input-group--two-rows .college-select { grid-area: college; width: 100%; }
+.input-group--two-rows .department-select { grid-area: department; }
+.input-group--two-rows button { grid-area: add; }
+
+/* grid 환경에서 넘침/말줄임 + 축소 허용 */
+.input-group--two-rows .college-select,
+.input-group--two-rows .department-select {
+    min-width: 0;                  /* 중요: 축소 허용 */
+    white-space: nowrap;           /* 한 줄 */
+    overflow: hidden;              /* 넘침 숨김 */
+    text-overflow: ellipsis;       /* … 처리 */
+}
+
 /* --- 여기부터 ‘단과대/학과’ 셀렉트 전용 오버라이드 --- */
 .input-group .college-select,
 .input-group .department-select {
@@ -197,7 +225,7 @@ body {
 }
 
 .input-group button {
-    padding: 0 14px;
+    padding: 0 18px;
     background-color: var(--button-blue);
     color: white; border: none; border-radius: 8px;
     cursor: pointer; font-size: 14px; font-weight: 600;
@@ -218,32 +246,68 @@ body {
 .item-chip-list {
     display: flex; flex-wrap: wrap; gap: 10px;
 }
+/* 파란 테두리 + 밝은 배경 + 파란 텍스트 */
 .item-chip {
-    display: inline-flex; align-items: center;
-    padding: 6px 4px 6px 12px; /* 오른쪽 패딩 줄임 */
-    border-radius: 18px;
-    background: var(--chip-background);
-    color: var(--text-primary);
-    font-size: 14px; font-weight: 500;
+    --chip-primary: var(--aura-blue, #4A6DDB);
+    --chip-bg: #F3F7FF;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 6px 6px 12px;
+    background: var(--chip-bg);
+    border: 2px solid var(--chip-primary);
+    border-radius: 9999px;         /* 완전 둥글게 */
+    color: #1A1B1F;    /* 텍스트 파란색 */
+    font-size: 14px;               /* 텍스트 크기: 기존 그대로 */
+    font-weight: 550;
+    line-height: 1;
 }
+
+/* 버튼 크기/폰트 크기: 기존 그대로 유지 */
 .item-chip button {
-    background: var(--primary-blue);
-    color: white; border: none;
+    background: var(--chip-primary);
+    color: #fff;
+    border: none;
     border-radius: 50%;
-    width: 20px; /* 크기 조정 */
-    height: 20px; /* 크기 조정 */
-    font-size: 16px; /* '×' 크기 키움 */
-    line-height: 20px; /* '×' 세로 중앙 정렬 */
-    padding: 0; cursor: pointer;
+    width: 18px;                   /* 동일 */
+    height: 18px;                  /* 동일 */
+    font-size: 16px;               /* 동일 (X) */
+    line-height: 20px;             /* 세로 중앙 */
+    padding: 0;
+    /*margin-left: 8px;*/
     display: flex; justify-content: center; align-items: center;
-    margin-left: 8px;
-    flex-shrink: 0;
-    font-weight: 400; /* '×' 굵기 조정 */
     transition: background-color 0.2s;
 }
-.item-chip button:hover:not(:disabled) {
-    background-color: #406ec8;
-}
+
+.item-chip button:hover:not(:disabled) { background-color: #3d60d8; }
+
+/*.item-chip {*/
+/*    display: inline-flex; align-items: center;*/
+/*    padding: 6px 4px 6px 12px; !* 오른쪽 패딩 줄임 *!*/
+/*    border-radius: 18px;*/
+/*    background: var(--chip-background);*/
+/*    color: var(--text-primary);*/
+/*    font-size: 14px; font-weight: 500;*/
+/*}*/
+/*.item-chip button {*/
+/*    background: var(--primary-blue);*/
+/*    color: white; border: none;*/
+/*    border-radius: 50%;*/
+/*    width: 20px; !* 크기 조정 *!*/
+/*    height: 20px; !* 크기 조정 *!*/
+/*    font-size: 16px; !* '×' 크기 키움 *!*/
+/*    line-height: 20px; !* '×' 세로 중앙 정렬 *!*/
+/*    padding: 0; cursor: pointer;*/
+/*    display: flex; justify-content: center; align-items: center;*/
+/*    margin-left: 8px;*/
+/*    flex-shrink: 0;*/
+/*    font-weight: 400; !* '×' 굵기 조정 *!*/
+/*    transition: background-color 0.2s;*/
+/*}*/
+/*.item-chip button:hover:not(:disabled) {*/
+/*    background-color: #406ec8;*/
+/*}*/
 
 /* --- 푸터 --- */
 .settings-footer {
@@ -344,7 +408,7 @@ button:disabled {
 }
 
 .bulk-actions-bar {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     display: flex;
     gap: 8px;
     align-items: center;
@@ -379,7 +443,7 @@ button:disabled {
 .toggle-chip-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
 }
 
 .toggle-chip {
@@ -387,14 +451,14 @@ button:disabled {
     background-color: #f0f3f7; /* 시안의 회색 배경 */
     /*background-color: var(--toggle-chip-background);*/
     color: var(--text-secondary); /* 회색 텍스트 */
-    border: 1px solid transparent; /* 테두리는 투명하게 */
+    border: 2px solid transparent; /* 테두리는 투명하게 */
     padding: 6px 12px;
     border-radius: 18px; /* 시안에 맞춰 둥근 사각형으로 변경 */
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 550;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -412,8 +476,10 @@ button:disabled {
 .toggle-chip.active {
     /* 활성화 스타일 - 파란색 버튼 */
     background-color: #eef5ff; /* 연한 파란색 배경 */
-    color: #0b5bd3; /* 진한 파란색 텍스트 */
-    border: 1px solid #1677ff; /* 파란색 테두리 */
+    /*color: #0b5bd3; !* 진한 파란색 텍스트 *!*/
+    /*border: 1px solid #1677ff; !* 파란색 테두리 *!*/
+    color: var(--aura-blue);
+    border: 2px solid var(--aura-blue);
 }
 
 .toggle-chip-indicator {
@@ -425,7 +491,8 @@ button:disabled {
 }
 
 .toggle-chip.active .toggle-chip-indicator {
-    background: #1677ff;
+    /*background: #1677ff;*/
+    background: var(--aura-blue);
 }
 
 
@@ -460,7 +527,7 @@ button:disabled {
 .switch-container {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     cursor: pointer;
     user-select: none;
 }
@@ -468,8 +535,12 @@ button:disabled {
 .switch-group {
     display: flex; /* 자식 요소들을 가로로 나란히 배치합니다. */
     align-items: center; /* 세로선 중앙에 정렬합니다. */
-    gap: 80px; /* 스위치들 사이의 간격을 줍니다. */
+    /*gap: 80px; !* 스위치들 사이의 간격을 줍니다. *!*/
+    /*gap: clamp(12px, 60vw, 80px); !* 최소 12px, 보통 화면폭의 6%, 최대 80px *!*/
     /*margin-bottom: 8px;*/
+    justify-content: space-between; /* 좌/우로 벌리기 */
+    gap: 12px;                      /* 고정(적당히 작게) */
+    flex-wrap: nowrap;              /* 줄바꿈 방지 */
 }
 
 .switch-label-text {
@@ -483,6 +554,26 @@ button:disabled {
     display: inline-block;
     width: 44px;
     height: 24px;
+}
+
+/* 좌/우 라벨용(옵션) */
+.switch-container.with-sides {
+    gap: 12px;
+}
+
+.switch-side {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.switch-side.is-active {
+    color: var(--text-primary); /* 활성 쪽 강조 (원하면 var(--text-primary)로) */
+}
+
+.switch-container.disabled .switch-side {
+    opacity: 0.6;
 }
 
 /* 실제 체크박스는 숨깁니다. */
@@ -520,7 +611,7 @@ button:disabled {
 
 /* 체크됐을 때 스타일 */
 .switch-input:checked + .switch-slider {
-    background-color: var(--primary-blue, #5685E6);
+    background-color: var(--aura-blue, #5685E6);
 }
 
 .switch-input:checked + .switch-slider:before {
@@ -532,7 +623,15 @@ button:disabled {
     cursor: not-allowed;
     opacity: 0.5;
 }
+/* 좌/우 라벨 스위치: 키워드 선택(checked)일 때 */
+.switch-input.labels:checked + .switch-slider {
+    background-color: var(--aura-blue, #5685E6);
+}
 
+/* 좌/우 라벨 스위치: 전체 선택(unchecked)일 때 */
+.switch-input.labels:not(:disabled):not(:checked) + .switch-slider {
+    background-color: var(--aura-blue, #5685E6);
+}
 
 .settings-container .mc-body {
     transition:max-height .20s ease;
@@ -546,9 +645,14 @@ button:disabled {
 }
 
 
+/* 스위치 아래 현재 상태 요약 */
+.notification-description.after-switch {
+    margin-top: 8px;
+}
+
 /*Logout.tsx*/
 .logout-container {
-    margin-top: 16px;
+    /*margin-top: 16px;*/
     display: flex;
     justify-content: center;
 }
@@ -560,10 +664,32 @@ button:disabled {
     color: var(--text-primary);
     padding: 10px 10px;
     border-radius: 8px;
-    border: 0px solid var(--card-border, #e6e8ed);
+    border: 0 solid var(--card-border, #e6e8ed);
     background: var(--background-color);
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
     margin-bottom: 16px;
+}
+
+/*AboutPage.tsx*/
+.about-container {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.about-button {
+    /*display: flex;*/
+    /*justify-content: center;  !* 가로 중앙 *!*/
+    align-items: center;       /* 세로 중앙 */
+    color: var(--text-primary);
+    padding: 10px 10px;
+    border-radius: 8px;
+    border: 0 solid var(--card-border, #e6e8ed);
+    background: var(--background-color);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    /*margin-bottom: 16px;*/
 }

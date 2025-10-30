@@ -1,44 +1,179 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
-import { departmentGroups, departmentNameMap } from '../../components/departmentMap';
+import React, {useEffect, useRef, useState} from 'react';
+import NotificationPreferences, {NotificationPreferencesHandle} from "../SettingsPage/NotificationPreferences";
+import {Keyword} from "../../types/keywords";
+import {addDepartment, listDepartments, listKeywords, removeDepartment} from "../../services/settings.service";
+import DepartmentSelector from "../SettingsPage/DepartmentSelector";
+import "./SelectDepartmentPage.css"
+import {appNavigate} from "../../utils/router";
 
 
 export default function SelectDepartmentPage() {
-    const [department, setDepartment] = useState('');
-    const navigate = useNavigate();
+    const [keywords, setKeywords] = useState<Keyword[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [departments, setDepartments] = useState<string[]>([]);
 
-    const handleSubmit = async () => {
+    const hasDepartments = departments.length > 0;
+
+    // 초기 데이터 로딩
+    useEffect(() => {
+        (async () => {
+            await loadDepartments();
+            await loadKeywords();
+        })();
+    }, []);
+
+
+    // 키워드 목록을 불러오는 함수
+    const loadKeywords = async () => {
+        setLoading(true);
         try {
-            await api.post('/user/departments', { department });
-            navigate('/mypage');
-
-        } catch (error) {
-            console.error('학과 등록 에러:', error);
-            alert('학과 등록에 실패했습니다.');
+            const list = await listKeywords();
+            setKeywords(list ?? []);
+        } finally {
+            setLoading(false);
         }
     };
 
+    // 학과 목록만 불러오는 함수 (재사용을 위해 분리)
+    const loadDepartments = async () => {
+        setLoading(true);
+        try {
+            const departmentsData = await listDepartments();
+            setDepartments(departmentsData);
+        } catch (error) {
+            console.error("학과 정보 로딩 실패:", error);
+            setDepartments([]); // 에러 발생 시 빈 배열로 초기화
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 학과 추가/삭제 핸들러
+    const handleAddDepartment = async (code: string) => {
+        setLoading(true);
+        await addDepartment(code);
+        await loadDepartments(); // 변경 후 목록 새로고침
+        setLoading(false);
+    };
+    const handleRemoveDepartment = async (code: string) => {
+        setLoading(true);
+        await removeDepartment(code);
+        await loadDepartments(); // 변경 후 목록 새로고침
+        setLoading(false);
+    };
+
+    // 설정 완료
+    const handleOnClick = async () => {
+        try {
+            await Promise.all([
+                generalRef.current?.save?.(),
+                scholarshipRef.current?.save?.(),
+                dormRef.current?.save?.(),
+                hasDepartments ? deptRef.current?.save?.() : Promise.resolve(),
+            ]);
+        } finally {
+            // 네이티브에 알림
+            if (window.AURA?.onboardingComplete) {
+                window.AURA.onboardingComplete();
+            }
+
+            // 세션 플래그 확실히 제거 (이중 안전장치)
+            sessionStorage.removeItem('justSignedUp');
+
+            // state를 명시적으로 비우고 이동
+            // replace: true로 히스토리 스택 정리
+            appNavigate('/notice', {
+                replace: true,
+                state: {} // state 완전히 비우기
+            });
+        }
+    };
+
+    // 섹션별 리모컨
+    const generalRef = useRef<NotificationPreferencesHandle>(null);
+    const scholarshipRef = useRef<NotificationPreferencesHandle>(null);
+    const dormRef = useRef<NotificationPreferencesHandle>(null);
+    const deptRef = useRef<NotificationPreferencesHandle>(null);
 
     return (
-        <div>
-            <h2>학과를 선택해주세요</h2>
-            <select value={department} onChange={(e) => setDepartment(e.target.value)}>
-                <option value="">-- 학과 선택 --</option>
+        <div className="sdp-root">
+            <div className="sdp-container">
+                <header className="sdp-header">
+                    <h1 className="sdp-title">앱의 기본값을 설정해주세요</h1>
+                    <p className="sdp-subtitle">기본 설정은 이후에 설정창에서 변경할 수 있습니다.</p>
+                </header>
 
-                {Object.entries(departmentGroups).map(([college, codes]) => (
-                    <optgroup key={college} label={college}>
-                        {codes.map((code) => (
-                            <option key={code} value={code}>
-                                {departmentNameMap[code] ?? code}
-                            </option>
-                        ))}
-                    </optgroup>
-                ))}
-            </select>
+                <section className="sdp-section">
+                    <h2 className="sdp-section-title">학과 설정</h2>
+                    <DepartmentSelector
+                        departments={departments}
+                        onAddDepartment={handleAddDepartment}
+                        onRemoveDepartment={handleRemoveDepartment}
+                        loading={loading}
+                    />
+                </section>
 
-            <br /><br />
-            <button onClick={handleSubmit} disabled={!department}>확인</button>
+                <section className="sdp-section">
+                    <h2 className="sdp-section-title">기본 알림 설정</h2>
+                    <div className="fcm-group">
+                        <div className="fcm-item">
+                            <h3 className="fcm-item-title">일반 공지 알림</h3>
+                            <NotificationPreferences
+                                ref={generalRef}
+                                allKeywords={keywords}
+                                loading={loading}
+                                category="general"
+                            />
+                        </div>
+                        <div className="fcm-item">
+                            <h3 className="fcm-item-title">장학 공지 알림</h3>
+                            <NotificationPreferences
+                                ref={scholarshipRef}
+                                allKeywords={keywords}
+                                loading={loading}
+                                category="scholarship"
+                            />
+                        </div>
+                        <div className="fcm-item">
+                            <h3 className="fcm-item-title">생활관 공지 알림</h3>
+                            <NotificationPreferences
+                                ref={dormRef}
+                                allKeywords={keywords}
+                                loading={loading}
+                                category="dormitory"
+                            />
+                        </div>
+
+                        <div className={`fcm-item ${!hasDepartments ? 'fcm-item-disabled' : ''}`}>
+                            <h3 className="fcm-item-title">학과 공지 알림</h3>
+
+                            {/* 학과가 없을 때 안내 메시지 표시 */}
+                            {!hasDepartments && (
+                                <p className="fcm-disabled-message">
+                                    학과를 먼저 등록해주세요.
+                                </p>
+                            )}
+
+                            {/* 학과가 있을 때만 NotificationPreferences를 활성화하여 렌더링 */}
+                            <div style={{ pointerEvents: hasDepartments ? 'auto' : 'none' }}>
+                                <NotificationPreferences
+                                    ref={deptRef}
+                                    allKeywords={keywords}
+                                    loading={loading}
+                                    // 첫 번째 학과를 category로 전달, 없으면 빈 문자열
+                                    category={hasDepartments ? departments[0] : ""}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <footer className="sdp-footer">
+                <button className="sdp-submit-button" onClick={handleOnClick}>
+                    설정 완료
+                </button>
+            </footer>
         </div>
     );
 }

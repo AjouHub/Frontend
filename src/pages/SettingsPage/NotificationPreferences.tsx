@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react';
 import type { Keyword } from '../../types/keywords';
 import {
     listKeywordSubscriptions,
@@ -11,6 +11,18 @@ import ChipCollapse from "../../components/ChipCollapse";
 import {departmentNameMap} from "../../components/departmentMap";
 
 
+// 카테고리 키 -> 한글 라벨
+const categoryLabelMap: Record<string, string> = {
+    general: '일반 공지사항',
+    scholarship: '장학 공지사항',
+    dormitory: '생활관 공지사항',
+};
+
+// 부모에게 노출할 함수의 타입. 리모컨의 버튼 정의
+export interface NotificationPreferencesHandle {
+    save: () => Promise<void>;
+}
+
 // 부모로부터 받을 props 타입을 정의합니다.
 interface NotificationPreferencesProps {
     allKeywords: Keyword[];
@@ -20,7 +32,7 @@ interface NotificationPreferencesProps {
     departments?: string[];
 }
 
-export default function NotificationPreferences({ allKeywords, loading, category, isDepartment = false, departments = [] }: NotificationPreferencesProps) {
+const NotificationPreferences = forwardRef<NotificationPreferencesHandle, NotificationPreferencesProps>(({ allKeywords, loading, category, isDepartment = false, departments = [] }, ref) => {
     const [initialSubs, setInitialSubs] = useState<number[]>([]);
     const [selected, setSelected] = useState<Set<number>>(new Set());
     const [subsLoading, setSubsLoading] = useState(true); // 구독 정보 로딩 상태
@@ -49,6 +61,9 @@ export default function NotificationPreferences({ allKeywords, loading, category
 
     // 키워드 목록을 보여줘야 하는 조건
     const shouldShowKeywords = isNotiEnabled && isKeywordNotice;
+
+    // ref가 있으면 부모가 제어하는 것으로 간주
+    const isExternallyControlled = !!ref;
 
 
     useEffect(() => {
@@ -176,23 +191,6 @@ export default function NotificationPreferences({ allKeywords, loading, category
         }
     }, [showKeywords, allKeywords, subsLoading]);
 
-    // // 학과의 설정일때만 학과 목록을 불러옴
-    // useEffect(() => {
-    //     if (isDepartment) {
-    //         const loadDepartments = async () => {
-    //             const user = await fetchUserInfo();
-    //             if (user?.departments) {
-    //                 setDepartments(user.departments);
-    //                 // 첫 번째 학과를 기본 선택으로 설정
-    //                 if (user.departments.length > 0) {
-    //                     setSelectedDept(user.departments[0]);
-    //                 }
-    //             }
-    //         };
-    //         loadDepartments();
-    //     }
-    // }, [isDepartment]);
-
 
     // 토글 핸들러
     const toggle = (id: number) => {
@@ -230,6 +228,39 @@ export default function NotificationPreferences({ allKeywords, loading, category
             setSaving(false);
         }
     };
+
+    // 현재 탭/학과의 라벨 (학과 탭이면 선택 학과명 우선)
+    const normCategory = (category ?? '').trim().toLowerCase();
+    const isDeptCtx = isDepartment || normCategory.startsWith('department.');
+
+    const targetLabel = useMemo(() => {
+        if (isDeptCtx) {
+            const candidate =
+                (selectedDept?.trim()) ||
+                (departments?.[0]?.trim()) ||
+                (category?.trim()) ||
+                '';
+            if (candidate) {
+                return departmentNameMap[candidate] ?? '학과 공지사항';
+            }
+            return '학과 공지사항';
+        }
+
+        // 시스템 카테고리(일반/장학/생활관 등)
+        return categoryLabelMap[normCategory] ?? (category || '공지사항');
+    }, [isDeptCtx, selectedDept, departments, category]);
+
+    // 스위치 상태에 따른 요약 문구
+    const summaryText = useMemo(() => {
+        if (!isNotiEnabled) return `${targetLabel}의 알림을 받지 않습니다.`;
+        if (isKeywordNotice) return `${targetLabel}의 선택한 키워드가 포함된 알림만 받습니다.`;
+        return `${targetLabel}의 모든 알림을 받습니다.`;
+    }, [isNotiEnabled, isKeywordNotice, targetLabel]);
+
+    // useImperativeHandle을 사용해 onSave 함수를 'save'라는 이름으로 외부에 노출
+    useImperativeHandle(ref, () => ({
+        save: onSave
+    }));
 
     const isBusy = loading || subsLoading || saving
 
@@ -270,12 +301,16 @@ export default function NotificationPreferences({ allKeywords, loading, category
                     onChange={setIsNotiEnabled}
                 />
                 <Switch
-                    label={isKeywordNotice ? "키워드" : "전체"}
+                    leftLabel="전체"
+                    rightLabel="키워드"
                     checked={isKeywordNotice}
                     onChange={setIsKeywordNotice}
-                    disabled={!isNotiEnabled} // 알림이 OFF이면 disabled 처리
-                    labelWidth={40}
+                    disabled={!isNotiEnabled}
                 />
+            </div>
+
+            <div className="notification-description after-switch" role="status" aria-live="polite">
+                {summaryText}
             </div>
 
             <div
@@ -348,18 +383,22 @@ export default function NotificationPreferences({ allKeywords, loading, category
                             </div>
 
                             {/* 저장 바 */}
-                            <div className="save-section">
-                                <button onClick={onSave} disabled={!changed || saving} className="save-button">
-                                    {saving ? '저장 중…' : '변경사항 저장'}
-                                </button>
-                                {!changed && (
-                                    <span className="save-status-message">변경된 내용이 없습니다.</span>
-                                )}
-                            </div>
+                            {!isExternallyControlled && (
+                                <div className="save-section">
+                                    <button onClick={onSave} disabled={!changed || saving} className="save-button">
+                                        {saving ? '저장 중…' : '변경사항 저장'}
+                                    </button>
+                                    {!changed && (
+                                        <span className="save-status-message">변경된 내용이 없습니다.</span>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
             </div>
         </div>
     );
-}
+});
+
+export default NotificationPreferences;
