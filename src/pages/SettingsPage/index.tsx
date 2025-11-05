@@ -1,5 +1,5 @@
 import React, {useState, ReactNode, useEffect, useRef} from 'react';
-import './SettingsPage.css'; // 새롭게 작성된 CSS 파일을 임포트합니다.
+import './SettingsPage.css';
 
 // 기존 컴포넌트들을 가져옵니다.
 import AccountInfo from './AccountInfo';
@@ -180,7 +180,7 @@ export default function SettingsPage() {
 
                     <AboutPage/>
                     <Logout/>
-                    <div ref={bottomRef} style={{ height: 1}} />
+                    <div ref={bottomRef} className="settings-bottom-anchor" />
                 </main>
             </div>
         </div>

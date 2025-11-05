@@ -694,7 +694,11 @@ button:disabled {
     /*margin-bottom: 16px;*/
 }
 
+/* 웹 환경일 때 */
+.is-web .settings-bottom-anchor {
+    height: 1px;
+}
 /* 💡 앱 환경일 때 */
-.is-app .settings-container {
-    padding-bottom: 120px; /* 80.dp 네이티브 바 높이 */
+.is-app .settings-bottom-anchor {
+    height: 120px;
 }
