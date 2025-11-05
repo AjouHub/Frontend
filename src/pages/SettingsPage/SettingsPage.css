@@ -696,5 +696,5 @@ button:disabled {
 
 /* 💡 앱 환경일 때 */
 .is-app .settings-container {
-    padding-bottom: 80px; /* 80.dp 네이티브 바 높이 */
+    padding-bottom: 120px; /* 80.dp 네이티브 바 높이 */
 }
