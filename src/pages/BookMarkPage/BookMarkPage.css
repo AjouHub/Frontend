@@ -8,7 +8,8 @@
 /* 💡 앱 환경일 때 */
 .is-app .np-bookmark-container {
     /*card gap + 80px (앱 하단바)*/
-    padding-bottom: calc(var(--card-gap, 10px) + 120px);
+    /*padding-bottom: calc(var(--card-gap, 10px) + 120px);*/
+    padding-bottom: 120px;
 }
 
 .np-section-title {

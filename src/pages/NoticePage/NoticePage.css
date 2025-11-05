@@ -62,7 +62,7 @@ body{
 }
 /* 💡 앱 환경일 때 하단 바 만큼 패딩 */
 .is-app .np-container {
-    padding-bottom: 120px; /* 80.dp 네이티브 바 높이 */
+    padding-bottom: 140px; /* 80.dp 네이티브 바 높이 */
 }
 
 /* AppBar */
