@@ -693,3 +693,8 @@ button:disabled {
     cursor: pointer;
     /*margin-bottom: 16px;*/
 }
+
+/* 💡 앱 환경일 때 */
+.is-app .settings-container {
+    padding-bottom: 80px; /* 80.dp 네이티브 바 높이 */
+}
