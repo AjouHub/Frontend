@@ -41,7 +41,7 @@ export default function AboutPage() {
                 onClick={handleAboutButton}
                 disabled={!ABOUT_PAGE_URL}
             >
-                어바웃 페이지
+                앱 소개
             </button>
         </div>
     );
